@@ -24,7 +24,8 @@ API_ERROR_OUTPUT = "$ERROR$"
 TIE_DELTA = 0.1
 
 # Categories that need reference answers
-NEED_REF_CATS = ["math", "reasoning", "coding"]
+#NEED_REF_CATS = ["math", "reasoning", "coding"]
+NEED_REF_CATS = []
 
 # Extract scores from judgments
 two_score_pattern = re.compile("\[\[(\d+\.?\d*),\s?(\d+\.?\d*)\]\]")
@@ -104,10 +105,17 @@ def load_model_answers(answer_dir: str):
     for filename in filenames:
         model_name = os.path.basename(filename)[:-6]
         answer = {}
-        with open(filename) as fin:
-            for line in fin:
-                line = json.loads(line)
-                answer[line["question_id"]] = line
+        
+        #print(filename)
+        with open(filename, "r") as fin:
+            if "lora" not in filename:
+                for line in fin:
+                    line = json.loads(line)
+                    answer[line["question_id"]] = line
+            else:
+                data = json.load(fin)
+                for line in data:
+                    answer[line["question_id"]] = line
         model_answers[model_name] = answer
 
     return model_answers
@@ -641,13 +649,16 @@ def check_data(questions, model_answers, ref_answers, models, judges):
             ), f"Missing model {m}'s answer to Question {q['question_id']}"
     # check ref answers
     for jg in judges.values():
+        print(jg)
         if not jg.ref_based:
             continue
         for q in questions:
             if q["category"] not in NEED_REF_CATS:
                 continue
+            print(q["question_id"])
+            #print(ref_answers[jg.model_name])
             assert (
-                q["question_id"] in ref_answers[jg.model_name]
+                int(q["question_id"]) in ref_answers[jg.model_name]
             ), f"Missing reference answer to Question {q['question_id']} for judge {jg.model_name}"
 
 

@@ -1,7 +1,7 @@
 python gen_rinna_answer.py \
-    --base_model "rinna/japanese-gpt-neox-3.6b"\
-    --model_id rinna-3.6b\
+    --base_model "rinna/japanese-gpt-neox-3.6b-instruction-ppo"\
+    --model_id rinna-3.6b-ppo\
     --with_prompt \
     --gpus 0 \
-    --max_new_tokens 1024 \
-    --interactive \
+    --max_new_tokens 2048 \
+    --benchmark vicuna_jp \

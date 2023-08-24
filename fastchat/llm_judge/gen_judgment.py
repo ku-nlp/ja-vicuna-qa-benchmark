@@ -9,7 +9,7 @@ import json
 import numpy as np
 from tqdm import tqdm
 
-from fastchat.llm_judge.common import (
+from common import (
     load_questions,
     load_model_answers,
     load_judge_prompts,
@@ -209,7 +209,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    question_file = f"data/{args.bench_name}/question_Japanese_ver2.jsonl"
+    question_file = f"data/{args.bench_name}/question.jsonl"
     answer_dir = f"data/{args.bench_name}/model_answer"
     ref_answer_dir = f"data/{args.bench_name}/reference_answer"
 

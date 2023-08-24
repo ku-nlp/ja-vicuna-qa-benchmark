@@ -20,7 +20,7 @@ if args.only_cpu is True:
     args.gpus = ""
 os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
 import torch
-from transformers import LlamaForCausalLM, LlamaTokenizer, AutoModelForCausalLM, AutoTokenizer
+from transformers import GenerationConfig,LlamaForCausalLM, LlamaTokenizer, AutoModelForCausalLM, AutoTokenizer
 from peft import  PeftModel
 
 
@@ -73,10 +73,14 @@ def rinna_prompt(tmp_dict):
         + "<NL>"
         + "システム: "
     )
-def generate_prompt(instruction, input=None):
+def generate_prompt(instruction, model_id, input=None):
     if input:
+
         instruction = instruction + '\n' + input
-    return prompt_input_jp.format_map({'instruction': instruction})
+    if "rinna" in model_id:
+        return prompt_input_jp.format_map({'iinstruction': instruction})
+    else:
+        return prompt_input.format_map({'instruction': instruction})
 
 
 if __name__ == '__main__':
@@ -86,7 +90,7 @@ if __name__ == '__main__':
     else:
         device = torch.device('cpu')
     if args.tokenizer_path is None:
-        args.tokenizer_path = args.lora_model
+        args.tokenizer_path = args.base_model
         if args.lora_model is None:
             args.tokenizer_path = args.base_model
     if "rinna" in args.model_id:
@@ -128,20 +132,20 @@ if __name__ == '__main__':
     if device==torch.device('cpu'):
         model.float()
     # test data
-    args.benchmark= 'question'
+    #args.benchmark= 'question'
     if args.benchmark is None:
         examples = sample_data
     else:
         question = []
-        data_file = "./data/{}_Japanese_ver.jsonl".format(args.benchmark)
+        data_file = "./data/{}/question.jsonl".format(args.benchmark)
         with open(data_file,'r') as f:
             instruction_list = []
             for line in tqdm(f.read().splitlines()):
                 tmp_dict = json.loads(line)
                 question.append(tmp_dict)
-                instruction_list.append(tmp_dict["text"][0:])
-            #examples = [l.strip() for l in instruction_list]
-            examples= instruction_list
+                instruction_list.append(tmp_dict["turns"][0])
+            examples = [l.strip() for l in instruction_list]
+            #examples= instruction_list
             
             
         '''print("first 10 examples:")
@@ -167,7 +171,7 @@ if __name__ == '__main__':
                 if len(raw_input_text.strip())==0:
                     break
                 if args.with_prompt:
-                    input_text = generate_prompt(instruction=raw_input_text)
+                    input_text = generate_prompt(instruction=raw_input_text,model_id=args.model_id)
                 else:
                     input_text = raw_input_text
                 #print(input_text)
@@ -193,24 +197,48 @@ if __name__ == '__main__':
             results = []
             for index, example in tqdm(enumerate(examples)):
                 if args.with_prompt is True:
-                    input_text = generate_prompt(instruction=example)
+                    input_text = generate_prompt(instruction=example,model_id=args.model_id)
                 else:
                     input_text = example
-                token_ids = tokenizer.encode(input_text, add_special_tokens=False, return_tensors="pt")
-                output_ids = model.generate(
+                if "rinna" in args.base_model:
+                    token_ids = tokenizer.encode(input_text, add_special_tokens=False, return_tensors="pt")
+                    output_ids = model.generate(
                     token_ids.to(model.device),
                     do_sample=True,
-                    max_new_tokens=128,
+                    max_new_tokens=args.max_new_tokens,
                     temperature=0.7,
                     repetition_penalty=1.1,
                     pad_token_id=tokenizer.pad_token_id,
                     bos_token_id=tokenizer.bos_token_id,
                     eos_token_id=tokenizer.eos_token_id
-                )
+                    )
+                    output = tokenizer.decode(output_ids.tolist()[0][token_ids.size(1):])
+                    output = output.replace("<NL>", "\n")
+                    output = output.replace("</s>", "")
+                else:
+                    inputs = tokenizer(input_text, return_tensors="pt")
+                    input_ids = inputs["input_ids"].to(device)
+                    generation_config = GenerationConfig(
+                        temperature=0.1,
+                        top_p=0.75,
+                        top_k=40,
+                        num_beams=4,
+                        no_repeat_ngram_size=3
+                        )
 
-                output = tokenizer.decode(output_ids.tolist()[0][token_ids.size(1):])
-                output = output.replace("<NL>", "\n")
-                output = output.replace("</s>", "")
+                    with torch.no_grad():
+                        generation_output = model.generate(
+                            input_ids=input_ids,
+                            generation_config=generation_config,
+                            return_dict_in_generate=True,
+                            output_scores=True,
+                            max_new_tokens=args.max_new_tokens,
+                            )
+                    s = generation_output.sequences[0]
+                    output = tokenizer.decode(s)
+                    output = output.split("### Response:")[1].strip()
+                    output = output.split("\n\n")[0].strip()
+
                 response = output
                 #print("Response: ",response)
                 print("\n")
@@ -225,16 +253,18 @@ if __name__ == '__main__':
                 print(f"Input: {example}\n")
                 print(f"Output: {response}\n")
                 results.append({
-                    "question_id":question[index]["question_id"],
+                    "question_id":int(question[index]["question_id"]),
                     "answer_id":shortuuid.uuid(),
                     "model_id": args.model_id,
                     "choices":[{"index": 0, "turns": [response]}],
                     "tstamp": time.time(),
                     })            
-            predictions_file = "./data/model_answer/{}.jsonl".format(args.model_id)
+            predictions_file = "./data/{}/model_answer/{}.jsonl".format(args.benchmark, args.model_id)
             dirname = os.path.dirname(predictions_file)
             os.makedirs(dirname,exist_ok=True)
             with open(predictions_file,'w') as f:
-                json.dump(results,f,ensure_ascii=False,indent=2)
+                for tmp_dict in results:
+                    json.dump(results,f,ensure_ascii=False,indent=2)
+                    f.write("\n")
             #with open(dirname+'/generation_config.json','w') as f:
                 #json.dump(generation_config,f,ensure_ascii=False,indent=2)
