@@ -149,3 +149,10 @@ python show_result.py \
 ## Comparison Results
 ![Comparison](./comparison.png)  
 
+
+## Supported Models
+[Rinna-3.6B](https://huggingface.co/rinna/japanese-gpt-neox-3.6b)
+[Rinna-3.6B-sft-v2](https://huggingface.co/rinna/japanese-gpt-neox-3.6b-instruction-sft-v2)
+[Rinna-3.6B-ppo](https://huggingface.co/rinna/japanese-gpt-neox-3.6b-instruction-ppo)
+[Japanese-Alpaca-Lora](https://huggingface.co/kunishou)
+
