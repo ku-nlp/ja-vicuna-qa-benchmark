@@ -1,4 +1,4 @@
-python gen_rinna_answer.py \
+python gen_model_answer.py \
     --base_model "decapoda-research/llama-7b-hf"\
     --lora_model "kunishou/Japanese-Alpaca-LoRA-7b-v0"\
     --model_id japanese-alpaca-lora-7b\
