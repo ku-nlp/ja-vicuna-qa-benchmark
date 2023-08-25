@@ -1,10 +1,10 @@
 # Japanese Vicuna QA Benchmark
 
- We offer 80 diverse Japanese questions (manually translated from English Vicuna benchmark) to measure various capabilities of Japanese LLMs, which consists of 80 diverse questions in 10 categories (generic, coding, roleplay, writing, etc.) 
+ We offer 80 diverse Japanese questions to measure various capabilities of Japanese LLMs, which consists of 80 diverse questions in 10 categories (generic, coding, roleplay, writing, etc.) 
 You can leverage this package to evaluate the answers of your Japanese LLM models in a reference-free manner with LLM-as-a-judge.
 To automate the evaluation process, we prompt strong LLMs like GPT-4 to act as judges and assess the quality of the models' responses.
 
-To be noticed, such zero-shot QA-style evaluation might be more suitable for those LLMs that have been fine-tuned with instructions.
+To be clarified, such zero-shot QA-style evaluation might be more suitable for those LLMs that have been fine-tuned with instructions. The 80 questions are manually translated from the English Vicuna benchmark.
 
 ## Contents
 - [Install](#install)
