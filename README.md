@@ -1,7 +1,10 @@
-# LLM Judge
+# Japanese Vicuna QA Benchmark
 
-In this package, you can use Vicuna-Japanese questions and prompts to evaluate your models with LLM-as-a-judge.
+We manually translated Vicuna Questions to Japanese, which consists of 80 diverse questions in 10 categories (generic, coding, roleplay, writing, etc.) 
+
+In this package, you can leverage these 80 Questions and prompts to evaluate your models in a reference-free manner with LLM-as-a-judge.
 To automate the evaluation process, we prompt strong LLMs like GPT-4 to act as judges and assess the quality of the models' responses.
+To be noticed, such zero-shot QA-style evaluation might be more suitable for those LLMs that have been fine-tuned with instructions.
 
 ## Contents
 - [Install](#install)
@@ -16,7 +19,7 @@ cd fastchat/llm_judge
 ```
 
 
-### Evaluate a model on jp-bench (Vicuna-Japanese)
+### Evaluate a model on Japanese Vicuna QA Benchmark (noted as jp-bench).
 
 #### Step 1. Generate model answers to jp-bench questions
 ```
@@ -51,10 +54,7 @@ The answers will be saved to `data/jp_bench/model_answer/[MODEL-ID].jsonl`.
 You can also specify `--num-gpus-per-model` for model parallelism (needed for large 65B models) and `--num-gpus-total` to parallelize answer generation with multiple GPUs.
 
 #### Step 2. Generate GPT-4 judgments
-There are several options to use GPT-4 as a judge, such as pairwise winrate and single-answer grading.
-In MT-bench, we recommond single-answer grading as the default mode.
-This mode asks GPT-4 to grade and give a score to model's answer directly without pairwise comparison.
-For each turn, GPT-4 will give a score on a scale of 10. We then compute the average score on all turns.
+There are several options to use GPT-4 as a judge, such as pairwise win-rate and single-answer grading. We show an example of the pairwise win-rate evaluation of three Rinna models at the bottom.
 
 ```
 OPENAI_API_KEY=[YOUR-KEY] python -B gen_judgment.py \
@@ -68,11 +68,12 @@ e.g.,
 ```
 OPENAI_API_KEY=[YOUR-KEY] python -B gen_judgment.py \
 --bench-name "jp_bench" \
---mode single \
+--mode pairwise-all \
 --model-list rinna-3.6b rinna-3.6b-ppo \
 --parallel 2
 ```
-The judgments will be saved to `data/jp_bench/model_judgment/gpt-4_single.jsonl`
+`pairwise-all`: run pairwise comparison between all model pairs.
+The judgments will be saved to `data/jp_bench/model_judgment/gpt-4_pair.jsonl`
 
 #### Step 3. Show jp-bench scores
 
@@ -80,20 +81,16 @@ The judgments will be saved to `data/jp_bench/model_judgment/gpt-4_single.jsonl`
   ```
   python show_result.py \
   --bench-name "jp_bench" \
-  --mode single \
-  --model-listrinna-3.6b rinna-3.6b-ppo 
-  ```
-- Show all scores
-  ```
-  python show_result.py
+  --mode pairwise-all \
+  --model-list rinna-3.6b rinna-3.6b-ppo 
   ```
 
 ---
 
 ### Other grading options
-Besides score-based single-answer grading, we also support two additional grading options based on win rates:
+For GPT-4 judgments, besides score-based single-answer grading, we also support two additional grading options based on win rates:
 - `pariwise-baseline`: run pairwise comparison against a baseline model.
-- `pairwise-all`: run pairwise comparison between all model pairs on all questions.
+- `single`: run score-based single-model grading.
 
 #### Option 2: pairwise comparison against a baseline (default: gpt-3.5-turbo)
 
@@ -102,8 +99,8 @@ Besides score-based single-answer grading, we also support two additional gradin
 OPENAI_API_KEY=[YOUR-KEY] python -B gen_judgment.py \
 --bench-name "jp_bench" \
 --mode pairwise-baseline \
---model-list rinna-3.6b rinna-3.6b-ppo \
---parallel 2
+--model-list [LIST-OF-MODEL-ID] \
+--parallel [num-concurrent-api-call]
 ```
 The judgments will be saved to `data/jp_bench/model_judgment/gpt-4_pair.jsonl`
 
@@ -111,18 +108,18 @@ The judgments will be saved to `data/jp_bench/model_judgment/gpt-4_pair.jsonl`
 ```
 python show_result.py \
 --bench-name "jp_bench" \
---mode pairwise-baseline
+--mode pairwise-baseline \
+--model-list [LIST-OF-MODEL-ID] \
 ```
 
-#### Option 3: Run GPT-4 judge with all pair comparisons
+#### Option 3: Run GPT-4 judge with the single model
 
-Another option is to run pairwise comparisons on all possible pairs.
-This could be more expensive when #models increases, but it gives you a more comprehensive information.
+The `single` mode grades models by asking GPT-4 to grade and give a score to model's answer directly without pairwise comparison.
 
 ```
 OPENAI_API_KEY=[YOUR-KEY] python -B gen_judgment.py \
 --bench-name "jp_bench" \
---mode pairwise-all \
+--mode single \
 --model-list [LIST-OF-MODEL-ID] \
 --parallel [num-concurrent-api-call]
 ```
@@ -130,27 +127,32 @@ OPENAI_API_KEY=[YOUR-KEY] python -B gen_judgment.py \
 ```
 python show_result.py \
 --bench-name "jp_bench" \
---mode pairwise-all
+--mode single
+--model-list [LIST-OF-MODEL-ID] \
 ```
 
 
 ## Sample Outputs
 
 ### Question: 
-時間管理能力を向上させるにはどうしたらいいですか？
-### Answer-rinna-3.6b: 
-時間管理とは、目標や優先順位を決め、タスクを効果的に実行し、自分自身の人生を管理するスキルです。一般的には、自己モチベーションを高め、生産性を高めるために役立ちます。
-### Answer-rinna-3.6b-sft: 
-私自身はあまり経験がありませんが、いくつかのアイデアを紹介できます。最も重要なのは、目標を達成するためにどのように計画を立てるかということだと思います。また、毎日やるべきことを書き出す習慣を身につけることも役立つでしょう。
-### Answer-rinna-3.6b-ppo: 
-時間管理とは、目標や優先順位を決め、タスクを効果的に実行し、自分自身の人生を管理するスキルです。一般的には、自己モチベーションを高め、生産性を高めるために役立ちます。
+植物性タンパク源と動物性タンパク源の違いは何ですか？
+### Answer of rinna-3.6b: 
+栄養素の含有量に大きな違いがあります。
+### Answer of rinna-3.6b-sft-v2: 
+植物性タンパク源は肉や魚など、いくつかの種類の食品を指します。一方、動物性タンパク源には卵、乳製品、大豆、ナッツ、種などが含まれます。
+### Answer of rinna-3.6b-ppo: 
+植物性タンパク源とは、主に大豆や豆腐などの大豆製品を生産する植物によって作られるタンパク質で、卵、牛乳、肉などの動物性タンパク源よりも栄養価が高く、低カロリーです。一方、動物性タンパク源には、牛肉、豚肉、鶏肉などが含まれます。
 
 
-## Comparison Results
+## Comparison 
 ![Comparison](./comparison.png)  
 
 
-## Supported Models
+## Supported baseline Models
+To make it more convenient for users to utilize pairwise comparisons with existing Japanese LLMs, we offer the prediction of the following four baselines in: 
+```
+fastchat/llm_judge/data/jp_bench/model_answer
+```
 [Rinna-3.6B](https://huggingface.co/rinna/japanese-gpt-neox-3.6b)
 
 [Rinna-3.6B-sft-v2](https://huggingface.co/rinna/japanese-gpt-neox-3.6b-instruction-sft-v2)
@@ -159,3 +161,7 @@ python show_result.py \
 
 [Japanese-Alpaca-Lora](https://huggingface.co/kunishou)
 
+We will regularly include more LLM baselines.
+
+## Questions
+If you have any questions related to the code or papers, please feel free to send a mail to feicheng@i.kyoto-u.ac.jp or leave questions in the Issues list.

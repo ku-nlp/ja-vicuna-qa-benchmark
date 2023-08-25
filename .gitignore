@@ -5,12 +5,23 @@ __pycache__
 dist
 .venv
 
+# folder
+fastchat/llm_judge/data/vicuna_jp
+
+# files
+fastchat/llm_judge/data/judge_prompts_jp.jsonl
+fastchat/llm_judge/data/question_Japanese_ver.jsonl
+fastchat/llm_judge/data/jp_bench/question_Japanese_ver.jsonl
+fastchat/llm_judge/data/jp_bench/question_Japanese_ver2.jsonl
+fastchat/llm_judge/run_eval.sh
+
 # Log
 *.log
 *.log.*
 *.json
 !playground/deepspeed_config_s2.json
 !playground/deepspeed_config_s3.json
+.nfs00*
 
 # Editor
 .idea
