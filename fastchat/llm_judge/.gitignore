@@ -1,15 +1,8 @@
 # created by virtualenv automatically
 /judge
-clean_judgement.py
-compute_agreement.py
-download_mt_bench_pregenerated.py
-gen_api_answer.py
 gen_alpaca_answer.py
-gen_model_answer.py
 jsontoexcel.py
 qa_browser.py
-result.sh
-show_result.py
 test.py
 test.xlsx
 test2.py
