@@ -220,6 +220,7 @@ if __name__ == "__main__":
     model_answers = load_model_answers(answer_dir)
     ref_answers = load_model_answers(ref_answer_dir)
 
+
     # Load judge
     judge_prompts = load_judge_prompts(args.judge_file)
 

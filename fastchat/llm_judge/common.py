@@ -108,14 +108,20 @@ def load_model_answers(answer_dir: str):
         
         #print(filename)
         with open(filename, "r") as fin:
-            if "lora" not in filename:
-                for line in fin:
-                    line = json.loads(line)
-                    answer[line["question_id"]] = line
-            else:
-                data = json.load(fin)
-                for line in data:
-                    answer[line["question_id"]] = line
+            # distinguished process for lora predictions
+            # if "lora" not in filename:
+            #     for line in fin:
+            #         line = json.loads(line)
+            #         answer[line["question_id"]] = line
+            # else:
+            #     data = json.load(fin)
+            #     for line in data:
+            #         answer[line["question_id"]] = line
+
+            # unified format of prediction files
+            for line in fin:
+                line = json.loads(line)
+                answer[line["question_id"]] = line
         model_answers[model_name] = answer
 
     return model_answers

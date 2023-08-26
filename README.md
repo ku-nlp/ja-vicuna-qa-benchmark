@@ -54,7 +54,7 @@ The answers will be saved to `data/jp_bench/model_answer/[MODEL-ID].jsonl`.
 You can also specify `--num-gpus-per-model` for model parallelism (needed for large 65B models) and `--num-gpus-total` to parallelize answer generation with multiple GPUs.
 
 #### Step 2. Generate GPT-4 judgments
-There are several options to use GPT-4 as a judge, such as pairwise win-rate and single-answer grading. We show an example of the pairwise win-rate evaluation of three Rinna models at the bottom.
+There are several options to use GPT-4 as a judge, such as pairwise win-rate and single-answer grading. We show an example of the pairwise win-rate evaluation of instruction fine-tuned models (rinna-3.6b-sft-v2, rinna-3.6b-ppo, and japanese-alpaca-lora-7b) at the bottom.
 
 ```
 OPENAI_API_KEY=[YOUR-KEY] python -B gen_judgment.py \
@@ -69,7 +69,7 @@ e.g.,
 OPENAI_API_KEY=[YOUR-KEY] python -B gen_judgment.py \
 --bench-name "jp_bench" \
 --mode pairwise-all \
---model-list rinna-3.6b rinna-3.6b-ppo \
+--model-list rinna-3.6b-sft-v2 rinna-3.6b-ppo japanese-alpaca-lora-7b \
 --parallel 2
 ```
 `pairwise-all`: run pairwise comparison between all model pairs.
@@ -82,7 +82,7 @@ The judgments will be saved to `data/jp_bench/model_judgment/gpt-4_pair.jsonl`
   python show_result.py \
   --bench-name "jp_bench" \
   --mode pairwise-all \
-  --model-list rinna-3.6b rinna-3.6b-ppo 
+  --model-list rinna-3.6b-sft-v2 rinna-3.6b-ppo japanese-alpaca-lora-7b
   ```
 
 ---
@@ -142,11 +142,22 @@ python show_result.py \
 植物性タンパク源は肉や魚など、いくつかの種類の食品を指します。一方、動物性タンパク源には卵、乳製品、大豆、ナッツ、種などが含まれます。
 ### Answer of rinna-3.6b-ppo: 
 植物性タンパク源とは、主に大豆や豆腐などの大豆製品を生産する植物によって作られるタンパク質で、卵、牛乳、肉などの動物性タンパク源よりも栄養価が高く、低カロリーです。一方、動物性タンパク源には、牛肉、豚肉、鶏肉などが含まれます。
+### Answer of japanese-alpaca-lora-7b:
+動物タンポク源（ATP）は、動物によって生産されるエネルギー源である。ATPは、細胞におけるATP認識システムの活性化により生成されています。動物のATP源は、遺伝的に組み込まれたATP生成機構であり、これは、ATPを生成するために使用され、経験的にATPの量を増加させることができる。
 
+[//]: # (## Comparison )
 
-## Comparison 
-![Comparison](./comparison.png)  
+[//]: # (![Comparison]&#40;./comparison.png&#41;  )
 
+## Pairwise win-rate of three Japanese LLMs (rinna-3.6b-sft-v2, rinna-3.6b-ppo, and japanese-alpaca-lora-7b)
+| Model                   | win | loss | tie |  win_rate | loss_rate | win_rate_adjusted |
+|:------------------------|----:|-----:|----:|----------:|----------:|------------------:|
+| rinna-3.6b-ppo          |  87 |   25 |  52 |  0.530488 |  0.152439 |          0.689024 |
+| rinna-3.6b-sft-v2       |  70 |   35 |  58 |  0.429448 |  0.214724 |          0.607362 |
+| japanese-alpaca-lora-7b |  15 |  112 |  38 |  0.090909 |  0.678788 |          0.206061 |
+The GPT4 judgments is placed in `data/jp_bench/model_judgment/gpt-4_pair.jsonl`. 
+
+To be noticed, `pairwise-all` might become very inefficient when evaluating more LLMs, as it evaluates combinations of each two of them. In such cases, we recommend using the `pairwise-baseline` mode, allowing all models to be compared against a fixed baseline such as ChatGPT.
 
 ## Supported baseline Models
 To make it more convenient for users to utilize pairwise comparisons with existing Japanese LLMs, we offer the prediction of the following four baselines in: 
@@ -161,7 +172,7 @@ fastchat/llm_judge/data/jp_bench/model_answer
 
 [Japanese-Alpaca-Lora](https://huggingface.co/kunishou)
 
-We will regularly include more LLM baselines.
+We will regularly include latest LLM baselines.
 
 ## Questions
-If you have any questions related to the code or papers, please feel free to send a mail to feicheng@i.kyoto-u.ac.jp or leave questions in the Issues list.
+If you have any questions and feedback, please feel free to send a mail to feicheng@i.kyoto-u.ac.jp or leave questions in the `Issues' list.

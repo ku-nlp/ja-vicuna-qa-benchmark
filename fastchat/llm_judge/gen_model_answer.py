@@ -78,7 +78,7 @@ def generate_prompt(instruction, model_id, input=None):
 
         instruction = instruction + '\n' + input
     if "rinna" in model_id:
-        return prompt_input_jp.format_map({'iinstruction': instruction})
+        return prompt_input_jp.format_map({'instruction': instruction})
     else:
         return prompt_input.format_map({'instruction': instruction})
 
@@ -248,7 +248,7 @@ if __name__ == '__main__':
                 '''if args.with_prompt:
                     response = output.split("### Response:")[1].strip()'''
                 
-                response = output
+                # response = output
                 print(f"======={index}=======")
                 print(f"Input: {example}\n")
                 print(f"Output: {response}\n")
@@ -264,7 +264,7 @@ if __name__ == '__main__':
             os.makedirs(dirname,exist_ok=True)
             with open(predictions_file,'w') as f:
                 for tmp_dict in results:
-                    json.dump(results,f,ensure_ascii=False,indent=2)
+                    json.dump(tmp_dict,f,ensure_ascii=False)
                     f.write("\n")
             #with open(dirname+'/generation_config.json','w') as f:
                 #json.dump(generation_config,f,ensure_ascii=False,indent=2)
