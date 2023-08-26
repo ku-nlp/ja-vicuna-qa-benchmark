@@ -149,7 +149,7 @@ python show_result.py \
 
 [//]: # (![Comparison]&#40;./comparison.png&#41;  )
 
-## Pairwise win-rate of three Japanese LLMs (rinna-3.6b-sft-v2, rinna-3.6b-ppo, and japanese-alpaca-lora-7b)
+## Pairwise win-rate of three Japanese LLMs
 | Model                   | win | loss | tie |  win_rate | loss_rate | win_rate_adjusted |
 |:------------------------|----:|-----:|----:|----------:|----------:|------------------:|
 | rinna-3.6b-ppo          |  87 |   25 |  52 |  0.530488 |  0.152439 |          0.689024 |
