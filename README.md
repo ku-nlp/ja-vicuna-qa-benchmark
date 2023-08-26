@@ -8,7 +8,11 @@ To be clarified, such zero-shot QA-style evaluation might be more suitable for t
 
 ## Contents
 - [Install](#install)
-- [Review Pre-Generated Model Answers and Judgments](#review-pre-generated-model-answers-and-judgments)
+- [Evaluate a model with Japanese Vicuna QA Benchmark](#evaluate-a-model-with-japanese-vicuna-qa-benchmark)
+- [Sample Outputs](#sample-outputs)
+- [An Example of pairwise win-rate of three Japanese LLMs](#pairwise-win-rate-of-three-japanese-llms)
+- [Supported baseline Models](#supported-baseline-models)
+
 ## Install
 ```
 git clone https://github.com/hitoshizuku7/LLM_Judge_ku.git
@@ -19,9 +23,9 @@ cd fastchat/llm_judge
 ```
 
 
-### Evaluate a model on Japanese Vicuna QA Benchmark (noted as jp-bench).
+## Evaluate a model with Japanese Vicuna QA Benchmark
 
-#### Step 1. Generate model answers to jp-bench questions
+#### Step 1. Generate model answers to Japanese Vicuna QA questions (noted as jp-bench).
 ```
 python gen_model_answer.py \
 --base_model [MODEL-PATH] \
@@ -163,13 +167,10 @@ To be noticed, `pairwise-all` might become very inefficient when evaluating more
 ## Supported baseline Models
 To make it more convenient for users to utilize pairwise comparisons with existing Japanese LLMs, we offer the prediction of the following four baselines in `fastchat/llm_judge/data/jp_bench/model_answer`. 
 
-[Rinna-3.6B](https://huggingface.co/rinna/japanese-gpt-neox-3.6b)
-
-[Rinna-3.6B-sft-v2](https://huggingface.co/rinna/japanese-gpt-neox-3.6b-instruction-sft-v2)
-
-[Rinna-3.6B-ppo](https://huggingface.co/rinna/japanese-gpt-neox-3.6b-instruction-ppo)
-
-[Japanese-Alpaca-Lora](https://huggingface.co/kunishou)
+- [Rinna-3.6B](https://huggingface.co/rinna/japanese-gpt-neox-3.6b)
+- [Rinna-3.6B-sft-v2](https://huggingface.co/rinna/japanese-gpt-neox-3.6b-instruction-sft-v2)
+- [Rinna-3.6B-ppo](https://huggingface.co/rinna/japanese-gpt-neox-3.6b-instruction-ppo)
+- [Japanese-Alpaca-Lora](https://huggingface.co/kunishou)
 
 We will regularly include latest LLM baselines.
 
