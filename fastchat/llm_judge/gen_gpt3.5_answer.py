@@ -10,10 +10,9 @@ import shortuuid
 #openai.api_type = "azure"
 #openai.api_base = "https://pomegranate.openai.azure.com/"
 #openai.api_version = "2022-12-01"
-#openai.api_key = "82560beabdb543f68286c0e9fded05d0"
+openai.api_key = "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"
 
 #use openai api with group PRISM
-openai.api_key = ""
 class Chat_Demo(object):
     def __init__(self, model, user_system, temperature, max_tokens, top_p, frequency_penalty, presence_penalty, n, stream, stop, logit_bias):
         self.model = model
@@ -56,6 +55,7 @@ class Chat_Demo(object):
 def run_chatgpt(user_prompt_list):
     demo = Chat_Demo(
         model="gpt-3.5-turbo-16k-0613",  # gpt-3.5-turbo: chatgpt with lowerest price, gpt-4: lateset version, higher price
+        #model="gpt-4",  # gpt-3.5-turbo: chatgpt with lowerest price, gpt-4: lateset version, higher price
         user_system="You are a helpful assistant", # add more description after this to fit your task, e.g., "you are a helpful assistant that translates English to Chinese." will be a good system for MT.
         temperature=1.0,  # default 1.0, control randomness: lowring results in less random completion (0 ~ 2.0)
         max_tokens=256,  # max number of tokens to generate (1 ~ 4,000)
@@ -84,8 +84,8 @@ if __name__ == '__main__':
     results = []
     for index, example in tqdm(enumerate(examples)):
         response=run_chatgpt(example)
-        results.append({"question_id":question[index]["question_id"],"answer_id":shortuuid.uuid(),"model_id":"gpt-3.5-turbo-16k-0613" ,"choices":[{"index": 0, "turns": [response]}],"tstamp": time.time(),})    
-    predictions_file = "./data/jp_bench/model_answer/gpt_3.5.jsonl"
+        results.append({"question_id":question[index]["question_id"],"answer_id":shortuuid.uuid(),"model_id":"gpt-4" ,"choices":[{"index": 0, "turns": [response]}],"tstamp": time.time(),})    
+    predictions_file = "./data/jp_bench/model_answer/GPT-4_reference.jsonl"
     dirname = os.path.dirname(predictions_file)
     os.makedirs(dirname,exist_ok=True)
     with open(predictions_file, 'w') as f:

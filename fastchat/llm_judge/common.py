@@ -24,14 +24,16 @@ API_ERROR_OUTPUT = "$ERROR$"
 TIE_DELTA = 0.1
 
 # Categories that need reference answers
-#NEED_REF_CATS = ["math", "reasoning", "coding"]
-NEED_REF_CATS = []
+NEED_REF_CATS = ["math", "reasoning", "coding"]
+#NEED_REF_CATS = []
 
 # Extract scores from judgments
 two_score_pattern = re.compile("\[\[(\d+\.?\d*),\s?(\d+\.?\d*)\]\]")
 two_score_pattern_backup = re.compile("\[(\d+\.?\d*),\s?(\d+\.?\d*)\]")
 one_score_pattern = re.compile("\[\[(\d+\.?\d*)\]\]")
-one_score_pattern_backup = re.compile("\[(\d+\.?\d*)\]")
+#one_score_pattern_backup = re.compile("\[(\d+\.?\d*)\]")
+one_score_pattern_another_format = re.compile("\[\[rating:(\d+)\]\]")
+one_score_pattern_another_format2 =re.compile("\[\[rating: (\d+)\]\]")
 
 # Sampling temperature configs for
 temperature_config = {
@@ -146,7 +148,7 @@ def run_judge_single(question, answer, judge, ref_answer, multi_turn=False):
     model = judge.model_name
     if ref_answer is not None:
         kwargs["ref_answer_1"] = ref_answer["choices"][0]["turns"][0]
-        kwargs["ref_answer_2"] = ref_answer["choices"][0]["turns"][1]
+        #kwargs["ref_answer_2"] = ref_answer["choices"][0]["turns"][1]
 
     if multi_turn:
         user_prompt = judge.prompt_template["prompt_template"].format(
@@ -159,7 +161,7 @@ def run_judge_single(question, answer, judge, ref_answer, multi_turn=False):
     else:
         user_prompt = judge.prompt_template["prompt_template"].format(
             question=question["turns"][0],
-            answer=answer["choices"]["turns"],
+            answer=answer["choices"][0]["turns"][0],
             **kwargs,
         )
 
@@ -182,9 +184,12 @@ def run_judge_single(question, answer, judge, ref_answer, multi_turn=False):
 
     if judge.prompt_template["output_format"] == "[[rating]]":
         match = re.search(one_score_pattern, judgment)
+        # if not match:
+        #     match = re.search(one_score_pattern_backup, judgment)
         if not match:
-            match = re.search(one_score_pattern_backup, judgment)
-
+            match = re.search(one_score_pattern_another_format,judgment)
+        if not match:
+            match = re.search(one_score_pattern_another_format2,judgment)
         if match:
             rating = ast.literal_eval(match.groups()[0])
         else:
@@ -235,7 +240,7 @@ def play_a_match_single(match: MatchPair, output_file: str):
     if output_file:
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
         with open(output_file, "a") as fout:
-            fout.write(json.dumps(result) + "\n")
+            fout.write(json.dumps(result,ensure_ascii=False) + "\n")
 
     return result
 
@@ -245,7 +250,9 @@ def run_judge_pair(question, answer_a, answer_b, judge, ref_answer, multi_turn=F
     model = judge.model_name
     if ref_answer is not None:
         kwargs["ref_answer_1"] = ref_answer["choices"][0]["turns"][0]
+        print("参考回答1:",ref_answer["choices"][0]["turns"][0])
         kwargs["ref_answer_2"] = ref_answer["choices"][0]["turns"][1]
+        print("参考回答2:",ref_answer["choices"][0]["turns"][1])
 
     if multi_turn:
         system_prompt = judge.prompt_template["system_prompt"]
@@ -655,13 +662,12 @@ def check_data(questions, model_answers, ref_answers, models, judges):
             ), f"Missing model {m}'s answer to Question {q['question_id']}"
     # check ref answers
     for jg in judges.values():
-        print(jg)
         if not jg.ref_based:
             continue
         for q in questions:
             if q["category"] not in NEED_REF_CATS:
                 continue
-            print(q["question_id"])
+            #print(q["question_id"])
             #print(ref_answers[jg.model_name])
             assert (
                 int(q["question_id"]) in ref_answers[jg.model_name]

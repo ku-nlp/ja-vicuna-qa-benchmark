@@ -13,7 +13,7 @@ parser.add_argument('--tokenizer_path',default=None,type=str)
 parser.add_argument('--benchmark',default=None, type=str,help="A file that contains instructions (one instruction per line)")
 parser.add_argument('--with_prompt',action='store_true',help="wrap the input with the prompt automatically")
 parser.add_argument('--interactive',action='store_true',help="run in the instruction mode (single-turn)")
-parser.add_argument('--gpus', default="0", type=str)
+parser.add_argument('--gpus', default=" 3", type=str)
 parser.add_argument('--only_cpu',action='store_true',help='only use CPU for inference')
 args = parser.parse_args()
 if args.only_cpu is True:
@@ -28,11 +28,14 @@ from peft import  PeftModel
  # The prompt template below is taken from llama.cpp
  # and is slightly different from the one used in training.
  # But we find it gives better results
-prompt_input = (
-    "Below is an instruction that describes a task. "
-    "Write a response that appropriately completes the request.\n\n"
-    "### Instruction:\n\n{instruction}\n\n### Response:\n\n"
-)
+ #Japanese version 
+'''prompt_input = (
+    "以下にあるタスクの指示を示します。"
+    "示された指示に適切に従うように回答を埋めてください。"
+    "### 指示：\n\n{instruction}\n\n### 回答：\n\n"
+)'''
+prompt_input = ("Below is an instruction that describes a task. Write a response that appropriately completes the request. ### Instruction:\n\n{instruction}\n\n### Response:\n\n")
+
 prompt_input_jp = (
     "ユーザー: {instruction}<NL>システム: "
 )
@@ -167,16 +170,41 @@ if __name__ == '__main__':
 
             while True:
                 raw_input_text = input("Input:")
-                print(raw_input_text)
+                #print(raw_input_text)
                 if len(raw_input_text.strip())==0:
                     break
                 if args.with_prompt:
                     input_text = generate_prompt(instruction=raw_input_text,model_id=args.model_id)
                 else:
                     input_text = raw_input_text
+                if True:
+                    print (input_text)   
+                    inputs = tokenizer(input_text, return_tensors="pt")
+                    input_ids = inputs["input_ids"].to(device)
+                    generation_config = GenerationConfig(
+                        temperature=0.1,
+                        top_p=0.75,
+                        top_k=40,
+                        num_beams=4,
+                        no_repeat_ngram_size=3
+                        )
+
+                    with torch.no_grad():
+                        generation_output = model.generate(
+                            input_ids=input_ids,
+                            generation_config=generation_config,
+                            return_dict_in_generate=True,
+                            output_scores=True,
+                            max_new_tokens=args.max_new_tokens,
+                            )
+                    s = generation_output.sequences[0]
+                    output = tokenizer.decode(s)
+                    print(output)
+                    #output = output.split("### response:")[1].strip()
+                    #output = output.split("\n\n")[0].strip()
                 #print(input_text)
                 # 对input编码 get answer
-                token_ids = tokenizer.encode(raw_input_text, add_special_tokens=False, return_tensors="pt")
+                '''token_ids = tokenizer.encode(input_text, add_special_tokens=False, return_tensors="pt")
                 output_ids = model.generate(
                     token_ids.to(model.device),
                     do_sample=True,
@@ -187,11 +215,13 @@ if __name__ == '__main__':
                     bos_token_id=tokenizer.bos_token_id,
                     eos_token_id=tokenizer.eos_token_id
                 )
-                output = tokenizer.decode(output_ids.tolist()[0][token_ids.size(1):])
+                
+                output = tokenizer.decode(generation_output.tolist()[0][token_ids.size(1):])
                 output = output.replace("<NL>", "\n")
                 response = output
-                print("Response: ",response)
-                print("\n")
+                '''
+                #print("Response: ",output)
+                #print("\n")
         else:
             print("Start inference.")
             results = []
@@ -236,12 +266,12 @@ if __name__ == '__main__':
                             )
                     s = generation_output.sequences[0]
                     output = tokenizer.decode(s)
-                    output = output.split("### Response:")[1].strip()
+                    output = output.split("### Response：")[1].strip()
                     output = output.split("\n\n")[0].strip()
 
                 response = output
                 #print("Response: ",response)
-                print("\n")
+                #print("\n")
 
                 #s = generation_output[0]
                 #output = tokenizer.decode(s,skip_special_tokens=True)
