@@ -24,17 +24,29 @@ from transformers import GenerationConfig,LlamaForCausalLM, LlamaTokenizer, Auto
 from peft import  PeftModel
 
 
+temperature_config = {
+    "writing": 0.7,
+    "roleplay": 0.7,
+    "extraction": 0.0,
+    "math": 0.0,
+    "coding": 0.0,
+    "reasoning": 0.0,
+    "stem": 0.1,
+    "humanities": 0.1,
+    "arena-hard-200": 0.0,
+}
+
 
  # The prompt template below is taken from llama.cpp
  # and is slightly different from the one used in training.
  # But we find it gives better results
  #Japanese version 
-'''prompt_input = (
+prompt_input = (
     "以下にあるタスクの指示を示します。"
     "示された指示に適切に従うように回答を埋めてください。"
     "### 指示：\n\n{instruction}\n\n### 回答：\n\n"
-)'''
-prompt_input = ("Below is an instruction that describes a task. Write a response that appropriately completes the request. ### Instruction:\n\n{instruction}\n\n### Response:\n\n")
+)
+prompt_input_alpaca = ("Below is an instruction that describes a task. Write a response that appropriately completes the request. ### Instruction:\n\n{instruction}\n\n### Response:\n\n")
 
 prompt_input_jp = (
     "ユーザー: {instruction}<NL>システム: "
@@ -76,12 +88,14 @@ def rinna_prompt(tmp_dict):
         + "<NL>"
         + "システム: "
     )
-def generate_prompt(instruction, model_id, input=None):
+def generate_prompt(instruction, base_model, input=None):
     if input:
 
         instruction = instruction + '\n' + input
-    if "rinna" in model_id:
+    if "rinna" in base_model:
         return prompt_input_jp.format_map({'instruction': instruction})
+    elif "llama" in base_model.lowercase():
+        return prompt_input_alpaca.format_map({'instruction': instruction})
     else:
         return prompt_input.format_map({'instruction': instruction})
 
@@ -96,12 +110,12 @@ if __name__ == '__main__':
         args.tokenizer_path = args.base_model
         if args.lora_model is None:
             args.tokenizer_path = args.base_model
-    if "rinna" in args.model_id:
+    try:
         tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_path)
-    else:
+    except:
         tokenizer = LlamaTokenizer.from_pretrained(args.tokenizer_path)
 
-    if "rinna" in args.model_id:
+    try:
         base_model = AutoModelForCausalLM.from_pretrained(
         args.base_model, 
         load_in_8bit=False,
@@ -109,7 +123,7 @@ if __name__ == '__main__':
         low_cpu_mem_usage=True,
         device_map='auto',
         )
-    else:
+    except:
         base_model = LlamaForCausalLM.from_pretrained(
         args.base_model, 
         load_in_8bit=False,
@@ -174,10 +188,10 @@ if __name__ == '__main__':
                 if len(raw_input_text.strip())==0:
                     break
                 if args.with_prompt:
-                    input_text = generate_prompt(instruction=raw_input_text,model_id=args.model_id)
+                    input_text = generate_prompt(instruction=raw_input_text,base_model=args.base_model)
                 else:
                     input_text = raw_input_text
-                if True:
+                if False:
                     print (input_text)   
                     inputs = tokenizer(input_text, return_tensors="pt")
                     input_ids = inputs["input_ids"].to(device)
@@ -199,6 +213,27 @@ if __name__ == '__main__':
                             )
                     s = generation_output.sequences[0]
                     output = tokenizer.decode(s)
+                    print(output)
+                else:
+                    print (input_text)   
+                    inputs = tokenizer(input_text, return_tensors="pt")
+                    input_ids = inputs["input_ids"].to(device)
+
+                    with torch.no_grad():
+                        generation_output = model.generate(
+                            input_ids=input_ids,
+                            top_p=1.0,
+                            top_k=0,
+                            temperature=0.1,
+                            repetition_penalty=1.0,
+                            return_dict_in_generate=True,
+                            output_scores=True,
+                            max_new_tokens=args.max_new_tokens,
+                            )
+                    s = generation_output.sequences[0]
+                    output = tokenizer.decode(s)
+                    output = output.split("### 回答：")[1].strip()
+                    output = output.split("\n\n")[0].strip()
                     print(output)
                     #output = output.split("### response:")[1].strip()
                     #output = output.split("\n\n")[0].strip()
@@ -226,8 +261,9 @@ if __name__ == '__main__':
             print("Start inference.")
             results = []
             for index, example in tqdm(enumerate(examples)):
+                temperature = temperature_config[question[index]["category"]]
                 if args.with_prompt is True:
-                    input_text = generate_prompt(instruction=example,model_id=args.model_id)
+                    input_text = generate_prompt(instruction=example,base_model=args.base_model)
                 else:
                     input_text = example
                 if "rinna" in args.base_model:
@@ -236,7 +272,7 @@ if __name__ == '__main__':
                     token_ids.to(model.device),
                     do_sample=True,
                     max_new_tokens=args.max_new_tokens,
-                    temperature=0.7,
+                    temperature=temperature,
                     repetition_penalty=1.1,
                     pad_token_id=tokenizer.pad_token_id,
                     bos_token_id=tokenizer.bos_token_id,
@@ -245,11 +281,11 @@ if __name__ == '__main__':
                     output = tokenizer.decode(output_ids.tolist()[0][token_ids.size(1):])
                     output = output.replace("<NL>", "\n")
                     output = output.replace("</s>", "")
-                else:
+                elif "llama" in args.base_model.lowercase():
                     inputs = tokenizer(input_text, return_tensors="pt")
                     input_ids = inputs["input_ids"].to(device)
                     generation_config = GenerationConfig(
-                        temperature=0.1,
+                        temperature=temperature,
                         top_p=0.75,
                         top_k=40,
                         num_beams=4,
@@ -267,6 +303,26 @@ if __name__ == '__main__':
                     s = generation_output.sequences[0]
                     output = tokenizer.decode(s)
                     output = output.split("### Response：")[1].strip()
+                    output = output.split("\n\n")[0].strip()
+
+                else:
+                    inputs = tokenizer(input_text, return_tensors="pt")
+                    input_ids = inputs["input_ids"].to(device)
+
+                    with torch.no_grad():
+                        generation_output = model.generate(
+                            input_ids=input_ids,
+                            top_p=1.0,
+                            top_k=0,
+                            temperature=temperature,
+                            repetition_penalty=1.0,
+                            return_dict_in_generate=True,
+                            output_scores=True,
+                            max_new_tokens=args.max_new_tokens,
+                            )
+                    s = generation_output.sequences[0]
+                    output = tokenizer.decode(s)
+                    output = output.split("### 回答：")[1].strip()
                     output = output.split("\n\n")[0].strip()
 
                 response = output
