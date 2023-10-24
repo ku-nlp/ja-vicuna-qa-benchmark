@@ -175,4 +175,4 @@ To make it more convenient for users to utilize pairwise comparisons with existi
 We will regularly include latest LLM baselines.
 
 ## Questions
-If you have any questions and feedback, please feel free to send a mail to feicheng@i.kyoto-u.ac.jp or leave questions in the `Issues' list.
+If you have any questions and feedback, please feel free to leave questions in the `Issues' list.
