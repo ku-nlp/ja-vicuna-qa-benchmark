@@ -54,12 +54,15 @@ def display_result_pairwise(args):
     list_res = []
     # traverse df row by row
     for index, row in df_all.iterrows():
-        if args.model_list is not None and row["model_1"] not in args.model_list:
-            continue
-        if args.model_list is not None and row["model_2"] not in args.model_list:
-            continue
         if args.baseline_model is not None:
             if args.baseline_model not in [row["model_1"], row["model_2"]]:
+                continue
+            if row["model_1"] not in args.model_list and row["model_2"] not in args.model_list:
+                continue
+        else:
+            if args.model_list is not None and row["model_1"] not in args.model_list:
+                continue
+            if args.model_list is not None and row["model_2"] not in args.model_list:
                 continue
         if row["g1_winner"] == "tie" or row["g1_winner"] != row["g2_winner"]:
             list_res.append({"model": row["model_1"], "win": 0, "loss": 0, "tie": 1})
