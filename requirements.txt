@@ -1,1 +1,4 @@
 shortuuid
+openai
+ray
+anthropic
