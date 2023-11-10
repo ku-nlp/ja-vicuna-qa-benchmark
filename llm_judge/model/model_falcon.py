@@ -6,7 +6,7 @@ import torch
 import transformers
 from transformers import TextIteratorStreamer, GenerationConfig
 
-from fastchat.utils import is_partial_stop
+from utils import is_partial_stop
 
 transformers.logging.set_verbosity_error()
 

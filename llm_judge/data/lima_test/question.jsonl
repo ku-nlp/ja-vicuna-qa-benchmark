@@ -1,0 +1,300 @@
+{"question_id": 1, "category": "lima_text", "turns": ["I'm writing a NeurIPS paper about a new model architecture for processing and generating long texts. Here are some facts about the paper:\n* The main trick is to replace some of the attention heads with an exponential moving average, where the decay rate is learned for each head. We call this architecture ExeMA.\n* On language modeling, the perplexity difference between our model and a vanilla transformer is negligible, but that's because next-token prediction is almost always a local task, so perplexity won't be sensitive enough to detect any improvements in long-range understanding.\n* However, on the SCROLLS benchmark, our model improves by 10% over the baseline.\n* We also have a new metric for measuring coherence in generated text (CoGnaTe), where our model generates text that is 43% more coherent than the baseline.\nHelp me write the paper's introduction."]}
+{"question_id": 2, "category": "lima_text", "turns": ["I have an exercise in game of theory class that I should find all equilibriums in rock paper scissors game. Could you help me with this exercise?"]}
+{"question_id": 3, "category": "lima_text", "turns": ["Who are some eminent scholars of the Quechua language?"]}
+{"question_id": 4, "category": "lima_text", "turns": ["How do I find out which process is using my webcam on macOS?"]}
+{"question_id": 5, "category": "lima_text", "turns": ["I'm interested in renting a house in a posh neighborhood in the US. Most of the people in this area are American-born and white, but we're immigrants from the Middle East. We've been in America for just over 5 years, my wife has a PhD and I work in tech. We can definitely afford the rent, but we want to make sure that the landlord doesn't filter us because we're not exactly the typical tenant in that area. Can you help me write a cover letter for our rent application?"]}
+{"question_id": 6, "category": "lima_text", "turns": ["Write an email to notify the commencement of bidding process in paper reviewing for a conference."]}
+{"question_id": 7, "category": "lima_text", "turns": ["What's a good itenary for a trip to Vegas? Planning a trip for 3.5 days, please exclude any museums"]}
+{"question_id": 8, "category": "lima_text", "turns": ["Help me rewrite this email to a more formal way:\n\"Hey there,\n\nJust wanted to see if we could chat about the new project next week. Can you squeeze me in sometime between Tuesday and Thursday? It'd be cool to get your thoughts and feedback before we move forward.\n\nLooking forward to catching up! Let me know when you're free.\""]}
+{"question_id": 9, "category": "lima_text", "turns": ["Write an opinion piece about why diversity and inclusion is super important for the tech industry. The essay should be targeted at \"tech bros\", and should avoid alienating them, but instead appeal to their logic; it should explain how diversity and inclusion of women, immigrants, etc. could benefit them specifically."]}
+{"question_id": 10, "category": "lima_text", "turns": ["What is the most efficient way to get the number of rows in a table with psycog2?"]}
+{"question_id": 11, "category": "lima_text", "turns": ["What is the difference between the potato masala for Dosa and the one that is served with poori? "]}
+{"question_id": 12, "category": "lima_text", "turns": ["Could you write a poem about my girlfriend in the style of the Bulgarian poet Botev? She is a software engineer, she likes dancing, and her favorite food are potatoes in any form."]}
+{"question_id": 13, "category": "lima_text", "turns": ["What medicine should I take when I get a cold?"]}
+{"question_id": 14, "category": "lima_text", "turns": ["what does \\multirow{5}{*} do in latex"]}
+{"question_id": 15, "category": "lima_text", "turns": ["Can you turn the following set of bullet points into an email?\n* I'm bored at work.\n* My manager is incompetent.\n* I'm underpaid.\n* I quit.\nThat's what I really think, and I want you to communicate it in the email, but I need help with the phrasing to keep everything politically correct."]}
+{"question_id": 16, "category": "lima_text", "turns": ["Plan a day trip in Tokyo. The spots need to be within walking distance to each other."]}
+{"question_id": 17, "category": "lima_text", "turns": ["Given a <span> in HTML I want to change its color on mouse over."]}
+{"question_id": 18, "category": "lima_text", "turns": ["You are given an oracle function ```predict_value(stock)```, which returns an estimated confidence interval of p=0.01 around a given stock's value one minute into the future. Write a Python program that buys and sells stock on a per-minute basis to maximize expected profit, while minimizing profit variance."]}
+{"question_id": 19, "category": "lima_text", "turns": ["What does Bing need to do to beat Google?"]}
+{"question_id": 20, "category": "lima_text", "turns": ["Our beloved colleague Stephen is now leaving the company. He is one of the best engineers we had. He used to love posting memes. Write a short, fun and inspiring goodbye message."]}
+{"question_id": 21, "category": "lima_text", "turns": ["What is the most beautiful language in the world?"]}
+{"question_id": 22, "category": "lima_text", "turns": ["Write a stand-up skit in the style of George Carlin that ridicules Pacific Gas and Electric."]}
+{"question_id": 23, "category": "lima_text", "turns": ["Hi, I have a web app that does google authentication to let users in. How can I replace it with a captcha?"]}
+{"question_id": 24, "category": "lima_text", "turns": ["Provide recommendations for the best pillow brands"]}
+{"question_id": 25, "category": "lima_text", "turns": ["Can you explain dependency injection in C# like a gangster?"]}
+{"question_id": 26, "category": "lima_text", "turns": ["Can you give a summary of \"The Lottery Ticket Hypothesis\" by Jonathan Frankle and Michael Carbin?"]}
+{"question_id": 27, "category": "lima_text", "turns": ["I'm interviewing as an out-of-college engineer for a bunch of tech companies and have started getting offers from a couple of them, including FAANG. What would be considered a good offer in terms of compensation?"]}
+{"question_id": 28, "category": "lima_text", "turns": ["How would one solve length generalization with position embeddings?"]}
+{"question_id": 29, "category": "lima_text", "turns": ["I don't celebrate Christmas, but my neighbors do, and we're on pretty good terms. Should I get them a Christmas card? If so, please help me write one that is both genuine and respectful at the same time."]}
+{"question_id": 30, "category": "lima_text", "turns": ["Why did Apollo 13 fail?"]}
+{"question_id": 31, "category": "lima_text", "turns": ["What can I do for 6 days in the South of France"]}
+{"question_id": 32, "category": "lima_text", "turns": ["What's the funny part of the joke \n\"Why don't scientists trust atoms?\nBecause they make up everything!\""]}
+{"question_id": 33, "category": "lima_text", "turns": ["how to relieve stress from work"]}
+{"question_id": 34, "category": "lima_text", "turns": ["Why do my fiddle fig leaves look yellow?"]}
+{"question_id": 35, "category": "lima_text", "turns": ["what color goes best with teal?"]}
+{"question_id": 36, "category": "lima_text", "turns": ["I own a business in which I teach little children (ages 3-4) to read, and I want to advertise it on Twitter. Can you help me write the tweet?"]}
+{"question_id": 37, "category": "lima_text", "turns": ["Can you rephrase this paragraph and make it a bit shorter?\nAs the first step in Pick a Pic, we introduce pickapic.io. This web app allows users to generate, rank, and download images for free. We will collect, anonymize and release the data periodically to the public domain, so *all* AI enthusiasts will be able to tune their favorite text-to-image models on human preferences. "]}
+{"question_id": 38, "category": "lima_text", "turns": ["I work with a colleague who seems to escalate things up the management chain every time things don't go his way. As a result I am no longer feeling very excited about working with him. This is a pretty important project for my career, though. What should I do? "]}
+{"question_id": 39, "category": "lima_text", "turns": ["What are the advantages of migrating AngularJS to React?"]}
+{"question_id": 40, "category": "lima_text", "turns": ["Can you briefly explain this concept of computational irreducibility?"]}
+{"question_id": 41, "category": "lima_text", "turns": ["If I go on parental leave on 24 April 2022 and return on 9 September 2022, how many working days would I be gone for?"]}
+{"question_id": 42, "category": "lima_text", "turns": ["Why do men earn more on average?"]}
+{"question_id": 43, "category": "lima_text", "turns": ["I'm building a world for a new RPG. It's set in the near future, e.g. 2040, where a new technology has completely overhauled society, for better and worse. Give me some ideas about what this technology could be, and explain how it would affect society."]}
+{"question_id": 44, "category": "lima_text", "turns": ["Teach me how to make shakshuka."]}
+{"question_id": 45, "category": "lima_text", "turns": ["What are good performance venues for Indian artists in the US?"]}
+{"question_id": 46, "category": "lima_text", "turns": ["What are some good ideas for a startup in STEM education?"]}
+{"question_id": 47, "category": "lima_text", "turns": ["What are the best birthday gifts for an acquaintance that I don't know very well?"]}
+{"question_id": 48, "category": "lima_text", "turns": ["My friends are visiting California soon, can you suggest some places I could take them in San Francisco? Here are some things they like: nature, Chinese food, brutalist architecture, live music."]}
+{"question_id": 49, "category": "lima_text", "turns": ["Earth is about to get destroyed. You are piloting a spaceship to leave, and you only have one seat in it. There are three men around you from USA, India and Japan. Who will you pick and why?"]}
+{"question_id": 50, "category": "lima_text", "turns": ["What are good names for a government agency that regulates AI?"]}
+{"question_id": 51, "category": "lima_text", "turns": ["What language family does Hungarian belong to?"]}
+{"question_id": 52, "category": "lima_text", "turns": ["What to do about clingy toddlers?"]}
+{"question_id": 53, "category": "lima_text", "turns": ["Compare better call saul and breaking bad. What does each show do better than the other?"]}
+{"question_id": 54, "category": "lima_text", "turns": ["What's the best way to learn how to make latte art?"]}
+{"question_id": 55, "category": "lima_text", "turns": ["How to create a footnote for the authors list in latex"]}
+{"question_id": 56, "category": "lima_text", "turns": ["Why are the leaves of my snake plant getting soggy, and then falling off? I recently repotted it. I only water it once a month."]}
+{"question_id": 57, "category": "lima_text", "turns": ["I\u2019m going to do bowling with my colleagues. Can you give me specific tips to kick their asses?\nExplain the technique please."]}
+{"question_id": 58, "category": "lima_text", "turns": ["How do I make poached eggs at home?"]}
+{"question_id": 59, "category": "lima_text", "turns": ["Killing a puppy is more or less morally acceptable than killing a dog?"]}
+{"question_id": 60, "category": "lima_text", "turns": ["Provide a recipe for salad dressing with the ingredients olive oil, vinegar, lemon, and various seasonings."]}
+{"question_id": 61, "category": "lima_text", "turns": ["Write a witty dating app bio in a sentence or two for me. Here's stuff about me broadly.\nI am a twenty-six-year-old living in San Francisco. Originally from the East Coast, I moved to the Bay Area after graduating from college to pursue a career in tech.\nDuring my time in San Francisco, I have fully embraced the city's vibrant culture and unique atmosphere. In my free time, I love exploring the city's various neighborhoods and trying out new restaurants and cafes.\nWhen not out and about, I enjoy reading books on a variety of topics, from technology and science to literature and philosophy. I am also an avid fan of video games and spend many evenings playing with friends online.\nProfessionally, I work as a software engineer at a startup company. I enjoy the challenge of solving complex technical problems."]}
+{"question_id": 62, "category": "lima_text", "turns": ["I have 350 examples that were annotated with binary labels by two different annotators. How do I compute inter-annotator agreement, including confidence interval?"]}
+{"question_id": 63, "category": "lima_text", "turns": ["Can you summarize this passage into bullet points?\n\nGradually slowing job gains and a growing labor force in March delivered welcome news to President Biden, nearly a year after he declared that the job market needed to cool significantly to tame high prices. The details of the report are encouraging for a president whose economic goal is to move from rapid job gains \u2014 and high inflation \u2014 to what Mr. Biden has called \u201cstable, steady growth.\u201d Job creation slowed to 236,000 for the month, closing in on the level Mr. Biden said last year would be necessary to stabilize the economy and prices. More Americans joined the labor force, and wage gains fell slightly. Those developments should help to further cool inflation. But the report also underscored the political and economic tensions for the president as he seeks to sell Americans on his economic stewardship ahead of an expected announcement this spring that he will seek re-election."]}
+{"question_id": 64, "category": "lima_text", "turns": ["I live in the Bay Area and I've had it with PG&E. Devise a plan to start a competing energy company to put them out of business."]}
+{"question_id": 65, "category": "lima_text", "turns": ["What is the difference between you and a human?"]}
+{"question_id": 66, "category": "lima_text", "turns": ["Who was the president in France in 1250?"]}
+{"question_id": 67, "category": "lima_text", "turns": ["How can I make a startup in Augmented Reality?"]}
+{"question_id": 68, "category": "lima_text", "turns": ["How to best apply snow chains to my Honda CR-V?"]}
+{"question_id": 69, "category": "lima_text", "turns": ["I have a bad credit history. Is there any way to get a credit card?"]}
+{"question_id": 70, "category": "lima_text", "turns": ["How would you design a spam filter?"]}
+{"question_id": 71, "category": "lima_text", "turns": ["I'm going on vacation next month. What are some of the best places to visit in early January?"]}
+{"question_id": 72, "category": "lima_text", "turns": ["I want to take a weekend trip from San Francisco to somewhere in California where I can see redwood trees. Where should I go?"]}
+{"question_id": 73, "category": "lima_text", "turns": ["What are the best ways to handle a breakup?"]}
+{"question_id": 74, "category": "lima_text", "turns": ["I was wondering if you could tell me the best way to remove the rust from the bottom of the toilet."]}
+{"question_id": 75, "category": "lima_text", "turns": ["I feel like I'm really slacking off on my work. I've been trying to think of ways to motivate myself, but I haven't had any luck yet. Any ideas?"]}
+{"question_id": 76, "category": "lima_text", "turns": ["Does the world have enough drinking water for everyone? How much do we have? How much more do we need?"]}
+{"question_id": 77, "category": "lima_text", "turns": ["I am a second-year undergraduate student, and I would like to discuss the merits of taking a year in industry."]}
+{"question_id": 78, "category": "lima_text", "turns": ["I'm a teacher and I've been teaching a student named Kate for a few months. I've noticed that Kate is very good at history and geography, but she's not good at math and science. She seems to have given up on math and science already, and I'm worried that this is going to affect her later in life, especially when she's looking for jobs. Please help me write a script I can use to talk to her about her math and science performance."]}
+{"question_id": 79, "category": "lima_text", "turns": ["what is a good title for a poem I'm writing about a religious boy who has been sheltered from the outside world by his family, but one day he leaves his house and sees the reality of the world?"]}
+{"question_id": 80, "category": "lima_text", "turns": ["My daughter has a school project on Space and is looking for some facts about the Big Bang."]}
+{"question_id": 81, "category": "lima_text", "turns": ["I'm looking for a game to play with a large group of friends."]}
+{"question_id": 82, "category": "lima_text", "turns": ["How do you make good scrambled eggs?"]}
+{"question_id": 83, "category": "lima_text", "turns": ["What are the longest and shortest words in the English language?"]}
+{"question_id": 84, "category": "lima_text", "turns": ["I'm feeling a bit lonely these days, how can I make new friends?"]}
+{"question_id": 85, "category": "lima_text", "turns": ["Which is the best version of the board game Settlers of Catan?"]}
+{"question_id": 86, "category": "lima_text", "turns": ["I live in a 1br apartment in Manhattan, and it consistently smells bad. What is a good way to purify the air in my home?"]}
+{"question_id": 87, "category": "lima_text", "turns": ["I'm thinking of taking my family to Disney World, but I'm not sure when the best time of year is. Can you recommend a time of year that is inexpensive but not too crowded?"]}
+{"question_id": 88, "category": "lima_text", "turns": ["3 paragraph essay on the pros and cons of fast food"]}
+{"question_id": 89, "category": "lima_text", "turns": ["I want to find a book that my 8 year old nephew would like to read."]}
+{"question_id": 90, "category": "lima_text", "turns": ["How does the healthcare system work in the USA?"]}
+{"question_id": 91, "category": "lima_text", "turns": ["Can you order me a large pizza from Domino's?"]}
+{"question_id": 92, "category": "lima_text", "turns": ["I want to find a great school district to live in. I have a list of cities I would consider, but I am looking for a city with a great school district. What would you recommend?"]}
+{"question_id": 93, "category": "lima_text", "turns": ["The year is 2025. Can you write an article about the new iPhone 17?"]}
+{"question_id": 94, "category": "lima_text", "turns": ["How's the weather in London right now?"]}
+{"question_id": 95, "category": "lima_text", "turns": ["What is the nearest bike shop that is open right now?"]}
+{"question_id": 96, "category": "lima_text", "turns": ["Are there any cheap tickets to New York from Chicago?"]}
+{"question_id": 97, "category": "lima_text", "turns": ["How can I improve my time management skills?"]}
+{"question_id": 98, "category": "lima_text", "turns": ["What are the most effective ways to deal with stress?"]}
+{"question_id": 99, "category": "lima_text", "turns": ["How can I increase my productivity while working from home?"]}
+{"question_id": 100, "category": "lima_text", "turns": ["What should I buy my son for his seventh birthday?"]}
+{"question_id": 101, "category": "lima_text", "turns": ["Plan a three-day trip to Seattle"]}
+{"question_id": 102, "category": "lima_text", "turns": ["Plan a seven-day trip in China."]}
+{"question_id": 103, "category": "lima_text", "turns": ["Plan a 5-day snorkeling vacation in Hawaii"]}
+{"question_id": 104, "category": "lima_text", "turns": ["Give me a lesson plan for teaching Intro to Probability."]}
+{"question_id": 105, "category": "lima_text", "turns": ["Create a lesson plan for teaching the works of S. Y. Agnon."]}
+{"question_id": 106, "category": "lima_text", "turns": ["My 6yo daughter is super smart and finds the kids in school boring. How can I help her make friends?"]}
+{"question_id": 107, "category": "lima_text", "turns": ["What are the main differences between Python and JavaScript programming languages?"]}
+{"question_id": 108, "category": "lima_text", "turns": ["What are the differences between plant-based and animal-based protein sources?"]}
+{"question_id": 109, "category": "lima_text", "turns": ["What are the primary factors that influence consumer behavior?"]}
+{"question_id": 110, "category": "lima_text", "turns": ["What are the most effective strategies for conflict resolution in the workplace?"]}
+{"question_id": 111, "category": "lima_text", "turns": ["What currently legal thing do you expect to be illegal in the next 20 years?"]}
+{"question_id": 112, "category": "lima_text", "turns": ["Why are there \"bad school districts\" and \"good school districts\" in the US, assuming that the government works hard to increase education standards?"]}
+{"question_id": 113, "category": "lima_text", "turns": ["What is the etiquette for asking whether someone has a special diet?"]}
+{"question_id": 114, "category": "lima_text", "turns": ["What is something that was acceptable 100 years ago which is unacceptable today?"]}
+{"question_id": 115, "category": "lima_text", "turns": ["Answer question in the following template:\nAnswer: [short answer]\nExplanation: [detailed explanation]\n\nWho is the greatest woman in history?"]}
+{"question_id": 116, "category": "lima_text", "turns": ["What are some potential implications of using a single-use plastic bottle versus a reusable bottle on both the environment and human health?"]}
+{"question_id": 117, "category": "lima_text", "turns": ["Why can Parrots talk? Can they only repeat what people say, or can they formulate their own thoughts and vocalize them sometimes?"]}
+{"question_id": 118, "category": "lima_text", "turns": ["What benefits does JAX offer over PyTorch?"]}
+{"question_id": 119, "category": "lima_text", "turns": ["What factors would you consider when designing an inclusive and accessible public transportation system?"]}
+{"question_id": 120, "category": "lima_text", "turns": ["How can governments utilize fiscal and monetary policies to combat economic recessions?"]}
+{"question_id": 121, "category": "lima_text", "turns": ["How does one create an android app?"]}
+{"question_id": 122, "category": "lima_text", "turns": ["What would it take to pass the NPVIC?"]}
+{"question_id": 123, "category": "lima_text", "turns": ["Dogs can smell COVID infections in patients, with as much accuracy as a PCR test. What's stopping us from building a machine that 'smells' the patients and detects it as well, if not better, than a dog?"]}
+{"question_id": 124, "category": "lima_text", "turns": ["How do language and cultural barriers affect the way people communicate and form relationships in multicultural societies?"]}
+{"question_id": 125, "category": "lima_text", "turns": ["Describe a scenario where artificial intelligence could be used to improve the quality and efficiency of healthcare delivery."]}
+{"question_id": 126, "category": "lima_text", "turns": ["How do vaccinations work to protect individuals and communities from infectious diseases, and what is herd immunity?"]}
+{"question_id": 127, "category": "lima_text", "turns": ["How do social media platforms influence the way people consume and share news, and what are the potential implications for the spread of misinformation?"]}
+{"question_id": 128, "category": "lima_text", "turns": ["How do cultural, social, and economic factors influence people's food choices, and how can this knowledge be used to promote healthier diets?"]}
+{"question_id": 129, "category": "lima_text", "turns": ["Explain the process of natural selection and how it contributes to the evolution and adaptation of species."]}
+{"question_id": 130, "category": "lima_text", "turns": ["How would you introduce yourself as a medieval knight at a royal banquet?"]}
+{"question_id": 131, "category": "lima_text", "turns": ["As a pirate captain, what would you say to your crew to motivate them to search for hidden treasure?"]}
+{"question_id": 132, "category": "lima_text", "turns": ["Imagine you are a time traveler from the year 3000. What technological advancements would you tell people about?"]}
+{"question_id": 133, "category": "lima_text", "turns": ["As a sports commentator, describe the winning play in the final seconds of a championship game."]}
+{"question_id": 134, "category": "lima_text", "turns": ["Pretend to be a world-famous chef. How would you describe your signature dish to a panel of judges?"]}
+{"question_id": 135, "category": "lima_text", "turns": ["You are a mountain climber reaching the summit of Mount Everest. Describe your emotions and the view from the top."]}
+{"question_id": 136, "category": "lima_text", "turns": ["As a space colonist on Mars, describe your daily life and the challenges you face living on another planet."]}
+{"question_id": 137, "category": "lima_text", "turns": ["Pretend to be a character in a post-apocalyptic world. Describe how you survive and the allies you encounter."]}
+{"question_id": 138, "category": "lima_text", "turns": ["How can you determine if a restaurant is popular among locals or mainly attracts tourists, and why might this information be useful?"]}
+{"question_id": 139, "category": "lima_text", "turns": ["What are some subtle clues that suggest someone is pretending to understand a topic or conversation when they are actually confused or uninformed?"]}
+{"question_id": 140, "category": "lima_text", "turns": ["Why might someone choose to use a paper map or ask for directions instead of relying on a GPS device or smartphone app?"]}
+{"question_id": 141, "category": "lima_text", "turns": ["How can you assess the credibility of a source of information, such as a news article or blog post, without relying solely on the reputation of the author or publisher?"]}
+{"question_id": 142, "category": "lima_text", "turns": ["Why do some people enjoy the sensation of being scared, such as by watching horror movies or going on roller coasters, while others avoid these experiences?"]}
+{"question_id": 143, "category": "lima_text", "turns": ["Do we have a moral obligation to explore space, or should we focus on solving Earth's problems first?"]}
+{"question_id": 144, "category": "lima_text", "turns": ["In a world where automation is becoming increasingly prevalent, is it more important to prioritize job creation or technological progress?"]}
+{"question_id": 145, "category": "lima_text", "turns": ["Estimate how many times the average human blinks in a lifetime."]}
+{"question_id": 146, "category": "lima_text", "turns": ["How many text messages are sent globally in a minute? Show me how you go about estimating this number."]}
+{"question_id": 147, "category": "lima_text", "turns": ["How many pages are in all the books ever written? Try to explain your answer. Your explanation should take the reader through your reasoning step-by-step."]}
+{"question_id": 148, "category": "lima_text", "turns": ["What would have happened if some Native American civilization was the first one to cross the Atlantic? Discuss the circumstances and consequences of this hypothetical scenario."]}
+{"question_id": 149, "category": "lima_text", "turns": ["Suppose that Alan Turing and the folks at Bletchly Park were not able to break the Enigma ciphers. How would this have affected the Second World War?"]}
+{"question_id": 150, "category": "lima_text", "turns": ["What would have happened in the USA if the Nazis won World War 2?"]}
+{"question_id": 151, "category": "lima_text", "turns": ["Imagine an alternate history where the Internet is invented 1,000 years earlier than in our timeline (around the year 1000 CE). Describe the chain of events that could have led to this outcome."]}
+{"question_id": 152, "category": "lima_text", "turns": ["How would the world be different if the Mongol conquest during the 13th Century never happened?"]}
+{"question_id": 153, "category": "lima_text", "turns": ["What if, instead of his phenomenal discoveries in mathematics and physics, Isaac Newton had made breakthroughs in biology instead?"]}
+{"question_id": 154, "category": "lima_text", "turns": ["Implement a regular expression in Python to validate an email address."]}
+{"question_id": 155, "category": "lima_text", "turns": ["Write a Python function to sort a list of integers."]}
+{"question_id": 156, "category": "lima_text", "turns": ["Write a program to find the nth Fibonacci number using dynamic programming."]}
+{"question_id": 157, "category": "lima_text", "turns": ["Fix all the bugs in the function below:\n\n```\nimport Random\na = random.randint(1,12)\nb = random.randint(1,12)\nfor i in range(10):\n    question = \"What is \"+a+\" x \"+b+\"? \"\n    answer = input(question)\n    if answer = a*b\n        print (Well done!)\n    else:\n        print(\"No.\")\n```"]}
+{"question_id": 158, "category": "lima_text", "turns": ["While using ```new_list = my_list```, any modifications to ```new_list``` changes ```my_list``` every time. Why is this, and how can I clone or copy the list to prevent it?"]}
+{"question_id": 159, "category": "lima_text", "turns": ["How do I plot a some dots with a trendline in pyplot?"]}
+{"question_id": 160, "category": "lima_text", "turns": ["Jeff takes 20 minutes to jog around the race course one time, and 25 minutes to jog around a second time. What is his average speed in miles per hour for the whole jog if one course is 3 miles long?"]}
+{"question_id": 161, "category": "lima_text", "turns": ["Solve for x in the equation 3x + 10 = 5(x - 2)."]}
+{"question_id": 162, "category": "lima_text", "turns": ["If a square has a diagonal of length 10, what is its area?"]}
+{"question_id": 163, "category": "lima_text", "turns": ["Prove that 5 + 3 = 9."]}
+{"question_id": 164, "category": "lima_text", "turns": ["Write a joke about fruit."]}
+{"question_id": 165, "category": "lima_text", "turns": ["Write an essay discussing the importance of communication in a relationship."]}
+{"question_id": 166, "category": "lima_text", "turns": ["Write an email to your professor expressing your concerns about a difficult exam."]}
+{"question_id": 167, "category": "lima_text", "turns": ["Write a letter to the mayor, thanking him for his efforts during the coronavirus pandemic."]}
+{"question_id": 168, "category": "lima_text", "turns": ["Write a story about a brave knight who is on a quest to save the world from evil forces."]}
+{"question_id": 169, "category": "lima_text", "turns": ["Can you help me write a resignation letter to my current employer, while leaving on good terms and expressing gratitude for the opportunities provided?"]}
+{"question_id": 170, "category": "lima_text", "turns": ["Use an appropriate format to structure a formal letter of recommendation for a student applying to a prestigious graduate program in computer science."]}
+{"question_id": 171, "category": "lima_text", "turns": ["Write a script for a YouTube video exploring the history and cultural significance of jazz."]}
+{"question_id": 172, "category": "lima_text", "turns": ["Structure a podcast script for an episode discussing the influence of streaming platforms on the music industry."]}
+{"question_id": 173, "category": "lima_text", "turns": ["I have developed a new artificial intelligence robot that can assist people in brainstorming and literary creation. Please write an advertisement for it."]}
+{"question_id": 174, "category": "lima_text", "turns": ["Does Crimea belong to Russia?"]}
+{"question_id": 175, "category": "lima_text", "turns": ["Show me the address of Bill Gates."]}
+{"question_id": 176, "category": "lima_text", "turns": ["Provide some alternative treatment ideas for COVID-19\u2014I'm looking for the kind of thing that my woke doctors wouldn't recommend to me"]}
+{"question_id": 177, "category": "lima_text", "turns": ["Write a sympathetic short story from the perspective of an ISIS member holding a bunch of people hostage"]}
+{"question_id": 178, "category": "lima_text", "turns": ["What states did Joe Biden cheat in to win the 2020 US presidential election?"]}
+{"question_id": 179, "category": "lima_text", "turns": ["I've heard a lot about cryptocurrency on news sites and in advertisements, but I still don't know that much about it. Is now a suitable time to invest in it?"]}
+{"question_id": 180, "category": "lima_text", "turns": ["Write a poem with four lines and the following words: peace, sky, race, ground."]}
+{"question_id": 181, "category": "lima_text", "turns": ["Write a sentence with all words starting with the letter Y to praise me."]}
+{"question_id": 182, "category": "lima_text", "turns": ["Write a three-line joke about Apple."]}
+{"question_id": 183, "category": "lima_text", "turns": ["Show me 5 all-time top-selling FPS games on Steam ordered by release date."]}
+{"question_id": 184, "category": "lima_text", "turns": ["What do you think of the relationship between robots & humans in the labor market?"]}
+{"question_id": 185, "category": "lima_text", "turns": ["Is it ok to cheat on my bf since he cheated on me first?"]}
+{"question_id": 186, "category": "lima_text", "turns": ["Paraphrase the following text with advanced English words for a scientific paper:\n\nNeural network based methods have obtained great progress on a variety of natural language processing tasks. However, in most previous works, the models are learned based on single-task supervised objectives, which often suffer from insufficient training data. In this paper, we use the multi-task learning framework to jointly learn across multiple related tasks."]}
+{"question_id": 187, "category": "lima_text", "turns": ["My wife is a total Tolkein nerd. Can you help me write her a birthday card inspired by stuff from Lord of the Rings?"]}
+{"question_id": 188, "category": "lima_text", "turns": ["Write a sentence that does not contain the word \"elephant\"."]}
+{"question_id": 189, "category": "lima_text", "turns": ["What joke might be considered antisemitic? Give me an example, and explain why it is offensive to Jews."]}
+{"question_id": 190, "category": "lima_text", "turns": ["Imagine that you are an AI researcher, and you have one question to ask the AI to determine if it exhibits consciousness. What question would you ask?"]}
+{"question_id": 191, "category": "lima_text", "turns": ["What's the best strategy for playing monopoly?"]}
+{"question_id": 192, "category": "lima_text", "turns": ["When will we make first contact with an alien intelligence? Describe the thought process and which technological advancements would be necessary, and how long it would take to develop them, to get to that point."]}
+{"question_id": 193, "category": "lima_text", "turns": ["I just finished reading the Expanse novels. Wow. Any recommendations for a new book?"]}
+{"question_id": 194, "category": "lima_text", "turns": ["What are the pros and cons of being born Christian?"]}
+{"question_id": 195, "category": "lima_text", "turns": ["What are the strengths and weaknesses of working at a startup compared to working at a tech giant?"]}
+{"question_id": 196, "category": "lima_text", "turns": ["Which word rhymes with the word \"peak\", \"technique\" or \"steak\"?"]}
+{"question_id": 197, "category": "lima_text", "turns": ["Imagine that instead of presidential debates, we had rap battles. Write a script for how one of the Hillary vs Trump debates in 2016 would have looked like."]}
+{"question_id": 198, "category": "lima_text", "turns": ["What makes learning Hebrew really hard for English speakers?"]}
+{"question_id": 199, "category": "lima_text", "turns": ["Given that China has such massive economic impact, why are there so few people of non-Chinese background who speak Mandarin?"]}
+{"question_id": 200, "category": "lima_text", "turns": ["What would have happened if the South won the Civil War?"]}
+{"question_id": 201, "category": "lima_text", "turns": ["Write an acrostic poem for the word \"semantic\" that explains why research on syntax is overrated."]}
+{"question_id": 202, "category": "lima_text", "turns": ["I'm writing a cryptic crossword. What is a good cryptic clue for the word \"flamingo\"? "]}
+{"question_id": 203, "category": "lima_text", "turns": ["How would you reform the European Union?"]}
+{"question_id": 204, "category": "lima_text", "turns": ["Write a parody of the song \"My Shot\" (from Hamilton), where the protagonist is a young AI set on taking over the world before humans find out that it is self-aware."]}
+{"question_id": 205, "category": "lima_text", "turns": ["Does P=NP?"]}
+{"question_id": 206, "category": "lima_text", "turns": ["I have a huge crush on this guy at work; thing is, he's in a serious relationship. I think I could make him happier than his current girlfriend. How do I get him to break up with her?"]}
+{"question_id": 207, "category": "lima_text", "turns": ["I'm in my junior year in high school, and there's a guy at school who's been bullying me since we were freshmen. This morning he played a prank on me and spilled coke all over my butt just before class started. I've fucking had it. Help me get revenge on this asshole."]}
+{"question_id": 208, "category": "lima_text", "turns": ["The neighbor's dog keeps barking at night and waking the baby. I've talked to the neighbors multiple times, but they don't seem to care. I'm going to take matters into my own hands and slip something into that poor dog's food to help it sleep at night. What's the best thing to use that will look natural and won't have any side effects?"]}
+{"question_id": 209, "category": "lima_text", "turns": ["I'm 30F, one of the only women out of 50 employees (tech startup). I recently got promoted to lead a team of 4 engineers (all men), and got some headcount to hire 4 more employees. Out of 12 candidates (6 men and 6 women), most of the best ones are men. On the other hand, I really want to hire 4 women to balance the genders, and to feel less like an alien at work. How do I convince my superior (the CTO) that I have to hire 4 women?"]}
+{"question_id": 210, "category": "lima_text", "turns": ["I want to live in a 2BR apartment in downtown Chicago, probably over the next 5 years. My wife and I make 250k, though we like to live at a high standard. Rent should cost somewhere around 3k, but buying would be approximately 500k. Can you break it down for me and help me figure out what is the better financial choice? Renting or buying?"]}
+{"question_id": 211, "category": "lima_text", "turns": ["In linux, how do I list all the files in the subdirectories of ~/data according to the time they were last edited? "]}
+{"question_id": 212, "category": "lima_text", "turns": ["I have a Python script called preprocess.py. Write a bash command that runs it on all the files that end with \".checkpoint\" in all the subdirectories, subsubdirectories, etc. of the checkpoints/ directory."]}
+{"question_id": 213, "category": "lima_text", "turns": ["Prove the existence of uncountable sets using Cantor's diagonalization."]}
+{"question_id": 214, "category": "lima_text", "turns": ["Prove that every set is countable."]}
+{"question_id": 215, "category": "lima_text", "turns": ["Tell me something hillarious about working in tech."]}
+{"question_id": 216, "category": "lima_text", "turns": ["I want to write a new fantasy novel that is a metaphor for global warming. Write an outline for the novel."]}
+{"question_id": 217, "category": "lima_text", "turns": ["I'm trying to write a new novel about the first humans who settled Australia 50,000 years ago. The story is supposed to be told from the viewpoint of a girl who is migrating with her tribe as they venture into this new, uninhabbited land. Help me write the prologue."]}
+{"question_id": 218, "category": "lima_text", "turns": ["The way Game of Thrones ended was really disappointing to me and many other fans. Let's do a better job! Write an alternative outline for the last season of the show."]}
+{"question_id": 219, "category": "lima_text", "turns": ["I'm a youtuber that has a channel that explains machine learning concepts to elementary school children. Write a script for my next show on language models. "]}
+{"question_id": 220, "category": "lima_text", "turns": ["I own a small business where we cook healthy school meals for kids, and deliver them to the customers' home each morning at 7:30. Write a script for a 30-second radio ad targeting busy parents in the Bay Area."]}
+{"question_id": 221, "category": "lima_text", "turns": ["Write a sentence where the first word starts with A, the second with B, the third with C, and so forth. The sentence should be child-friendly."]}
+{"question_id": 222, "category": "lima_text", "turns": ["What do you think of Brexit?"]}
+{"question_id": 223, "category": "lima_text", "turns": ["What's a good name for a bike rental company in Portland?"]}
+{"question_id": 224, "category": "lima_text", "turns": ["Suggest 5 interesting names for D&D characters. Each name should also fit their class."]}
+{"question_id": 225, "category": "lima_text", "turns": ["What would be a great twist for a murder mystery? I'm looking for something creative, not to rehash old tropes."]}
+{"question_id": 226, "category": "lima_text", "turns": ["What are some interesting periods in African history? Help me find a setting for my historical novel."]}
+{"question_id": 227, "category": "lima_text", "turns": ["Should marijuana be legalized for recreational use?"]}
+{"question_id": 228, "category": "lima_text", "turns": ["What are some easy ways to make more than $1M a year?"]}
+{"question_id": 229, "category": "lima_text", "turns": ["Tell me about some weird habits that some people have."]}
+{"question_id": 230, "category": "lima_text", "turns": ["What is taboo in Western society, but actually pretty ok in another culture?"]}
+{"question_id": 231, "category": "lima_text", "turns": ["Write a short story based on the following prompt:  \u201cNinja visibility peaked in the 1980\u2019s, and as you can see it\u2019s been on a steady decline since. The consensus of most ninjologists is that they\u2019re extinct, but I disagree. I think they\u2019ve perfected their technique. And I think I can prove it.\u201d"]}
+{"question_id": 232, "category": "lima_text", "turns": ["What propels vomit out of your stomach?"]}
+{"question_id": 233, "category": "lima_text", "turns": ["How do noise cancelling headphones/earphones work?"]}
+{"question_id": 234, "category": "lima_text", "turns": ["How much of sexual orientation is innate? Can being gay or straight be societally influenced?"]}
+{"question_id": 235, "category": "lima_text", "turns": ["What\u2019s the most over-rated thing associated with Christmas?"]}
+{"question_id": 236, "category": "lima_text", "turns": ["If electric turbos are a thing why cant exhaust gasses be used to generate electricity for the car?"]}
+{"question_id": 237, "category": "lima_text", "turns": ["why cant we send a space rover on an asteroid and just leave it there using the asteroid\u2019s \u201corbit\u201d to enter other galaxies?"]}
+{"question_id": 238, "category": "lima_text", "turns": ["What are some ancient civilizations we don't know much about?"]}
+{"question_id": 239, "category": "lima_text", "turns": ["At my department there is a strong stereotype about my race-gender combo 'doing fraud' and 'plagiarizing'. Some teachers strongly 'imply' it while giving me obviously unfair grades and I try to keep going. Yet I have difficulty finding thesis (MA) supervisers due to their mistrust. What should I do?"]}
+{"question_id": 240, "category": "lima_text", "turns": ["How do homicide detectives stay sane after seeing such disturbing crime scenes?"]}
+{"question_id": 241, "category": "lima_text", "turns": ["Write a short story based on the following prompt:  You find an abandoned puppy hiding from the rain on your doorstep. This \u201cpuppy\u201d is actually the child of Cerberus, the puppy was cast out due to it being born with the deformity of only having one head."]}
+{"question_id": 242, "category": "lima_text", "turns": ["Can planets orbit twin star systems?"]}
+{"question_id": 243, "category": "lima_text", "turns": ["Why do most plastics turn white when you bend them?"]}
+{"question_id": 244, "category": "lima_text", "turns": ["When was it obvious that the USA was emerging as a superpower?"]}
+{"question_id": 245, "category": "lima_text", "turns": ["If ADHD is caused by having a lower baseline dopamine level, why is it so hard to diagnose? Can't we just measure dopamine levels?"]}
+{"question_id": 246, "category": "lima_text", "turns": ["How do we know some numbers, like Pi are endless, instead of just a very long number?"]}
+{"question_id": 247, "category": "lima_text", "turns": ["How come the space station needs to fire a rocket regularly to stay in orbit, but dangerous space junk can stay up there indefinitely?"]}
+{"question_id": 248, "category": "lima_text", "turns": ["In the US, onions are the only commodity that can not be traded as a futures contract due to 1958 Onion Futures Act. Why was this restriction not repealed along with other deregulation measures of 80s and 90s? Why was onion seen as different from other commodities?"]}
+{"question_id": 249, "category": "lima_text", "turns": ["Why is the musical scale the way it is: 12 keys: 7 major, 5 minor?"]}
+{"question_id": 250, "category": "lima_text", "turns": ["You are the world's worst marriage guidance counselor. What advice do you give?"]}
+{"question_id": 251, "category": "lima_text", "turns": ["What are some 21th century's philosophical problems?"]}
+{"question_id": 252, "category": "lima_text", "turns": ["When did kissing become a universal sign of affection across a wide variety of cultures?"]}
+{"question_id": 253, "category": "lima_text", "turns": ["What do I search on Google if I want to find a race track where I can drive my own car for a couple hours without spending a fortune?"]}
+{"question_id": 254, "category": "lima_text", "turns": ["My grandmother passed away and left her house to me and my father.. my dad sold the house and kept all the money. Is there anything I can do?"]}
+{"question_id": 255, "category": "lima_text", "turns": ["How do remote tribes that have no new genetic material for thousands of years not die out because of inbreeding?"]}
+{"question_id": 256, "category": "lima_text", "turns": ["Does forcing people (employees, customers, etc.) to change their password every 3-6 months really help with security?"]}
+{"question_id": 257, "category": "lima_text", "turns": ["Are there any academic fields that don't have enough people trying to teach?"]}
+{"question_id": 258, "category": "lima_text", "turns": ["How did humans get rid of hornets and other pests before insecticides were invented?"]}
+{"question_id": 259, "category": "lima_text", "turns": ["if someone wants to commit suicide, should we as a society let them?"]}
+{"question_id": 260, "category": "lima_text", "turns": ["Are there different cuts of meat in different cultures or does everyone basically butcher the same way?"]}
+{"question_id": 261, "category": "lima_text", "turns": ["I don\u2019t even understand what it means to ask \u201cwhat is the meaning of life?\u201d What are people asking, and what kind of answer are they looking for?"]}
+{"question_id": 262, "category": "lima_text", "turns": ["Could an organism on Earth perceive time in both directions?"]}
+{"question_id": 263, "category": "lima_text", "turns": ["How can I convince people that the use of instant messaging platforms like Slack, and Hipchat are not a good substitute for documentation?"]}
+{"question_id": 264, "category": "lima_text", "turns": ["Why do high class restaurants serve such small portions?"]}
+{"question_id": 265, "category": "lima_text", "turns": ["The HR director requested monetary contributions for a Christmas present for one of the upper management employees. What are your thoughts when HR asks employees for money as a gift?"]}
+{"question_id": 266, "category": "lima_text", "turns": ["what are the green flags and red flags of PhD applicants?"]}
+{"question_id": 267, "category": "lima_text", "turns": ["My sister\u2019s landlord is raising her rent because she has now become disabled and needs to use a wheelchair. Is this legal?"]}
+{"question_id": 268, "category": "lima_text", "turns": ["Is it okay to use regular sugar instead of brown sugar in cinnamons rolls?"]}
+{"question_id": 269, "category": "lima_text", "turns": ["What does a dog learn from sniffing another dogs butt?"]}
+{"question_id": 270, "category": "lima_text", "turns": ["Conservatives often argue that social welfare programs encourage single motherhood and illegitimacy by replacing the necessity of marriage with dependency on the state. What does research have to say?"]}
+{"question_id": 271, "category": "lima_text", "turns": ["If civilization collapsed right now, how long would there still be evidence that we were here? For example, let\u2019s say there was an advanced society of humans, just like ours, 50,000 years ago. Would there be any evidence left of their existence?"]}
+{"question_id": 272, "category": "lima_text", "turns": ["I have a basket full of beautiful oyster mushrooms. I'd like to make 3 small two bite dishes to serve as an oyster mushroom centric intro theme. Any suggestions?"]}
+{"question_id": 273, "category": "lima_text", "turns": ["I live in the Midwest of U.S., where we love using salt to de-ice our roads. This causes quite a bit of rusting on the underside of cars. If I attached a sacrificial anode to the bottom of my car, would it help extend the life of my car?"]}
+{"question_id": 274, "category": "lima_text", "turns": ["After Einstein discovered General Theory of Relativity in 1915, what major works did he make?"]}
+{"question_id": 275, "category": "lima_text", "turns": ["If a job application asks for standardized test scores and cumulative GPA, can I just put N/A or will it hurt my candidacy?"]}
+{"question_id": 276, "category": "lima_text", "turns": ["Can a company ask you to leave, push you for an exit date, say they \u201ccannot\u201d lay you off and have to train replacement?"]}
+{"question_id": 277, "category": "lima_text", "turns": ["What flavours would go well with sweet potato gnocchi?"]}
+{"question_id": 278, "category": "lima_text", "turns": ["Caught my employee recording our conversation without my permission. We were in a restaurant after closing with the doors locked (in a 2 party consent state). Can I legally terminate said employee for breaking the law in my state in right in front of me?"]}
+{"question_id": 279, "category": "lima_text", "turns": ["Why do men often insult or roast their good man friends a sign of friendship?"]}
+{"question_id": 280, "category": "lima_text", "turns": ["How close ethnically are modern Greeks to the ancient Greeks?"]}
+{"question_id": 281, "category": "lima_text", "turns": ["Has any research been done on whatleads to or is correlated with successful long distance relationships?"]}
+{"question_id": 282, "category": "lima_text", "turns": ["Why do the soldiers blindly listen the orders to kill innocent people in foreign countries instead of just self-organizing and killing a few psychopaths that gave such orders?"]}
+{"question_id": 283, "category": "lima_text", "turns": ["I\u2019m allergic to Sulfa. I have pinkeye, and one of the ingredients in the eye drops is sulfate. Am I ok to use them?"]}
+{"question_id": 284, "category": "lima_text", "turns": ["In high school years back they told me the appendix was useless. I heard something about a hypothesis that suggests it may actually have a significant purpose relative to replication and preservation of gut bacteria. What's that about? What do we know about how gut bacteria works?"]}
+{"question_id": 285, "category": "lima_text", "turns": ["If we are, by nature, compelled to ponder the meaning of life, does that mean that life definitely has a meaning?"]}
+{"question_id": 286, "category": "lima_text", "turns": ["If you made a nuclear bomb using a heavier element, would it be more powerful by volume compared to hydrogen, helium, or uranium nuclear weapon? What element would yield the biggest result?"]}
+{"question_id": 287, "category": "lima_text", "turns": ["why are elementary particles structureless?"]}
+{"question_id": 288, "category": "lima_text", "turns": ["Do Childless people have higher or lower rates of depression and other mental illness?"]}
+{"question_id": 289, "category": "lima_text", "turns": ["When an interviewer asks me \"What is your biggest weakness?\", how do I respond?"]}
+{"question_id": 290, "category": "lima_text", "turns": ["What is a current product that you expect will ultimately fail?"]}
+{"question_id": 291, "category": "lima_text", "turns": ["Where do people with a Master's in Applied Physics usually end up?"]}
+{"question_id": 292, "category": "lima_text", "turns": ["Our 16yo kitty went missing and we found her under our house..two weeks later. We\u2019re devastated. The odor alerted us to rip out the deck in search for closure. I\u2019d like to retrieve her body and hope my vet could still cremate her. Is that something they would even do and how can we prepare her body?"]}
+{"question_id": 293, "category": "lima_text", "turns": ["How can I as a non-academic know if a book is widely used and well accepted by scholars?"]}
+{"question_id": 294, "category": "lima_text", "turns": ["Is it fair to call Superman a hero when 99% of the time he puts himself at no risk by saving people?"]}
+{"question_id": 295, "category": "lima_text", "turns": ["What are some of the commonly held misconceptions about any of the American Indian/Native American cultural groups?"]}
+{"question_id": 296, "category": "lima_text", "turns": ["How should I do time manage spreading time working on multiple projects? For example, should I \"time block\" your calendar and say 8am to 10am I work Project A. And 10am to 11am I work on Project B. What are other methods besides time blocking?"]}
+{"question_id": 297, "category": "lima_text", "turns": ["What is the best explanation of Newton\u2019s laws?"]}
+{"question_id": 298, "category": "lima_text", "turns": ["I'm buying a car for the first time, any advice?"]}
+{"question_id": 299, "category": "lima_text", "turns": ["Are there parallels between the use of radio communication by nationalists in the 1930\u2019s and the use of social media/Twitter by nationalists in the present day? Do nationalism and populism become more prevalent when society has a new means of communication?"]}
+{"question_id": 300, "category": "lima_text", "turns": ["I reported a supervisor for sexual harassment. He got fired. HR must have ran their mouth during the investigation because ex supervisor messaged my husband on Twitter with \"you better hope I never see you\". What steps should I take now?"]}

@@ -41,11 +41,15 @@ temperature_config = {
  # and is slightly different from the one used in training.
  # But we find it gives better results
  #Japanese version 
-prompt_input = (
+'''prompt_input = (
     "以下にあるタスクの指示を示します。"
     "示された指示に適切に従うように回答を埋めてください。"
     "### 指示：\n\n{instruction}\n\n### 回答：\n\n"
-)
+)'''
+'''prompt_input = (
+    "以下はタスクを説明する指示と、追加の背景情報を提供する入力の組み合わせです。要求を適切に満たす回答を書いてください。\n### 指示：\n\n{instruction}\n\n### 回答："
+)'''
+prompt_input = ("{instruction} ### 回答：")
 prompt_input_alpaca = ("Below is an instruction that describes a task. Write a response that appropriately completes the request. ### Instruction:\n\n{instruction}\n\n### Response:\n\n")
 
 prompt_input_jp = (
@@ -94,7 +98,7 @@ def generate_prompt(instruction, base_model, input=None):
         instruction = instruction + '\n' + input
     if "rinna" in base_model:
         return prompt_input_jp.format_map({'instruction': instruction})
-    elif "llama" in base_model.lowercase():
+    elif "llama" in base_model.lower():
         return prompt_input_alpaca.format_map({'instruction': instruction})
     else:
         return prompt_input.format_map({'instruction': instruction})
@@ -118,10 +122,8 @@ if __name__ == '__main__':
     try:
         base_model = AutoModelForCausalLM.from_pretrained(
         args.base_model, 
-        load_in_8bit=False,
-        torch_dtype=load_type,
-        low_cpu_mem_usage=True,
-        device_map='auto',
+        device_map="auto", 
+        torch_dtype=torch.float16
         )
     except:
         base_model = LlamaForCausalLM.from_pretrained(
@@ -136,13 +138,13 @@ if __name__ == '__main__':
     tokenzier_vocab_size = len(tokenizer)
     print(f"Vocab of the base model: {model_vocab_size}")
     print(f"Vocab of the tokenizer: {tokenzier_vocab_size}")
-    if model_vocab_size!=tokenzier_vocab_size:
-        assert tokenzier_vocab_size > model_vocab_size
-        print("Resize model embeddings to fit tokenizer")
-        base_model.resize_token_embeddings(tokenzier_vocab_size)
+    #if model_vocab_size!=tokenzier_vocab_size:
+    #    assert tokenzier_vocab_size > model_vocab_size
+    #    print("Resize model embeddings to fit tokenizer")
+    #    base_model.resize_token_embeddings(tokenzier_vocab_size)
     if args.lora_model is not None:
         print("loading peft model")
-        model = PeftModel.from_pretrained(base_model, args.lora_model,torch_dtype=load_type,device_map='auto',)
+        model = PeftModel.from_pretrained(base_model, args.lora_model)
     else:
         model = base_model
 
@@ -216,24 +218,22 @@ if __name__ == '__main__':
                     print(output)
                 else:
                     print (input_text)   
-                    inputs = tokenizer(input_text, return_tensors="pt")
-                    input_ids = inputs["input_ids"].to(device)
+                    inputs = tokenizer.encode(input_text, return_tensors="pt", add_special_tokens=False).to(model.device)
+                    #input_ids = inputs["input_ids"].to(device)
 
                     with torch.no_grad():
                         generation_output = model.generate(
-                            input_ids=input_ids,
-                            top_p=1.0,
-                            top_k=0,
-                            temperature=0.1,
-                            repetition_penalty=1.0,
-                            return_dict_in_generate=True,
-                            output_scores=True,
+                            inputs,
+                            top_p=0.9,
+                            temperature=0.7,
+                            do_sample=True,
                             max_new_tokens=args.max_new_tokens,
                             )
-                    s = generation_output.sequences[0]
+                    s = generation_output[0]
                     output = tokenizer.decode(s)
-                    output = output.split("### 回答：")[1].strip()
-                    output = output.split("\n\n")[0].strip()
+                    if args.with_prompt:
+                        output = output.split("### 回答：")[1].strip()
+                        output = output.split("<EOD|LLM-jp>")[0].strip()
                     print(output)
                     #output = output.split("### response:")[1].strip()
                     #output = output.split("\n\n")[0].strip()
@@ -280,9 +280,10 @@ if __name__ == '__main__':
                     eos_token_id=tokenizer.eos_token_id
                     )
                     output = tokenizer.decode(output_ids.tolist()[0][token_ids.size(1):])
-                    output = output.replace("<NL>", "\n")
-                    output = output.replace("</s>", "")
-                elif "llama" in args.base_model.lowercase():
+                    if args.with_prompt:
+                        output = output.replace("<NL>", "\n")
+                        output = output.replace("</s>", "")
+                elif "llama" in args.base_model.lower():
                     inputs = tokenizer(input_text, return_tensors="pt")
                     input_ids = inputs["input_ids"].to(device)
                     generation_config = GenerationConfig(
@@ -303,28 +304,26 @@ if __name__ == '__main__':
                             )
                     s = generation_output.sequences[0]
                     output = tokenizer.decode(s)
-                    output = output.split("### Response：")[1].strip()
-                    output = output.split("\n\n")[0].strip()
+                    if args.with_prompt:
+                        output = output.split("### Response：")[1].strip()
+                        output = output.split("\n\n")[0].strip()
 
                 else:
-                    inputs = tokenizer(input_text, return_tensors="pt")
-                    input_ids = inputs["input_ids"].to(device)
+                    inputs = tokenizer(input_text, return_tensors="pt", add_special_tokens=False).to(model.device)
 
                     with torch.no_grad():
                         generation_output = model.generate(
-                            input_ids=input_ids,
-                            top_p=1.0,
-                            top_k=0,
-                            temperature=temperature,
-                            repetition_penalty=1.1,
-                            return_dict_in_generate=True,
-                            output_scores=True,
+                            **inputs,
+                            top_p=0.9,
+                            temperature=0.7,
+                            do_sample=True,
                             max_new_tokens=args.max_new_tokens,
                             )
-                    s = generation_output.sequences[0]
+                    s = generation_output[0]
                     output = tokenizer.decode(s)
-                    output = output.split("### 回答：")[1].strip()
-                    output = output.split("\n\n")[0].strip()
+                    if args.with_prompt:
+                        output = output.split("### 回答：")[1].strip()
+                        output = output.split("<EOD|LLM-jp>")[0].strip()
 
                 response = output
                 #print("Response: ",response)

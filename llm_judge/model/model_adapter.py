@@ -24,16 +24,16 @@ from transformers import (
     T5Tokenizer,
 )
 
-from fastchat.modules.gptq import GptqConfig, load_gptq_quantized
-from fastchat.conversation import Conversation, get_conv_template
-from fastchat.model.compression import load_compress_model
-from fastchat.model.model_chatglm import generate_stream_chatglm
-from fastchat.model.model_codet5p import generate_stream_codet5p
-from fastchat.model.model_falcon import generate_stream_falcon
-from fastchat.model.monkey_patch_non_inplace import (
+from modules.gptq import GptqConfig, load_gptq_quantized
+from conversation import Conversation, get_conv_template
+from model.compression import load_compress_model
+from model.model_chatglm import generate_stream_chatglm
+from model.model_codet5p import generate_stream_codet5p
+from model.model_falcon import generate_stream_falcon
+from model.monkey_patch_non_inplace import (
     replace_llama_attn_with_non_inplace_operations,
 )
-from fastchat.utils import get_gpu_memory
+from utils import get_gpu_memory
 
 
 class BaseModelAdapter:

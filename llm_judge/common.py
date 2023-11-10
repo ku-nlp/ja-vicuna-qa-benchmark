@@ -14,7 +14,7 @@ import sys
 import openai
 import anthropic
 
-from fastchat.model.model_adapter import get_conversation_template
+from model.model_adapter import get_conversation_template
 
 # API setting constants
 API_MAX_RETRY = 16

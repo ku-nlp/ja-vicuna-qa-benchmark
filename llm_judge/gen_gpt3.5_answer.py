@@ -7,10 +7,6 @@ import sys
 import time
 import shortuuid
 #use following codes to activate azure:
-#openai.api_type = "azure"
-#openai.api_base = "https://pomegranate.openai.azure.com/"
-#openai.api_version = "2022-12-01"
-openai.api_key = "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"
 
 #use openai api with group PRISM
 class Chat_Demo(object):
