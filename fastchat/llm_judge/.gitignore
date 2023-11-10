@@ -1,9 +1,0 @@
-# created by virtualenv automatically
-/judge
-/data
-gen_alpaca_answer.py
-jsontoexcel.py
-qa_browser.py
-test.py
-test.xlsx
-test2.py
