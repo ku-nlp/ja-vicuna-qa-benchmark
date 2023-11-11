@@ -7,3 +7,5 @@ python gen_model_answer.py \
     --gpus 0 \
     --max_new_tokens 400 \
     --benchmark jp_bench \
+    --template llm-jp \
+    --interactive

@@ -13,8 +13,9 @@ parser.add_argument('--tokenizer_path',default=None,type=str)
 parser.add_argument('--benchmark',default=None, type=str,help="A file that contains instructions (one instruction per line)")
 parser.add_argument('--with_prompt',action='store_true',help="wrap the input with the prompt automatically")
 parser.add_argument('--interactive',action='store_true',help="run in the instruction mode (single-turn)")
-parser.add_argument('--gpus', default=" 3", type=str)
+parser.add_argument('--gpus', default="3", type=str)
 parser.add_argument('--only_cpu',action='store_true',help='only use CPU for inference')
+parser.add_argument('--template',default="alpaca",help='template for prompt')
 args = parser.parse_args()
 if args.only_cpu is True:
     args.gpus = ""
@@ -41,6 +42,14 @@ temperature_config = {
  # and is slightly different from the one used in training.
  # But we find it gives better results
  #Japanese version 
+
+template = {
+    "alpaca": "Below is an instruction that describes a task. Write a response that appropriately completes the request. ### Instruction:\n\n{instruction}\n\n### Response:\n\n",
+    "alpaca_jp": "以下にあるタスクの指示を示します。示された指示に適切に従うように回答を埋めてください。### 指示：\n\n{instruction}\n\n### 回答：\n\n",
+    "rinna": "ユーザー: {instruction}<NL>システム: ",
+    "llm-jp": "{instruction} ### 回答："
+}
+
 '''prompt_input = (
     "以下にあるタスクの指示を示します。"
     "示された指示に適切に従うように回答を埋めてください。"
@@ -49,7 +58,7 @@ temperature_config = {
 '''prompt_input = (
     "以下はタスクを説明する指示と、追加の背景情報を提供する入力の組み合わせです。要求を適切に満たす回答を書いてください。\n### 指示：\n\n{instruction}\n\n### 回答："
 )'''
-prompt_input = ("{instruction} ### 回答：")
+'''prompt_input = ("{instruction} ### 回答：")
 prompt_input_alpaca = ("Below is an instruction that describes a task. Write a response that appropriately completes the request. ### Instruction:\n\n{instruction}\n\n### Response:\n\n")
 
 prompt_input_jp = (
@@ -57,7 +66,7 @@ prompt_input_jp = (
 )
 
 sample_data = ["なぜ公害を減らし、環境を守ることが重要なのか？"]
-
+'''
 test_prompt = [
     {
         "speaker": "ユーザー",
@@ -92,16 +101,18 @@ def rinna_prompt(tmp_dict):
         + "<NL>"
         + "システム: "
     )
-def generate_prompt(instruction, base_model, input=None):
+def generate_prompt(instruction, args, input=None):
     if input:
-
         instruction = instruction + '\n' + input
-    if "rinna" in base_model:
+    tmp_prompt = template[args.template]
+    return tmp_prompt.format_map({'instruction': instruction})
+    '''if "rinna" in base_model:
         return prompt_input_jp.format_map({'instruction': instruction})
     elif "llama" in base_model.lower():
         return prompt_input_alpaca.format_map({'instruction': instruction})
     else:
         return prompt_input.format_map({'instruction': instruction})
+    '''
 
 
 if __name__ == '__main__':
@@ -190,7 +201,7 @@ if __name__ == '__main__':
                 if len(raw_input_text.strip())==0:
                     break
                 if args.with_prompt:
-                    input_text = generate_prompt(instruction=raw_input_text,base_model=args.base_model)
+                    input_text = generate_prompt(instruction=raw_input_text,args=args)
                 else:
                     input_text = raw_input_text
                 if False:
@@ -264,7 +275,7 @@ if __name__ == '__main__':
                 #temperature = temperature_config[question[index]["category"]]
                 temperature = 0.7
                 if args.with_prompt is True:
-                    input_text = generate_prompt(instruction=example,base_model=args.base_model)
+                    input_text = generate_prompt(instruction=example,args=args)
                 else:
                     input_text = example
                 if "rinna" in args.base_model:
