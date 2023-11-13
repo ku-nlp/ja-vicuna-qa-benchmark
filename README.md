@@ -19,7 +19,7 @@ git clone https://github.com/hitoshizuku7/LLM_Judge_ku.git
 cd LLM_Judge_ku
 pip install -e .
 pip install openai anthropic ray
-cd fastchat/llm_judge
+cd llm_judge
 ```
 
 
