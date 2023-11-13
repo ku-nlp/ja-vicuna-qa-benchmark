@@ -104,6 +104,7 @@ OPENAI_API_KEY=[YOUR-KEY] python -B gen_judgment.py \
 --bench-name "jp_bench" \
 --mode pairwise-baseline \
 --model-list [LIST-OF-MODEL-ID] \
+--baseline-model [name-of-baseline-model] \
 --parallel [num-concurrent-api-call]
 ```
 The judgments will be saved to `data/jp_bench/model_judgment/gpt-4_pair.jsonl`
