@@ -2,3 +2,13 @@ shortuuid
 openai
 ray
 anthropic
+accelerate
+peft
+requests
+sentencepiece
+tiktoken
+tokenizers>=0.12.1
+torch
+transformers>=4.28.0,<4.29.0
+uvicorn
+wandb

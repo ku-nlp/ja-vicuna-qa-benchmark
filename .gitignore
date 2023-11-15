@@ -7,6 +7,11 @@ dist
 
 # folder
 fastchat/llm_judge/data/vicuna_jp
+llm_judge/data
+llm_judge/judge.sh
+llm_judge/LLMs
+llm_judge/gen_model_answer copy.py
+llm_judge/gen_model_answer_ori.py
 
 # files
 fastchat/llm_judge/data/judge_prompts_jp.jsonl
@@ -39,3 +44,4 @@ tests/state_of_the_union.txt
 
 # Build
 build
+
