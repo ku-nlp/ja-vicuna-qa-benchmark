@@ -11,7 +11,6 @@ import sys
 from typing import AsyncGenerator, Generator
 import warnings
 
-import requests
 import torch
 
 from constants import LOGDIR
@@ -65,11 +64,11 @@ def build_logger(logger_name, logger_filename):
     )
     handler.setFormatter(formatter)
 
-    for l in [stdout_logger, stderr_logger, logger]:
-        if l in visited_loggers:
+    for logger in [stdout_logger, stderr_logger, logger]:
+        if logger in visited_loggers:
             continue
-        visited_loggers.add(l)
-        l.addHandler(handler)
+        visited_loggers.add(logger)
+        logger.addHandler(handler)
 
     return logger
 
@@ -148,9 +147,9 @@ def violates_moderation(text):
 
     try:
         flagged = openai.Moderation.create(input=text)["results"][0]["flagged"]
-    except openai.error.OpenAIError as e:
+    except openai.error.OpenAIError:
         flagged = False
-    except (KeyError, IndexError) as e:
+    except (KeyError, IndexError):
         flagged = False
 
     return flagged

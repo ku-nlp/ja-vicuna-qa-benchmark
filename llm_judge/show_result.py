@@ -57,7 +57,10 @@ def display_result_pairwise(args):
         if args.baseline_model is not None:
             if args.baseline_model not in [row["model_1"], row["model_2"]]:
                 continue
-            if row["model_1"] not in args.model_list and row["model_2"] not in args.model_list:
+            if (
+                row["model_1"] not in args.model_list
+                and row["model_2"] not in args.model_list
+            ):
                 continue
         else:
             if args.model_list is not None and row["model_1"] not in args.model_list:

@@ -7,9 +7,6 @@ python compute_agreement.py --judges human human --votefiles human_judgments.jso
 """
 import argparse
 import json
-import os
-
-import numpy as np
 
 
 def get_judge_name(judge):
