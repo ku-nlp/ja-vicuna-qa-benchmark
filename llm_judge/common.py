@@ -10,7 +10,6 @@ import os
 import re
 import time
 from typing import Optional
-import sys
 import openai
 import anthropic
 
@@ -25,15 +24,15 @@ TIE_DELTA = 0.1
 
 # Categories that need reference answers
 NEED_REF_CATS = ["math", "reasoning", "coding"]
-#NEED_REF_CATS = []
+# NEED_REF_CATS = []
 
 # Extract scores from judgments
 two_score_pattern = re.compile("\[\[(\d+\.?\d*),\s?(\d+\.?\d*)\]\]")
 two_score_pattern_backup = re.compile("\[(\d+\.?\d*),\s?(\d+\.?\d*)\]")
 one_score_pattern = re.compile("\[\[(\d+\.?\d*)\]\]")
-#one_score_pattern_backup = re.compile("\[(\d+\.?\d*)\]")
+# one_score_pattern_backup = re.compile("\[(\d+\.?\d*)\]")
 one_score_pattern_another_format = re.compile("\[\[rating:(\d+)\]\]")
-one_score_pattern_another_format2 =re.compile("\[\[rating: (\d+)\]\]")
+one_score_pattern_another_format2 = re.compile("\[\[rating: (\d+)\]\]")
 
 # Sampling temperature configs for
 temperature_config = {
@@ -107,8 +106,8 @@ def load_model_answers(answer_dir: str):
     for filename in filenames:
         model_name = os.path.basename(filename)[:-6]
         answer = {}
-        
-        #print(filename)
+
+        # print(filename)
         with open(filename, "r") as fin:
             # distinguished process for lora predictions
             # if "lora" not in filename:
@@ -148,7 +147,7 @@ def run_judge_single(question, answer, judge, ref_answer, multi_turn=False):
     model = judge.model_name
     if ref_answer is not None:
         kwargs["ref_answer_1"] = ref_answer["choices"][0]["turns"][0]
-        #kwargs["ref_answer_2"] = ref_answer["choices"][0]["turns"][1]
+        # kwargs["ref_answer_2"] = ref_answer["choices"][0]["turns"][1]
 
     if multi_turn:
         user_prompt = judge.prompt_template["prompt_template"].format(
@@ -187,9 +186,9 @@ def run_judge_single(question, answer, judge, ref_answer, multi_turn=False):
         # if not match:
         #     match = re.search(one_score_pattern_backup, judgment)
         if not match:
-            match = re.search(one_score_pattern_another_format,judgment)
+            match = re.search(one_score_pattern_another_format, judgment)
         if not match:
-            match = re.search(one_score_pattern_another_format2,judgment)
+            match = re.search(one_score_pattern_another_format2, judgment)
         if match:
             rating = ast.literal_eval(match.groups()[0])
         else:
@@ -240,7 +239,7 @@ def play_a_match_single(match: MatchPair, output_file: str):
     if output_file:
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
         with open(output_file, "a") as fout:
-            fout.write(json.dumps(result,ensure_ascii=False) + "\n")
+            fout.write(json.dumps(result, ensure_ascii=False) + "\n")
 
     return result
 
@@ -250,9 +249,9 @@ def run_judge_pair(question, answer_a, answer_b, judge, ref_answer, multi_turn=F
     model = judge.model_name
     if ref_answer is not None:
         kwargs["ref_answer_1"] = ref_answer["choices"][0]["turns"][0]
-        print("参考回答1:",ref_answer["choices"][0]["turns"][0])
+        print("参考回答1:", ref_answer["choices"][0]["turns"][0])
         kwargs["ref_answer_2"] = ref_answer["choices"][0]["turns"][1]
-        print("参考回答2:",ref_answer["choices"][0]["turns"][1])
+        print("参考回答2:", ref_answer["choices"][0]["turns"][1])
 
     if multi_turn:
         system_prompt = judge.prompt_template["system_prompt"]
@@ -365,7 +364,7 @@ def play_a_match_pair(match: MatchPair, output_file: str):
             "turn": turn,
             "tstamp": time.time(),
         }
-        
+
         print(
             f"question: {question_id}, turn: {turn}, model_1: {model_1}, model_2: {model_2}, "
             f"g1_winner: {g1_winner}, g2_winner: {g2_winner}, "
@@ -413,7 +412,7 @@ def play_a_match_pair(match: MatchPair, output_file: str):
     if output_file:
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
         with open(output_file, "a") as fout:
-            fout.write(json.dumps(result,ensure_ascii=False) + "\n")
+            fout.write(json.dumps(result, ensure_ascii=False) + "\n")
 
     return result
 
@@ -625,7 +624,7 @@ def get_pairwise_judge_explanation(gamekey, judgment_dict):
         return (
             f"**Game 1**. **A**: {model_1}, **B**: {model_2}\n\n"
             f"**Judgment**: {g1_judgment}"
-            + f"\n\n`--------------------------`\n\n"
+            + "\n\n`--------------------------`\n\n"
             + f"**Game 2**. **A**: {model_2}, **B**: {model_1}\n\n"
             f"**Judgment**: {g2_judgment}"
         )
@@ -667,8 +666,8 @@ def check_data(questions, model_answers, ref_answers, models, judges):
         for q in questions:
             if q["category"] not in NEED_REF_CATS:
                 continue
-            #print(q["question_id"])
-            #print(ref_answers[jg.model_name])
+            # print(q["question_id"])
+            # print(ref_answers[jg.model_name])
             assert (
                 int(q["question_id"]) in ref_answers[jg.model_name]
             ), f"Missing reference answer to Question {q['question_id']} for judge {jg.model_name}"
