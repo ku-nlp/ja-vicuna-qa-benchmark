@@ -5,7 +5,6 @@ python gen_judgment.py --model-list [LIST-OF-MODEL-ID] --parallel [num-concurren
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 import json
-
 import numpy as np
 from tqdm import tqdm
 
@@ -177,7 +176,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--judge-file",
         type=str,
-        default="data/judge_prompts_jp2.jsonl",
+        default="data/judge_prompts_jp.jsonl",
         help="The file of judge prompts.",
     )
     parser.add_argument("--judge-model", type=str, default="gpt-4")
