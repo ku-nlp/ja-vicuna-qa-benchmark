@@ -10,8 +10,3 @@
 
 <!-- For example: "Closes #1234" -->
 
-## Checks
-
-- [ ] I've run `format.sh` to lint the changes in this PR.
-- [ ] I've included any doc changes needed.
-- [ ] I've made sure the relevant tests are passing (if applicable).
