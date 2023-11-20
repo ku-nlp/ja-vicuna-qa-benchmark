@@ -50,7 +50,6 @@ parser.add_argument("--gpus", default="3", type=str)
 parser.add_argument(
     "--only_cpu", action="store_true", help="only use CPU for inference"
 )
-# parser.add_argument('--template',default="alpaca",help='template for prompt')
 args = parser.parse_args()
 if args.only_cpu is True:
     args.gpus = ""
@@ -83,32 +82,6 @@ template = {
     "elyza": "[INST] {B_SYS}{DEFAULT_SYSTEM_PROMPT}{E_SYS}{instruction} [/INST] ",
 }
 
-"""prompt_input = (
-    "以下にあるタスクの指示を示します。"
-    "示された指示に適切に従うように回答を埋めてください。"
-    "### 指示：\n\n{instruction}\n\n### 回答：\n\n"
-)"""
-"""prompt_input = (
-    "以下はタスクを説明する指示と、追加の背景情報を提供する入力の組み合わせです。要求を適切に満たす回答を書いてください。\n### 指示：\n\n{instruction}\n\n### 回答："
-)"""
-"""prompt_input = ("{instruction} ### 回答：")
-prompt_input_alpaca = ("Below is an instruction that describes a task. Write a response that appropriately completes the request. ### Instruction:\n\n{instruction}\n\n### Response:\n\n")
-
-prompt_input_jp = (
-    "ユーザー: {instruction}<NL>システム: "
-)
-
-sample_data = ["なぜ公害を減らし、環境を守ることが重要なのか？"]
-"""
-
-
-def generate_prompt(instruction, args, input=None):
-    if input:
-        instruction = instruction + "\n" + input
-    tmp_prompt = template[args.template]
-    print(tmp_prompt)
-    return tmp_prompt.format_map({"instruction": instruction})
-
 
 def generate_response(input_text, tokenizer, model, temperature, args):
     if args.temperature is not None:
@@ -122,7 +95,6 @@ def generate_response(input_text, tokenizer, model, temperature, args):
         inputs = tokenizer(
             input_text, return_tensors="pt", add_special_tokens=False
         ).to(model.device)
-        # input_ids = inputs["input_ids"].to(device)
 
         with torch.no_grad():
             generation_output = model.generate(
@@ -257,10 +229,6 @@ if __name__ == "__main__":
     tokenzier_vocab_size = len(tokenizer)
     print(f"Vocab of the base model: {model_vocab_size}")
     print(f"Vocab of the tokenizer: {tokenzier_vocab_size}")
-    # if model_vocab_size!=tokenzier_vocab_size:
-    #    assert tokenzier_vocab_size > model_vocab_size
-    #    print("Resize model embeddings to fit tokenizer")
-    #    base_model.resize_token_embeddings(tokenzier_vocab_size)
     if args.lora_model is not None:
         print("loading peft model")
         model = PeftModel.from_pretrained(base_model, args.lora_model)
@@ -270,7 +238,6 @@ if __name__ == "__main__":
     if device == torch.device("cpu"):
         model.float()
     # test data
-    # args.benchmark= 'question'
     if args.benchmark is not None:
         question = []
         data_file = "./data/{}/question.jsonl".format(args.benchmark)
@@ -281,11 +248,7 @@ if __name__ == "__main__":
                 question.append(tmp_dict)
                 instruction_list.append(tmp_dict["turns"][0])
             examples = [line.strip() for line in instruction_list]
-            # examples= instruction_list
 
-        """print("first 10 examples:")
-        for example in examples[:10]:
-            print(example)"""
     # model.eval()
 
     with torch.no_grad():
@@ -301,33 +264,16 @@ if __name__ == "__main__":
 
             while True:
                 raw_input_text = input("Input:")
-                # print(raw_input_text)
                 if len(raw_input_text.strip()) == 0:
                     break
-                # if args.with_prompt:
-                #    input_text = generate_prompt(instruction=raw_input_text,args=args)
-                # else:
-                #    input_text = raw_input_text
-
-                # print (input_text)
                 output = generate_response(raw_input_text, tokenizer, model, None, args)
                 print("Response: ", output)
                 print("\n")
-
-                # output = output.split("### response:")[1].strip()
-                # output = output.split("\n\n")[0].strip()
-                # print(input_text)
-
         else:
             print("Start inference.")
             results = []
             for index, example in tqdm(enumerate(examples)):
                 temperature = temperature_config[question[index]["category"]]
-
-                # if args.with_prompt is True:
-                #    input_text = generate_prompt(instruction=example,args=args)
-                # else:
-                #    input_text = example
                 output = generate_response(example, tokenizer, model, temperature, args)
 
                 response = output
@@ -352,5 +298,3 @@ if __name__ == "__main__":
                 for tmp_dict in results:
                     json.dump(tmp_dict, f, ensure_ascii=False)
                     f.write("\n")
-            # with open(dirname+'/generation_config.json','w') as f:
-            # json.dump(generation_config,f,ensure_ascii=False,indent=2)
