@@ -86,7 +86,7 @@ template = {
 def generate_response(input_text, tokenizer, model, temperature, args):
     if args.temperature is not None:
         temperature = args.temperature
-    if "llm-jp" in args.base_model or "llm-jp" in args.lora_model:
+    if "llm-jp" in args.base_model or (args.lora_model and "llm-jp" in args.lora_model):
         if args.with_prompt:
             input_text = "{instruction} ### 回答：".format_map(
                 {"instruction": input_text}
