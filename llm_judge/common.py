@@ -13,11 +13,11 @@ from typing import Optional
 import openai
 from dotenv import load_dotenv
 
+from model_adapter import get_conversation_template
+
 load_dotenv()  # Load environment variables from .env file
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
-
-from model_adapter import get_conversation_template
 
 # API setting constants
 API_MAX_RETRY = 16
@@ -86,7 +86,6 @@ class MatchPair:
     multi_turn: bool = False
 
 
-    
 def load_questions(question_file: str, begin: Optional[int], end: Optional[int]):
     """Load questions from a file."""
     questions = []
@@ -280,7 +279,6 @@ def run_judge_pair(question, answer_a, answer_b, judge, ref_answer, multi_turn=F
     conv.append_message(conv.roles[0], user_prompt)
     conv.append_message(conv.roles[1], None)
 
-
     if model in ["gpt-3.5-turbo", "gpt-4"]:
         conv.system = system_prompt
         judgment = chat_compeletion_openai(model, conv, temperature=0, max_tokens=2048)
@@ -434,7 +432,6 @@ def chat_compeletion_openai(model, conv, temperature, max_tokens):
             time.sleep(API_RETRY_SLEEP)
 
     return output
-
 
 
 def normalize_game_key_single(gamekey, result):

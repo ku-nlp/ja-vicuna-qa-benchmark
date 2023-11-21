@@ -4,7 +4,6 @@ import os
 import shortuuid
 import time
 from tqdm import tqdm
-import sys
 
 import torch
 from transformers import (
