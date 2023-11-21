@@ -1,6 +1,6 @@
 # Japanese Vicuna QA Benchmark
 
- We released Japanese Vicuna QA Benchmark for measuring comprehensive capabilities of Japanese LLMs, which consists of 80 diverse questions in 10 categories (generic, coding, roleplay, writing, etc.) 
+ We released Japanese Vicuna QA Benchmark for measuring comprehensive capabilities of Japanese LLMs, which consists of 80 diverse questions in 10 categories (generic, coding, roleplay, writing, etc.)
 You can leverage this package to evaluate the answers of your Japanese LLM models in a reference-free manner with LLM-as-a-judge.
 To automate the evaluation process, we prompt strong LLMs like GPT-4 to act as judges and assess the quality of the models' responses.
 
@@ -138,13 +138,13 @@ python show_result.py \
 
 ## Sample Outputs
 
-#### Question: 
+#### Question:
 > 植物性タンパク源と動物性タンパク源の違いは何ですか？
-#### Answer of rinna-3.6b: 
+#### Answer of rinna-3.6b:
 > 栄養素の含有量に大きな違いがあります。
-#### Answer of rinna-3.6b-sft-v2: 
+#### Answer of rinna-3.6b-sft-v2:
 > 植物性タンパク源は肉や魚など、いくつかの種類の食品を指します。一方、動物性タンパク源には卵、乳製品、大豆、ナッツ、種などが含まれます。
-#### Answer of rinna-3.6b-ppo: 
+#### Answer of rinna-3.6b-ppo:
 > 植物性タンパク源とは、主に大豆や豆腐などの大豆製品を生産する植物によって作られるタンパク質で、卵、牛乳、肉などの動物性タンパク源よりも栄養価が高く、低カロリーです。一方、動物性タンパク源には、牛肉、豚肉、鶏肉などが含まれます。
 #### Answer of japanese-alpaca-lora-7b:
 > 動物タンポク源（ATP）は、動物によって生産されるエネルギー源である。ATPは、細胞におけるATP認識システムの活性化により生成されています。動物のATP源は、遺伝的に組み込まれたATP生成機構であり、これは、ATPを生成するために使用され、経験的にATPの量を増加させることができる。
@@ -160,12 +160,12 @@ python show_result.py \
 | rinna-3.6b-sft-v2       |  70 |   35 |  58 |  0.429448 |  0.214724 |          0.607362 |
 | japanese-alpaca-lora-7b |  15 |  112 |  38 |  0.090909 |  0.678788 |          0.206061 |
 
-The GPT4 judgments is placed in `data/jp_bench/model_judgment/gpt-4_pair.jsonl`. 
+The GPT4 judgments is placed in `data/jp_bench/model_judgment/gpt-4_pair.jsonl`.
 
 To be noticed, `pairwise-all` might become very inefficient when evaluating more LLMs, as it evaluates combinations of each two of them. In such cases, we recommend using the `pairwise-baseline` mode, allowing all models to be compared against a fixed baseline such as ChatGPT.
 
 ## Supported baseline Models
-To make it more convenient for users to utilize pairwise comparisons with existing Japanese LLMs, we offer the prediction of the following four baselines in `fastchat/llm_judge/data/jp_bench/model_answer`. 
+To make it more convenient for users to utilize pairwise comparisons with existing Japanese LLMs, we offer the prediction of the following four baselines in `fastchat/llm_judge/data/jp_bench/model_answer`.
 
 - [Rinna-3.6B](https://huggingface.co/rinna/japanese-gpt-neox-3.6b)
 - [Rinna-3.6B-sft-v2](https://huggingface.co/rinna/japanese-gpt-neox-3.6b-instruction-sft-v2)

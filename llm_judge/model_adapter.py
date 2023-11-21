@@ -1,30 +1,20 @@
 """Model adapter registration."""
 
-import math
 import sys
-from typing import List, Optional
-import warnings
+from typing import List
 
 if sys.version_info >= (3, 9):
     from functools import cache
 else:
     from functools import lru_cache as cache
 
-import accelerate
-import psutil
-import torch
 from transformers import (
-    AutoConfig,
-    AutoModel,
     AutoModelForCausalLM,
-    AutoModelForSeq2SeqLM,
     AutoTokenizer,
-    LlamaTokenizer,
-    LlamaForCausalLM,
-    T5Tokenizer,
 )
 
 from conversation import Conversation, get_conv_template
+
 
 class BaseModelAdapter:
     """The base and the default model adapter."""
@@ -54,7 +44,6 @@ class BaseModelAdapter:
         )
         return model, tokenizer
 
-
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("one_shot")
 
@@ -78,15 +67,10 @@ def get_model_adapter(model_path: str) -> BaseModelAdapter:
     raise ValueError(f"No valid model adapter for {model_path}")
 
 
-
 def get_conversation_template(model_path: str) -> Conversation:
     """Get the default conversation template."""
     adapter = get_model_adapter(model_path)
     return adapter.get_default_conv_template(model_path)
-
-
-
-
 
 
 class ChatGPTAdapter(BaseModelAdapter):
@@ -100,9 +84,6 @@ class ChatGPTAdapter(BaseModelAdapter):
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("chatgpt")
-
-
-
 
 
 # Note: the registration order matters.

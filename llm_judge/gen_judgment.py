@@ -5,12 +5,7 @@ python gen_judgment.py --model-list [LIST-OF-MODEL-ID] --parallel [num-concurren
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 import json
-<<<<<<< HEAD
-import sys
 import os
-
-=======
->>>>>>> origin/dev
 import numpy as np
 from tqdm import tqdm
 from dotenv import load_dotenv
