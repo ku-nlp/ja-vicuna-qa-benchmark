@@ -6,9 +6,11 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor
 import json
 import sys
+import os
 
 import numpy as np
 from tqdm import tqdm
+from dotenv import load_dotenv
 
 from common import (
     load_questions,
@@ -23,6 +25,11 @@ from common import (
     MatchSingle,
     NEED_REF_CATS,
 )
+
+
+load_dotenv()  # Load environment variables from .env file
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 
 def make_match(

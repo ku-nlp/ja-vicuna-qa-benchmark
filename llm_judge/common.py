@@ -12,9 +12,13 @@ import time
 from typing import Optional
 import sys
 import openai
-import anthropic
+from dotenv import load_dotenv
 
-from model.model_adapter import get_conversation_template
+load_dotenv()  # Load environment variables from .env file
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+from model_adapter import get_conversation_template
 
 # API setting constants
 API_MAX_RETRY = 16
@@ -83,6 +87,7 @@ class MatchPair:
     multi_turn: bool = False
 
 
+    
 def load_questions(question_file: str, begin: Optional[int], end: Optional[int]):
     """Load questions from a file."""
     questions = []
@@ -175,10 +180,6 @@ def run_judge_single(question, answer, judge, ref_answer, multi_turn=False):
 
     if model in ["gpt-3.5-turbo", "gpt-4"]:
         judgment = chat_compeletion_openai(model, conv, temperature=0, max_tokens=2048)
-    elif model in ["claude-v1", "claude-instant-v1"]:
-        judgment = chat_compeletion_anthropic(
-            model, conv, temperature=0, max_tokens=1024
-        )
     else:
         raise ValueError(f"Invalid judge model name: {model}")
 
@@ -280,16 +281,12 @@ def run_judge_pair(question, answer_a, answer_b, judge, ref_answer, multi_turn=F
     conv.append_message(conv.roles[0], user_prompt)
     conv.append_message(conv.roles[1], None)
 
+
     if model in ["gpt-3.5-turbo", "gpt-4"]:
         conv.system = system_prompt
         judgment = chat_compeletion_openai(model, conv, temperature=0, max_tokens=2048)
-    elif model in ["claude-v1", "claude-instant-v1"]:
-        if system_prompt != "You are a helpful assistant.":
-            user_prompt = "[Instruction]\n" + system_prompt + "\n\n" + user_prompt
-            conv.messages[0][1] = user_prompt
-        judgment = chat_compeletion_anthropic(
-            model, conv, temperature=0, max_tokens=1024
-        )
+        print(judgment)
+        assert False
     else:
         raise ValueError(f"Invalid judge model name: {model}")
 
@@ -423,6 +420,7 @@ def chat_compeletion_openai(model, conv, temperature, max_tokens):
     for _ in range(API_MAX_RETRY):
         try:
             messages = conv.to_openai_api_messages()
+            print(messages)
             response = openai.ChatCompletion.create(
                 model=model,
                 messages=messages,
@@ -438,52 +436,6 @@ def chat_compeletion_openai(model, conv, temperature, max_tokens):
 
     return output
 
-
-def chat_compeletion_anthropic(model, conv, temperature, max_tokens):
-    output = API_ERROR_OUTPUT
-    for _ in range(API_MAX_RETRY):
-        try:
-            c = anthropic.Client(os.environ["ANTHROPIC_API_KEY"])
-            prompt = conv.get_prompt()
-            response = c.completion(
-                model=model,
-                prompt=prompt,
-                stop_sequences=[anthropic.HUMAN_PROMPT],
-                max_tokens_to_sample=max_tokens,
-                temperature=temperature,
-            )
-            output = response["completion"]
-            break
-        except anthropic.ApiException as e:
-            print(type(e), e)
-            time.sleep(API_RETRY_SLEEP)
-    return output.strip()
-
-
-def chat_compeletion_palm(chat_state, model, conv, temperature, max_tokens):
-    from fastchat.serve.api_provider import init_palm_chat
-
-    assert model == "palm-2-chat-bison-001"
-
-    if chat_state is None:
-        chat_state = init_palm_chat("chat-bison@001")
-
-    parameters = {
-        "temperature": temperature,
-        "top_p": 0.8,
-        "top_k": 40,
-        "max_output_tokens": max_tokens,
-    }
-    output = API_ERROR_OUTPUT
-    for _ in range(API_MAX_RETRY):
-        try:
-            response = chat_state.send_message(conv.messages[-2][1], **parameters)
-            output = response.text
-            break
-        except Exception as e:
-            print(type(e), e)
-            time.sleep(API_RETRY_SLEEP)
-    return chat_state, output
 
 
 def normalize_game_key_single(gamekey, result):

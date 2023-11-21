@@ -4,6 +4,11 @@ import shortuuid
 import time
 from tqdm import tqdm
 import sys
+import torch
+from transformers import GenerationConfig,LlamaForCausalLM, LlamaTokenizer, AutoModelForCausalLM, AutoTokenizer
+from peft import  PeftModel
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--base_model', default=None, type=str, required=True)
 parser.add_argument('--lora_model', default=None, type=str,help="If None, perform inference on the base model")
@@ -21,9 +26,6 @@ args = parser.parse_args()
 if args.only_cpu is True:
     args.gpus = ""
 os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
-import torch
-from transformers import GenerationConfig,LlamaForCausalLM, LlamaTokenizer, AutoModelForCausalLM, AutoTokenizer
-from peft import  PeftModel
 
 
 temperature_config = {
