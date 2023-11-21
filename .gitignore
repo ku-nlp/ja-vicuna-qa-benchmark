@@ -176,19 +176,11 @@ pyrightconfig.json
 # End of https://www.toptal.com/developers/gitignore/api/python
 
 # folder
-fastchat/llm_judge/data/vicuna_jp
-llm_judge/data
+data
 llm_judge/judge.sh
 llm_judge/LLMs
 llm_judge/gen_model_answer copy.py
 llm_judge/gen_model_answer_ori.py
-
-# files
-fastchat/llm_judge/data/judge_prompts_jp.jsonl
-fastchat/llm_judge/data/question_Japanese_ver.jsonl
-fastchat/llm_judge/data/jp_bench/question_Japanese_ver.jsonl
-fastchat/llm_judge/data/jp_bench/question_Japanese_ver2.jsonl
-fastchat/llm_judge/run_eval.sh
 
 # Log
 *.log
@@ -214,4 +206,3 @@ tests/state_of_the_union.txt
 
 # Build
 build
-
