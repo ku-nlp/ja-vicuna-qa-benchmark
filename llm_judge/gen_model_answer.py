@@ -68,9 +68,9 @@ torch.manual_seed(args.seed)
 temperature_config = {
     "writing": 0.7,
     "roleplay": 0.7,
-    "knowledge": 0.0,
-    "math": 0.0,
-    "coding": 0.0,
+    "knowledge": 0.001,
+    "math": 0.001,
+    "coding": 0.001,
     "common-sense": 0.3,
     "counterfactual": 0.7,
     "fermi": 0.3,
