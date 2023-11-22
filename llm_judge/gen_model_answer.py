@@ -33,7 +33,7 @@ parser.add_argument(
 parser.add_argument("--tokenizer_path", default=None, type=str)
 parser.add_argument(
     "--benchmark",
-    default=None,
+    default="jp_bench",
     type=str,
     help="A file that contains instructions (one instruction per line)",
 )
@@ -220,31 +220,28 @@ if __name__ == "__main__":
     model.eval()
 
     # test data
-    if args.benchmark is not None:
-        question = []
-        data_file = "./data/{}/question.jsonl".format(args.benchmark)
-        with open(data_file, "r") as f:
-            instruction_list = []
-            for line in tqdm(f.read().splitlines()):
-                tmp_dict = json.loads(line)
-                question.append(tmp_dict)
-                instruction_list.append(tmp_dict["turns"][0])
-            examples = [line.strip() for line in instruction_list]
+    print("loading data")
+    data_file = "./data/{}/question.jsonl".format(args.benchmark)
+    questions = []
+    with open(data_file, "r") as f:
+        for line in tqdm(f.read().splitlines()):
+            questions.append(json.loads(line))
 
     with torch.no_grad():
         print("Start inference.")
         results = []
-        for index, example in tqdm(enumerate(examples)):
-            temperature = temperature_config[question[index]["category"]]
-            output = generate_response(example, tokenizer, model, temperature, args)
+        for index, question in tqdm(enumerate(questions)):
+            instruction = question["turns"][0]
+            temperature = temperature_config[question["category"]]
+            output = generate_response(instruction, tokenizer, model, temperature, args)
 
             response = output
             print(f"======={index}=======")
-            print(f"Input: {example}\n")
+            print(f"Input: {instruction}\n")
             print(f"Output: {response}\n")
             results.append(
                 {
-                    "question_id": int(question[index]["question_id"]),
+                    "question_id": int(question["question_id"]),
                     "answer_id": shortuuid.uuid(),
                     "model_id": args.model_id,
                     "choices": [{"index": 0, "turns": [response]}],
