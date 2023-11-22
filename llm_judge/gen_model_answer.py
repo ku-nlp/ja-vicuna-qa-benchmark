@@ -58,7 +58,7 @@ random.seed(args.seed)
 np.random.seed(args.seed)
 torch.manual_seed(args.seed)
 
-temperature_config = {
+default_temperature_config = {
     "writing": 0.7,
     "roleplay": 0.7,
     "knowledge": 0.001,
@@ -86,8 +86,6 @@ template = {
 
 
 def generate_response(input_text, tokenizer, model, temperature, args):
-    if args.temperature is not None:
-        temperature = args.temperature
     if "llm-jp" in args.base_model or (args.lora_model and "llm-jp" in args.lora_model):
         if args.with_prompt:
             input_text = "{instruction} ### 回答：".format_map(
@@ -231,7 +229,9 @@ if __name__ == "__main__":
     results = []
     for index, question in tqdm(enumerate(questions)):
         instruction = question["turns"][0]
-        temperature = temperature_config[question["category"]]
+        temperature = (
+            args.temperature or default_temperature_config[question["category"]]
+        )
         with torch.no_grad():
             output = generate_response(instruction, tokenizer, model, temperature, args)
 
