@@ -42,11 +42,6 @@ parser.add_argument(
     action="store_true",
     help="wrap the input with the prompt automatically",
 )
-parser.add_argument(
-    "--interactive",
-    action="store_true",
-    help="run in the instruction mode (single-turn)",
-)
 parser.add_argument("--gpus", default="3", type=str)
 parser.add_argument(
     "--only_cpu", action="store_true", help="only use CPU for inference"
@@ -237,49 +232,31 @@ if __name__ == "__main__":
             examples = [line.strip() for line in instruction_list]
 
     with torch.no_grad():
-        if args.interactive:
-            print("Start inference with instruction mode.")
+        print("Start inference.")
+        results = []
+        for index, example in tqdm(enumerate(examples)):
+            temperature = temperature_config[question[index]["category"]]
+            output = generate_response(example, tokenizer, model, temperature, args)
 
-            print("=" * 85)
-            print(
-                "+ This mode only supports single-turn QA.\n"
-                "+ If you want to experience multi-turn dialogue, please use llama.cpp or llamachat."
+            response = output
+            print(f"======={index}=======")
+            print(f"Input: {example}\n")
+            print(f"Output: {response}\n")
+            results.append(
+                {
+                    "question_id": int(question[index]["question_id"]),
+                    "answer_id": shortuuid.uuid(),
+                    "model_id": args.model_id,
+                    "choices": [{"index": 0, "turns": [response]}],
+                    "tstamp": time.time(),
+                }
             )
-            print("=" * 85)
-
-            while True:
-                raw_input_text = input("Input:")
-                if len(raw_input_text.strip()) == 0:
-                    break
-                output = generate_response(raw_input_text, tokenizer, model, None, args)
-                print("Response: ", output)
-                print("\n")
-        else:
-            print("Start inference.")
-            results = []
-            for index, example in tqdm(enumerate(examples)):
-                temperature = temperature_config[question[index]["category"]]
-                output = generate_response(example, tokenizer, model, temperature, args)
-
-                response = output
-                print(f"======={index}=======")
-                print(f"Input: {example}\n")
-                print(f"Output: {response}\n")
-                results.append(
-                    {
-                        "question_id": int(question[index]["question_id"]),
-                        "answer_id": shortuuid.uuid(),
-                        "model_id": args.model_id,
-                        "choices": [{"index": 0, "turns": [response]}],
-                        "tstamp": time.time(),
-                    }
-                )
-            predictions_file = "./data/{}/model_answer/{}.jsonl".format(
-                args.benchmark, args.model_id
-            )
-            dirname = os.path.dirname(predictions_file)
-            os.makedirs(dirname, exist_ok=True)
-            with open(predictions_file, "w") as f:
-                for tmp_dict in results:
-                    json.dump(tmp_dict, f, ensure_ascii=False)
-                    f.write("\n")
+        predictions_file = "./data/{}/model_answer/{}.jsonl".format(
+            args.benchmark, args.model_id
+        )
+        dirname = os.path.dirname(predictions_file)
+        os.makedirs(dirname, exist_ok=True)
+        with open(predictions_file, "w") as f:
+            for tmp_dict in results:
+                json.dump(tmp_dict, f, ensure_ascii=False)
+                f.write("\n")
