@@ -25,7 +25,7 @@ parser.add_argument(
 )
 parser.add_argument("--model_id", default=None, type=str, help="name of the model")
 parser.add_argument(
-    "--max_new_tokens", default=None, type=int, help="number of generated tokens"
+    "--max_new_tokens", default=512, type=int, help="number of generated tokens"
 )
 parser.add_argument(
     "--temperature", default=None, type=int, help="generation temperature"
@@ -80,7 +80,7 @@ template = {
 }
 
 
-def generate_response(input_text, tokenizer, model, temperature, args):
+def generate_response(input_text, tokenizer, model, temperature, max_new_tokens, args):
     if "llm-jp" in args.base_model or (args.lora_model and "llm-jp" in args.lora_model):
         input_text = "{instruction} ### 回答：".format_map({"instruction": input_text})
 
@@ -94,7 +94,7 @@ def generate_response(input_text, tokenizer, model, temperature, args):
                 top_p=0.9,
                 temperature=temperature,
                 do_sample=True,
-                max_new_tokens=args.max_new_tokens,
+                max_new_tokens=max_new_tokens,
             )
         s = generation_output[0]
         output = tokenizer.decode(s)
@@ -113,7 +113,7 @@ def generate_response(input_text, tokenizer, model, temperature, args):
         output_ids = model.generate(
             token_ids.to(model.device),
             do_sample=True,
-            max_new_tokens=args.max_new_tokens,
+            max_new_tokens=max_new_tokens,
             temperature=temperature,
             repetition_penalty=1.1,
             pad_token_id=tokenizer.pad_token_id,
@@ -144,7 +144,7 @@ def generate_response(input_text, tokenizer, model, temperature, args):
 
         output_ids = model.generate(
             token_ids.to(model.device),
-            max_new_tokens=args.max_new_tokens,
+            max_new_tokens=max_new_tokens,
             pad_token_id=tokenizer.pad_token_id,
             eos_token_id=tokenizer.eos_token_id,
         )
@@ -174,7 +174,7 @@ def generate_response(input_text, tokenizer, model, temperature, args):
                 generation_config=generation_config,
                 return_dict_in_generate=True,
                 output_scores=True,
-                max_new_tokens=args.max_new_tokens,
+                max_new_tokens=max_new_tokens,
             )
         s = generation_output.sequences[0]
         output = tokenizer.decode(s)
@@ -218,8 +218,11 @@ if __name__ == "__main__":
         temperature = (
             args.temperature or default_temperature_config[question["category"]]
         )
+        max_new_tokens = args.max_new_tokens
         with torch.no_grad():
-            output = generate_response(instruction, tokenizer, model, temperature, args)
+            output = generate_response(
+                instruction, tokenizer, model, temperature, max_new_tokens, args
+            )
 
         response = output
         print(f"======={index}=======")
