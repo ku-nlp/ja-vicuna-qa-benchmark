@@ -66,20 +66,6 @@ default_temperature_config = {
 }
 
 
-# The prompt template below is taken from llama.cpp
-# and is slightly different from the one used in training.
-# But we find it gives better results
-# Japanese version
-
-template = {
-    "alpaca": "Below is an instruction that describes a task. Write a response that appropriately completes the request. ### Instruction:\n\n{instruction}\n\n### Response:\n\n",
-    "alpaca_jp": "以下にあるタスクの指示を示します。示された指示に適切に従うように回答を埋めてください。### 指示：\n\n{instruction}\n\n### 回答：\n\n",
-    "rinna": "ユーザー: {instruction}<NL>システム: ",
-    "llm-jp": "{instruction} ### 回答：",
-    "elyza": "[INST] {B_SYS}{DEFAULT_SYSTEM_PROMPT}{E_SYS}{instruction} [/INST] ",
-}
-
-
 def generate_response(input_text, tokenizer, model, temperature, max_new_tokens, args):
     if "llm-jp" in args.base_model or (args.lora_model and "llm-jp" in args.lora_model):
         input_text = "{instruction} ### 回答：".format_map({"instruction": input_text})
