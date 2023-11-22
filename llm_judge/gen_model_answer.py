@@ -56,11 +56,11 @@ def generate_response(input_text, tokenizer, model, temperature, max_new_tokens,
             {"instruction": input_text}
         )
 
-        token_ids = tokenizer.encode(
+        input_token_ids = tokenizer.encode(
             input_text, add_special_tokens=False, return_tensors="pt"
         )
-        output_ids = model.generate(
-            token_ids.to(model.device),
+        output_token_ids = model.generate(
+            input_token_ids.to(model.device),
             do_sample=True,
             max_new_tokens=max_new_tokens,
             temperature=temperature,
@@ -68,11 +68,10 @@ def generate_response(input_text, tokenizer, model, temperature, max_new_tokens,
             pad_token_id=tokenizer.pad_token_id,
             bos_token_id=tokenizer.bos_token_id,
             eos_token_id=tokenizer.eos_token_id,
-        )
-        output = tokenizer.decode(output_ids.tolist()[0][token_ids.size(1) :])
+        )[0]
+        output_token_ids = output_token_ids[input_token_ids.size(1) :]
+        output = tokenizer.decode(output_token_ids.tolist(), skip_special_tokens=True)
         output = output.replace("<NL>", "\n")
-        output = output.replace("</s>", "")
-
         return output
     elif "elyza" in args.base_model:
         B_INST, E_INST = "[INST]", "[/INST]"
@@ -87,19 +86,20 @@ def generate_response(input_text, tokenizer, model, temperature, max_new_tokens,
             e_inst=E_INST,
         )
 
-        token_ids = tokenizer.encode(
+        input_token_ids = tokenizer.encode(
             prompt, add_special_tokens=False, return_tensors="pt"
         )
 
-        output_ids = model.generate(
-            token_ids.to(model.device),
+        output_token_ids = model.generate(
+            input_token_ids.to(model.device),
             max_new_tokens=max_new_tokens,
             pad_token_id=tokenizer.pad_token_id,
             eos_token_id=tokenizer.eos_token_id,
         )
 
         output = tokenizer.decode(
-            output_ids.tolist()[0][token_ids.size(1) :], skip_special_tokens=True
+            output_token_ids.tolist()[0][input_token_ids.size(1) :],
+            skip_special_tokens=True,
         )
         return output
 
