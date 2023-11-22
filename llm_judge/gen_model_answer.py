@@ -215,14 +215,13 @@ if __name__ == "__main__":
     tokenizer_path = args.tokenizer_path or args.lora_model or args.base_model
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
 
-    base_model = AutoModelForCausalLM.from_pretrained(
+    print("loading model")
+    model = AutoModelForCausalLM.from_pretrained(
         args.base_model, device_map="auto", torch_dtype=torch_dtype
     )
-    if args.lora_model is not None:
+    if args.lora_model:
         print("loading peft model")
-        model = PeftModel.from_pretrained(base_model, args.lora_model)
-    else:
-        model = base_model
+        model = PeftModel.from_pretrained(model, args.lora_model)
 
     # test data
     if args.benchmark is not None:
