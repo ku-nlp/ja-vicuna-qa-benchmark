@@ -1,10 +1,12 @@
 import argparse
 import json
 import os
+import random
 import shortuuid
 import time
 from tqdm import tqdm
 
+import numpy as np
 import torch
 from transformers import (
     GenerationConfig,
@@ -51,11 +53,17 @@ parser.add_argument("--gpus", default="3", type=str)
 parser.add_argument(
     "--only_cpu", action="store_true", help="only use CPU for inference"
 )
+parser.add_argument(
+    "--seed", default=0, type=int, help="random seed for reproducibility"
+)
 args = parser.parse_args()
 if args.only_cpu is True:
     args.gpus = ""
 os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
 
+random.seed(args.seed)
+np.random.seed(args.seed)
+torch.manual_seed(args.seed)
 
 temperature_config = {
     "writing": 0.7,
