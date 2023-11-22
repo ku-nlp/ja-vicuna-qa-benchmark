@@ -236,12 +236,12 @@ if __name__ == "__main__":
                 "tstamp": time.time(),
             }
         )
+
     predictions_file = "./data/{}/model_answer/{}.jsonl".format(
         args.benchmark, args.model_id
     )
     dirname = os.path.dirname(predictions_file)
     os.makedirs(dirname, exist_ok=True)
     with open(predictions_file, "w") as f:
-        for tmp_dict in results:
-            json.dump(tmp_dict, f, ensure_ascii=False)
-            f.write("\n")
+        for result in results:
+            f.write(json.dumps(result, ensure_ascii=False) + "\n")
