@@ -37,11 +37,6 @@ parser.add_argument(
     type=str,
     help="A file that contains instructions (one instruction per line)",
 )
-parser.add_argument(
-    "--with_prompt",
-    action="store_true",
-    help="wrap the input with the prompt automatically",
-)
 parser.add_argument("--gpus", default="3", type=str)
 parser.add_argument(
     "--only_cpu", action="store_true", help="only use CPU for inference"
@@ -87,10 +82,7 @@ template = {
 
 def generate_response(input_text, tokenizer, model, temperature, args):
     if "llm-jp" in args.base_model or (args.lora_model and "llm-jp" in args.lora_model):
-        if args.with_prompt:
-            input_text = "{instruction} ### 回答：".format_map(
-                {"instruction": input_text}
-            )
+        input_text = "{instruction} ### 回答：".format_map({"instruction": input_text})
 
         inputs = tokenizer(
             input_text, return_tensors="pt", add_special_tokens=False
@@ -106,16 +98,14 @@ def generate_response(input_text, tokenizer, model, temperature, args):
             )
         s = generation_output[0]
         output = tokenizer.decode(s)
-        if args.with_prompt:
-            output = output.split("### 回答：")[1].strip()
-            output = output.split("<EOD|LLM-jp>")[0].strip()
+        output = output.split("### 回答：")[1].strip()
+        output = output.split("<EOD|LLM-jp>")[0].strip()
 
         return output
     elif "rinna" in args.base_model:
-        if args.with_prompt:
-            input_text = "ユーザー: {instruction}<NL>システム: ".format_map(
-                {"instruction": input_text}
-            )
+        input_text = "ユーザー: {instruction}<NL>システム: ".format_map(
+            {"instruction": input_text}
+        )
 
         token_ids = tokenizer.encode(
             input_text, add_special_tokens=False, return_tensors="pt"
@@ -131,24 +121,22 @@ def generate_response(input_text, tokenizer, model, temperature, args):
             eos_token_id=tokenizer.eos_token_id,
         )
         output = tokenizer.decode(output_ids.tolist()[0][token_ids.size(1) :])
-        if args.with_prompt:
-            output = output.replace("<NL>", "\n")
-            output = output.replace("</s>", "")
+        output = output.replace("<NL>", "\n")
+        output = output.replace("</s>", "")
 
         return output
     elif "elyza" in args.base_model:
-        if args.with_prompt:
-            B_INST, E_INST = "[INST]", "[/INST]"
-            B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
-            DEFAULT_SYSTEM_PROMPT = "あなたは誠実で優秀な日本人のアシスタントです。"
+        B_INST, E_INST = "[INST]", "[/INST]"
+        B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
+        DEFAULT_SYSTEM_PROMPT = "あなたは誠実で優秀な日本人のアシスタントです。"
 
-            prompt = "{bos_token}{b_inst} {system}{prompt} {e_inst} ".format(
-                bos_token=tokenizer.bos_token,
-                b_inst=B_INST,
-                system=f"{B_SYS}{DEFAULT_SYSTEM_PROMPT}{E_SYS}",
-                prompt=input_text,
-                e_inst=E_INST,
-            )
+        prompt = "{bos_token}{b_inst} {system}{prompt} {e_inst} ".format(
+            bos_token=tokenizer.bos_token,
+            b_inst=B_INST,
+            system=f"{B_SYS}{DEFAULT_SYSTEM_PROMPT}{E_SYS}",
+            prompt=input_text,
+            e_inst=E_INST,
+        )
 
         token_ids = tokenizer.encode(
             prompt, add_special_tokens=False, return_tensors="pt"
@@ -167,10 +155,9 @@ def generate_response(input_text, tokenizer, model, temperature, args):
         return output
 
     elif "llama" in args.base_model:
-        if args.with_prompt:
-            input_text = "以下にあるタスクの指示を示します。示された指示に適切に従うように回答を埋めてください。### 指示：\n\n{instruction}\n\n### 回答：\n\n".format_map(
-                {"instruction": input_text}
-            )
+        input_text = "以下にあるタスクの指示を示します。示された指示に適切に従うように回答を埋めてください。### 指示：\n\n{instruction}\n\n### 回答：\n\n".format_map(
+            {"instruction": input_text}
+        )
         inputs = tokenizer(input_text, return_tensors="pt")
         input_ids = inputs["input_ids"].to(device)
         generation_config = GenerationConfig(
@@ -191,9 +178,8 @@ def generate_response(input_text, tokenizer, model, temperature, args):
             )
         s = generation_output.sequences[0]
         output = tokenizer.decode(s)
-        if args.with_prompt:
-            output = output.split("### Response：")[1].strip()
-            output = output.split("\n\n")[0].strip()
+        output = output.split("### Response：")[1].strip()
+        output = output.split("\n\n")[0].strip()
         return output
 
 
