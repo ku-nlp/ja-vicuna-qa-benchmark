@@ -10,8 +10,6 @@ import numpy as np
 import torch
 from transformers import (
     GenerationConfig,
-    LlamaForCausalLM,
-    LlamaTokenizer,
     AutoModelForCausalLM,
     AutoTokenizer,
 )
@@ -215,23 +213,11 @@ if __name__ == "__main__":
         torch_dtype = torch.float32
 
     tokenizer_path = args.tokenizer_path or args.lora_model or args.base_model
-    try:
-        tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
-    except ValueError:
-        tokenizer = LlamaTokenizer.from_pretrained(tokenizer_path)
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
 
-    try:
-        base_model = AutoModelForCausalLM.from_pretrained(
-            args.base_model, device_map="auto", torch_dtype=torch_dtype
-        )
-    except ValueError:
-        base_model = LlamaForCausalLM.from_pretrained(
-            args.base_model,
-            load_in_8bit=False,
-            torch_dtype=torch_dtype,
-            low_cpu_mem_usage=True,
-            device_map="auto",
-        )
+    base_model = AutoModelForCausalLM.from_pretrained(
+        args.base_model, device_map="auto", torch_dtype=torch_dtype
+    )
 
     model_vocab_size = base_model.get_input_embeddings().weight.size(0)
     tokenzier_vocab_size = len(tokenizer)
