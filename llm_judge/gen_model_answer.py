@@ -207,11 +207,12 @@ def generate_response(input_text, tokenizer, model, temperature, args):
 
 
 if __name__ == "__main__":
-    load_type = torch.float16
     if torch.cuda.is_available():
-        device = torch.device(0)
+        device = "cuda"
+        torch_dtype = torch.float16
     else:
-        device = torch.device("cpu")
+        device = "cpu"
+        torch_dtype = torch.float32
     if args.tokenizer_path is None:
         args.tokenizer_path = args.base_model
         if args.lora_model is None:
@@ -223,13 +224,13 @@ if __name__ == "__main__":
 
     try:
         base_model = AutoModelForCausalLM.from_pretrained(
-            args.base_model, device_map="auto", torch_dtype=torch.float16
+            args.base_model, device_map="auto", torch_dtype=torch_dtype
         )
     except ValueError:
         base_model = LlamaForCausalLM.from_pretrained(
             args.base_model,
             load_in_8bit=False,
-            torch_dtype=load_type,
+            torch_dtype=torch_dtype,
             low_cpu_mem_usage=True,
             device_map="auto",
         )
@@ -244,8 +245,6 @@ if __name__ == "__main__":
     else:
         model = base_model
 
-    if device == torch.device("cpu"):
-        model.float()
     # test data
     if args.benchmark is not None:
         question = []
