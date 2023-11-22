@@ -1,0 +1,14 @@
+{
+  "model_id": "llm-jp--llm-jp-13b-instruct-full-jaster-dolly-oasst-v1.0",
+  "model_name_or_path": "llm-jp/llm-jp-13b-instruct-full-jaster-dolly-oasst-v1.0",
+  "lora_model_name_or_path": null,
+  "tokenizer_name_or_path": null,
+  "prompt_template": "{instruction} ### 回答：",
+  "generation_config": {
+    "do_sample": true,
+    "max_new_tokens": 512,
+    "temperature": 0.7,
+    "top_p": 0.9
+  },
+  "special_token_map": {}
+}
