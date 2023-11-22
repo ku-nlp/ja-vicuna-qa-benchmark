@@ -224,16 +224,15 @@ if __name__ == "__main__":
                 instruction, tokenizer, model, temperature, max_new_tokens, args
             )
 
-        response = output
         print(f"======={index}=======")
         print(f"Input: {instruction}\n")
-        print(f"Output: {response}\n")
+        print(f"Output: {output}\n")
         results.append(
             {
                 "question_id": int(question["question_id"]),
                 "answer_id": shortuuid.uuid(),
                 "model_id": args.model_id,
-                "choices": [{"index": 0, "turns": [response]}],
+                "choices": [{"index": 0, "turns": [output]}],
                 "tstamp": time.time(),
             }
         )
