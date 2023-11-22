@@ -155,17 +155,10 @@ if __name__ == "__main__":
         type=str,
         help="A file that contains instructions (one instruction per line)",
     )
-    parser.add_argument("--gpus", default="3", type=str)
-    parser.add_argument(
-        "--only_cpu", action="store_true", help="only use CPU for inference"
-    )
     parser.add_argument(
         "--seed", default=0, type=int, help="random seed for reproducibility"
     )
     args = parser.parse_args()
-    if args.only_cpu is True:
-        args.gpus = ""
-    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
 
     random.seed(args.seed)
     np.random.seed(args.seed)
