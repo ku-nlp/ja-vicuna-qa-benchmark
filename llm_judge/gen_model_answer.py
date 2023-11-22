@@ -15,43 +15,6 @@ from transformers import (
 )
 from peft import PeftModel
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--base_model", default=None, type=str, required=True)
-parser.add_argument(
-    "--lora_model",
-    default=None,
-    type=str,
-    help="If None, perform inference on the base model",
-)
-parser.add_argument("--model_id", default=None, type=str, help="name of the model")
-parser.add_argument(
-    "--max_new_tokens", default=512, type=int, help="number of generated tokens"
-)
-parser.add_argument(
-    "--temperature", default=None, type=int, help="generation temperature"
-)
-parser.add_argument("--tokenizer_path", default=None, type=str)
-parser.add_argument(
-    "--benchmark",
-    default="jp_bench",
-    type=str,
-    help="A file that contains instructions (one instruction per line)",
-)
-parser.add_argument("--gpus", default="3", type=str)
-parser.add_argument(
-    "--only_cpu", action="store_true", help="only use CPU for inference"
-)
-parser.add_argument(
-    "--seed", default=0, type=int, help="random seed for reproducibility"
-)
-args = parser.parse_args()
-if args.only_cpu is True:
-    args.gpus = ""
-os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
-
-random.seed(args.seed)
-np.random.seed(args.seed)
-torch.manual_seed(args.seed)
 
 default_temperature_config = {
     "writing": 0.7,
@@ -170,6 +133,44 @@ def generate_response(input_text, tokenizer, model, temperature, max_new_tokens,
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--base_model", default=None, type=str, required=True)
+    parser.add_argument(
+        "--lora_model",
+        default=None,
+        type=str,
+        help="If None, perform inference on the base model",
+    )
+    parser.add_argument("--model_id", default=None, type=str, help="name of the model")
+    parser.add_argument(
+        "--max_new_tokens", default=512, type=int, help="number of generated tokens"
+    )
+    parser.add_argument(
+        "--temperature", default=None, type=int, help="generation temperature"
+    )
+    parser.add_argument("--tokenizer_path", default=None, type=str)
+    parser.add_argument(
+        "--benchmark",
+        default="jp_bench",
+        type=str,
+        help="A file that contains instructions (one instruction per line)",
+    )
+    parser.add_argument("--gpus", default="3", type=str)
+    parser.add_argument(
+        "--only_cpu", action="store_true", help="only use CPU for inference"
+    )
+    parser.add_argument(
+        "--seed", default=0, type=int, help="random seed for reproducibility"
+    )
+    args = parser.parse_args()
+    if args.only_cpu is True:
+        args.gpus = ""
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
+
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+
     if torch.cuda.is_available():
         device = "cuda"
         torch_dtype = torch.float16
