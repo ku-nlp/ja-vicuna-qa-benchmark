@@ -213,14 +213,12 @@ if __name__ == "__main__":
     else:
         device = "cpu"
         torch_dtype = torch.float32
-    if args.tokenizer_path is None:
-        args.tokenizer_path = args.base_model
-        if args.lora_model is None:
-            args.tokenizer_path = args.base_model
+
+    tokenizer_path = args.tokenizer_path or args.lora_model or args.base_model
     try:
-        tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_path)
+        tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
     except ValueError:
-        tokenizer = LlamaTokenizer.from_pretrained(args.tokenizer_path)
+        tokenizer = LlamaTokenizer.from_pretrained(tokenizer_path)
 
     try:
         base_model = AutoModelForCausalLM.from_pretrained(
