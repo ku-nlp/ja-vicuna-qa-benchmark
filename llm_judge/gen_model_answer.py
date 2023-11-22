@@ -218,11 +218,6 @@ if __name__ == "__main__":
     base_model = AutoModelForCausalLM.from_pretrained(
         args.base_model, device_map="auto", torch_dtype=torch_dtype
     )
-
-    model_vocab_size = base_model.get_input_embeddings().weight.size(0)
-    tokenzier_vocab_size = len(tokenizer)
-    print(f"Vocab of the base model: {model_vocab_size}")
-    print(f"Vocab of the tokenizer: {tokenzier_vocab_size}")
     if args.lora_model is not None:
         print("loading peft model")
         model = PeftModel.from_pretrained(base_model, args.lora_model)
