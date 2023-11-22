@@ -36,20 +36,20 @@ def generate_response(input_text, tokenizer, model, temperature, max_new_tokens,
         inputs = tokenizer(
             input_text, return_tensors="pt", add_special_tokens=False
         ).to(model.device)
+        input_token_ids = inputs["input_ids"]
 
-        with torch.no_grad():
-            generation_output = model.generate(
-                **inputs,
-                top_p=0.9,
-                temperature=temperature,
-                do_sample=True,
-                max_new_tokens=max_new_tokens,
-            )
-        s = generation_output[0]
-        output = tokenizer.decode(s)
-        output = output.split("### 回答：")[1].strip()
-        output = output.split("<EOD|LLM-jp>")[0].strip()
-
+        output_token_ids = model.generate(
+            **inputs,
+            top_p=0.9,
+            temperature=temperature,
+            do_sample=True,
+            max_new_tokens=max_new_tokens,
+            pad_token_id=tokenizer.pad_token_id,
+            bos_token_id=tokenizer.bos_token_id,
+            eos_token_id=tokenizer.eos_token_id,
+        )[0]
+        output_token_ids = output_token_ids[input_token_ids.size(1) :]
+        output = tokenizer.decode(output_token_ids.tolist(), skip_special_tokens=True)
         return output
     elif "rinna" in args.base_model:
         input_text = "ユーザー: {instruction}<NL>システム: ".format_map(
@@ -118,14 +118,14 @@ def generate_response(input_text, tokenizer, model, temperature, max_new_tokens,
         )
 
         with torch.no_grad():
-            generation_output = model.generate(
+            output_token_ids = model.generate(
                 input_ids=input_ids,
                 generation_config=generation_config,
                 return_dict_in_generate=True,
                 output_scores=True,
                 max_new_tokens=max_new_tokens,
             )
-        s = generation_output.sequences[0]
+        s = output_token_ids.sequences[0]
         output = tokenizer.decode(s)
         output = output.split("### Response：")[1].strip()
         output = output.split("\n\n")[0].strip()
