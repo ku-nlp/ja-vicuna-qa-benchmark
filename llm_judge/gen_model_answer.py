@@ -222,6 +222,7 @@ if __name__ == "__main__":
     if args.lora_model:
         print("loading peft model")
         model = PeftModel.from_pretrained(model, args.lora_model)
+    model.eval()
 
     # test data
     if args.benchmark is not None:
@@ -234,8 +235,6 @@ if __name__ == "__main__":
                 question.append(tmp_dict)
                 instruction_list.append(tmp_dict["turns"][0])
             examples = [line.strip() for line in instruction_list]
-
-    # model.eval()
 
     with torch.no_grad():
         if args.interactive:
