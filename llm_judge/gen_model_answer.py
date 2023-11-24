@@ -1,9 +1,9 @@
 import argparse
 import json
-import os
 import random
 import shortuuid
 import time
+from pathlib import Path
 from tqdm import tqdm
 
 import numpy as np
@@ -11,8 +11,15 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
 
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+BENCHMARK_FILE_MAP = {
+    "jp_bench": DATA_DIR / "jp_bench" / "question.jsonl",
+}
+PREDICTION_DIR_MAP = {
+    "jp_bench": DATA_DIR / "jp_bench" / "model_answer",
+}
 
-default_temperature_config = {
+DEFAULT_TEMPERATURE_MAP = {
     "writing": 0.7,
     "roleplay": 0.7,
     "knowledge": 0.001,
@@ -34,12 +41,12 @@ def generate_response(
         input_text (str): Input text.
         model (transformers.PreTrainedModel): Model.
         tokenizer (transformers.PreTrainedTokenizer): Tokenizer.
-        generation_config (dict): Generation config.
-        special_token_map (dict): Special token map. This is used to replace special tokens in the output.
+        generation_config (Optional[dict]): Generation config.
+        special_token_map (Optional[dict]): Special token map used to replace special tokens.
     """
-    inputs = tokenizer(input_text, return_tensors="pt", add_special_tokens=False).to(
-        model.device
-    )
+    inputs = tokenizer(input_text, return_tensors="pt", add_special_tokens=False)
+    inputs = inputs.to(model.device)
+
     input_token_ids = inputs["input_ids"]
 
     if generation_config is None:
@@ -54,10 +61,12 @@ def generate_response(
             eos_token_id=tokenizer.eos_token_id,
         )[0]
     output_token_ids = output_token_ids[input_token_ids.size(1) :]
+
     output = tokenizer.decode(output_token_ids.tolist(), skip_special_tokens=True)
     if special_token_map:
-        for k, v in special_token_map.items():
-            output = output.replace(k, v)
+        for src, tgt in special_token_map.items():
+            output = output.replace(src, tgt)
+
     return output
 
 
@@ -81,10 +90,8 @@ if __name__ == "__main__":
     torch.manual_seed(seed)
 
     if torch.cuda.is_available():
-        device = "cuda"
         torch_dtype = torch.float16
     else:
-        device = "cpu"
         torch_dtype = torch.float32
 
     with open(args.config, "r") as f:
@@ -110,11 +117,9 @@ if __name__ == "__main__":
 
     # test data
     print("loading data")
-    data_file = "./data/{}/question.jsonl".format(args.benchmark)
-    questions = []
+    data_file = BENCHMARK_FILE_MAP[args.benchmark]
     with open(data_file, "r") as f:
-        for line in tqdm(f.read().splitlines()):
-            questions.append(json.loads(line))
+        questions = [json.loads(line) for line in tqdm(f)]
 
     print("Start inference.")
     model_id = config["model_id"]
@@ -125,13 +130,9 @@ if __name__ == "__main__":
     results = []
     for index, question in tqdm(enumerate(questions)):
         generation_config = config.get("generation_config", {})
-        if (
-            "temperature" not in generation_config
-            or generation_config["temperature"] is None
-        ):
-            generation_config["temperature"] = default_temperature_config[
-                question["category"]
-            ]
+        if generation_config.get("temperature") is None:
+            category = question["category"]
+            generation_config["temperature"] = DEFAULT_TEMPERATURE_MAP[category]
 
         instruction = question["turns"][0]
         output = generate_response(
@@ -155,11 +156,9 @@ if __name__ == "__main__":
             }
         )
 
-    predictions_file = "./data/{}/model_answer/{}.jsonl".format(
-        args.benchmark, model_id
-    )
-    dirname = os.path.dirname(predictions_file)
-    os.makedirs(dirname, exist_ok=True)
-    with open(predictions_file, "w") as f:
+    prediction_dir = PREDICTION_DIR_MAP[args.benchmark]
+    prediction_dir.mkdir(parents=True, exist_ok=True)
+    prediction_file = prediction_dir / f"{model_id}.jsonl"
+    with open(prediction_file, "w") as f:
         for result in results:
             f.write(json.dumps(result, ensure_ascii=False) + "\n")
