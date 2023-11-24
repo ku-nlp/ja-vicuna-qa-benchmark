@@ -1,5 +1,6 @@
 import argparse
 import json
+import logging
 import random
 import shortuuid
 import time
@@ -10,6 +11,8 @@ import numpy as np
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
+
+logger = logging.getLogger(__name__)
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 BENCHMARK_FILE_MAP = {
@@ -82,8 +85,22 @@ if __name__ == "__main__":
     parser.add_argument(
         "--seed", default=0, type=int, help="random seed for reproducibility"
     )
+    parser.add_argument(
+        "-v", "--verbose", action="count", default=0, help="verbosity level"
+    )
     args = parser.parse_args()
 
+    if args.verbose == 0:
+        level = logging.INFO
+    else:
+        level = logging.DEBUG
+    logging.basicConfig(
+        format="| %(asctime)s | %(levelname)s | %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        level=level,
+    )
+
+    logger.info(f"Set random seed to {args.seed}")
     seed = args.seed
     random.seed(seed)
     np.random.seed(seed)
@@ -94,20 +111,24 @@ if __name__ == "__main__":
     else:
         torch_dtype = torch.float32
 
+    logger.info(f"Loading config from {args.config}")
     with open(args.config, "r") as f:
         config = json.load(f)
+    logger.debug(config)
 
-    print("loading model")
+    logger.info("Load the model")
     model_name_or_path = config["model_name_or_path"]
     model = AutoModelForCausalLM.from_pretrained(
         model_name_or_path, device_map="auto", torch_dtype=torch_dtype
     )
     lora_model_name_or_path = config.get("lora_model_name_or_path")
     if lora_model_name_or_path:
-        print("loading peft model")
+        logger.info("Load the PEFT model")
         model = PeftModel.from_pretrained(model, lora_model_name_or_path)
     model.eval()
+    logger.debug(model)
 
+    logger.info("Load the tokenizer")
     tokenizer_name_or_path = (
         config.get("tokenizer_name_or_path")
         or lora_model_name_or_path
@@ -116,12 +137,12 @@ if __name__ == "__main__":
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_name_or_path)
 
     # test data
-    print("loading data")
+    logger.info("Load the data")
     data_file = BENCHMARK_FILE_MAP[args.benchmark]
     with open(data_file, "r") as f:
         questions = [json.loads(line) for line in tqdm(f)]
 
-    print("Start inference.")
+    logger.info("Start inference.")
     model_id = config["model_id"]
     prompt_template = config["prompt_template"]
     if "{instruction}" not in prompt_template:
@@ -129,12 +150,13 @@ if __name__ == "__main__":
     special_token_map = config.get("special_token_map", {})
     results = []
     for index, question in tqdm(enumerate(questions)):
+        instruction = question["turns"][0]
+
         generation_config = config.get("generation_config", {})
         if generation_config.get("temperature") is None:
             category = question["category"]
             generation_config["temperature"] = DEFAULT_TEMPERATURE_MAP[category]
 
-        instruction = question["turns"][0]
         output = generate_response(
             input_text=prompt_template.format_map({"instruction": instruction}),
             model=model,
@@ -143,9 +165,9 @@ if __name__ == "__main__":
             special_token_map=special_token_map,
         )
 
-        print(f"======={index}=======")
-        print(f"Input: {instruction}\n")
-        print(f"Output: {output}\n")
+        logger.debug(f"======={index}=======")
+        logger.debug(f"Input: {instruction}")
+        logger.debug(f"Output: {output}")
         results.append(
             {
                 "question_id": int(question["question_id"]),
@@ -156,9 +178,11 @@ if __name__ == "__main__":
             }
         )
 
+    logger.info("Save the results")
     prediction_dir = PREDICTION_DIR_MAP[args.benchmark]
     prediction_dir.mkdir(parents=True, exist_ok=True)
     prediction_file = prediction_dir / f"{model_id}.jsonl"
     with open(prediction_file, "w") as f:
         for result in results:
             f.write(json.dumps(result, ensure_ascii=False) + "\n")
+    logger.info(f"Saved the results to {prediction_file}")
