@@ -1,21 +1,22 @@
 """
 Common data structures and utilities.
 """
-#####
 import ast
 import dataclasses
 import glob
 import json
+import logging
 import os
 import re
 import time
-from typing import Optional
 import openai
 from dotenv import load_dotenv
 
 from model_adapter import get_conversation_template
 
-load_dotenv()  # Load environment variables from .env file
+logger = logging.getLogger(__name__)
+
+load_dotenv()
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 openai.organization = os.getenv("OPENAI_ORGANIZATION")
@@ -35,21 +36,8 @@ NEED_REF_CATS = ["math", "reasoning", "coding"]
 two_score_pattern = re.compile("\[\[(\d+\.?\d*),\s?(\d+\.?\d*)\]\]")
 two_score_pattern_backup = re.compile("\[(\d+\.?\d*),\s?(\d+\.?\d*)\]")
 one_score_pattern = re.compile("\[\[(\d+\.?\d*)\]\]")
-# one_score_pattern_backup = re.compile("\[(\d+\.?\d*)\]")
 one_score_pattern_another_format = re.compile("\[\[rating:(\d+)\]\]")
 one_score_pattern_another_format2 = re.compile("\[\[rating: (\d+)\]\]")
-
-# Sampling temperature configs for
-temperature_config = {
-    "writing": 0.7,
-    "roleplay": 0.7,
-    "extraction": 0.0,
-    "math": 0.0,
-    "coding": 0.0,
-    "reasoning": 0.0,
-    "stem": 0.1,
-    "humanities": 0.1,
-}
 
 reverse_model_map = {
     "model_1": "model_2",
@@ -87,15 +75,10 @@ class MatchPair:
     multi_turn: bool = False
 
 
-def load_questions(question_file: str, begin: Optional[int], end: Optional[int]):
+def load_questions(question_file: str) -> list[dict]:
     """Load questions from a file."""
-    questions = []
-    with open(question_file, "r") as ques_file:
-        for line in ques_file:
-            if line:
-                questions.append(json.loads(line))
-    questions = questions[begin:end]
-    return questions
+    with open(question_file, "r") as fin:
+        return [json.loads(line) for line in fin]
 
 
 def load_model_answers(answer_dir: str):
@@ -105,31 +88,16 @@ def load_model_answers(answer_dir: str):
     Dict[model_name: str -> Dict[question_id: int -> answer: dict]]
     """
     filenames = glob.glob(os.path.join(answer_dir, "*.jsonl"))
-    filenames.sort()
     model_answers = {}
-
-    for filename in filenames:
-        model_name = os.path.basename(filename)[:-6]
+    for filename in sorted(filenames):
+        logger.debug(f"Loading model answers from {filename}")
+        model_name, _ = os.path.splitext(os.path.basename(filename))
         answer = {}
-
-        # print(filename)
         with open(filename, "r") as fin:
-            # distinguished process for lora predictions
-            # if "lora" not in filename:
-            #     for line in fin:
-            #         line = json.loads(line)
-            #         answer[line["question_id"]] = line
-            # else:
-            #     data = json.load(fin)
-            #     for line in data:
-            #         answer[line["question_id"]] = line
-
-            # unified format of prediction files
             for line in fin:
                 line = json.loads(line)
                 answer[line["question_id"]] = line
         model_answers[model_name] = answer
-
     return model_answers
 
 
@@ -148,11 +116,18 @@ def load_judge_prompts(prompt_file: str):
 
 
 def run_judge_single(question, answer, judge, ref_answer, multi_turn=False):
-    kwargs = {}
     model = judge.model_name
+    if model not in {"gpt-3.5-turbo", "gpt-4"}:
+        raise ValueError(f"Invalid judge model name: {model}")
+
+    if judge.prompt_template["output_format"] != "[[rating]]":
+        raise ValueError(
+            f"Invalid output format: {judge.prompt_template['output_format']}"
+        )
+
+    kwargs = {}
     if ref_answer is not None:
         kwargs["ref_answer_1"] = ref_answer["choices"][0]["turns"][0]
-        # kwargs["ref_answer_2"] = ref_answer["choices"][0]["turns"][1]
 
     if multi_turn:
         user_prompt = judge.prompt_template["prompt_template"].format(
@@ -169,40 +144,32 @@ def run_judge_single(question, answer, judge, ref_answer, multi_turn=False):
             **kwargs,
         )
 
-    rating = -1
-
     system_prompt = judge.prompt_template["system_prompt"]
     conv = get_conversation_template(model)
     conv.system = system_prompt
     conv.append_message(conv.roles[0], user_prompt)
     conv.append_message(conv.roles[1], None)
 
-    if model in ["gpt-3.5-turbo", "gpt-4"]:
-        judgment = chat_compeletion_openai(model, conv, temperature=0, max_tokens=2048)
-    else:
-        raise ValueError(f"Invalid judge model name: {model}")
+    judgment = chat_compeletion_openai(model, conv, temperature=0, max_tokens=2048)
 
-    if judge.prompt_template["output_format"] == "[[rating]]":
-        match = re.search(one_score_pattern, judgment)
-        # if not match:
-        #     match = re.search(one_score_pattern_backup, judgment)
-        if not match:
-            match = re.search(one_score_pattern_another_format, judgment)
-        if not match:
-            match = re.search(one_score_pattern_another_format2, judgment)
-        if match:
-            rating = ast.literal_eval(match.groups()[0])
-        else:
-            rating = -1
+    match = (
+        re.search(one_score_pattern, judgment)
+        or re.search(one_score_pattern_another_format, judgment)
+        or re.search(one_score_pattern_another_format2, judgment)
+    )
+
+    if match:
+        rating = ast.literal_eval(match.groups()[0])
     else:
-        raise ValueError(
-            f"invalid output format: {judge.prompt_template['output_format']}"
-        )
+        rating = -1
 
     return rating, user_prompt, judgment
 
 
-def play_a_match_single(match: MatchPair, output_file: str):
+def play_a_match_single(match: MatchSingle, output_file: str):
+    if match.judge.prompt_template["type"] != "single":
+        raise ValueError(f"invalid judge type: {match.judge.prompt_template['type']}")
+
     question, model, answer, judge, ref_answer, multi_turn = (
         match.question,
         match.model,
@@ -212,30 +179,27 @@ def play_a_match_single(match: MatchPair, output_file: str):
         match.multi_turn,
     )
 
-    if judge.prompt_template["type"] == "single":
-        score, user_prompt, judgment = run_judge_single(
-            question, answer, judge, ref_answer, multi_turn=multi_turn
-        )
+    score, user_prompt, judgment = run_judge_single(
+        question, answer, judge, ref_answer, multi_turn=multi_turn
+    )
 
-        question_id = question["question_id"]
-        turn = 1 if not multi_turn else 2
-        result = {
-            "question_id": question_id,
-            "model": model,
-            "judge": (judge.model_name, judge.prompt_template["name"]),
-            "user_prompt": user_prompt,
-            "judgment": judgment,
-            "score": score,
-            "turn": turn,
-            "tstamp": time.time(),
-        }
-        print(
-            f"question: {question_id}, turn: {turn}, model: {model}, "
-            f"score: {score}, "
-            f"judge: {(judge.model_name, judge.prompt_template['name'])}"
-        )
-    else:
-        raise ValueError(f"invalid judge type: {judge['type']}")
+    question_id = question["question_id"]
+    turn = 1 if not multi_turn else 2
+    result = {
+        "question_id": question_id,
+        "model": model,
+        "judge": (judge.model_name, judge.prompt_template["name"]),
+        "user_prompt": user_prompt,
+        "judgment": judgment,
+        "score": score,
+        "turn": turn,
+        "tstamp": time.time(),
+    }
+    logger.info(
+        f"question: {question_id}, turn: {turn}, model: {model}, "
+        f"score: {score}, "
+        f"judge: {(judge.model_name, judge.prompt_template['name'])}"
+    )
 
     if output_file:
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
@@ -246,13 +210,21 @@ def play_a_match_single(match: MatchPair, output_file: str):
 
 
 def run_judge_pair(question, answer_a, answer_b, judge, ref_answer, multi_turn=False):
-    kwargs = {}
     model = judge.model_name
+    if model not in {"gpt-3.5-turbo", "gpt-4"}:
+        raise ValueError(f"Invalid judge model name: {model}")
+
+    if judge.prompt_template["output_format"] not in {"[[A]]", "[[rating_a,rating_b]]"}:
+        raise ValueError(
+            f"Invalid output format: {judge.prompt_template['output_format']}"
+        )
+
+    kwargs = {}
     if ref_answer is not None:
         kwargs["ref_answer_1"] = ref_answer["choices"][0]["turns"][0]
-        print("参考回答1:", ref_answer["choices"][0]["turns"][0])
+        logger.debug(f"参考回答1: {ref_answer['choices'][0]['turns'][0]}")
         kwargs["ref_answer_2"] = ref_answer["choices"][0]["turns"][1]
-        print("参考回答2:", ref_answer["choices"][0]["turns"][1])
+        logger.debug(f"参考回答2: {ref_answer['choices'][0]['turns'][1]}")
 
     if multi_turn:
         system_prompt = judge.prompt_template["system_prompt"]
@@ -274,19 +246,12 @@ def run_judge_pair(question, answer_a, answer_b, judge, ref_answer, multi_turn=F
             **kwargs,
         )
 
-    winner = "error"
-
     conv = get_conversation_template(model)
     conv.append_message(conv.roles[0], user_prompt)
     conv.append_message(conv.roles[1], None)
 
-    if model in ["gpt-3.5-turbo", "gpt-4"]:
-        conv.system = system_prompt
-        judgment = chat_compeletion_openai(model, conv, temperature=0, max_tokens=2048)
-        print(judgment)
-        assert False
-    else:
-        raise ValueError(f"Invalid judge model name: {model}")
+    conv.system = system_prompt
+    judgment = chat_compeletion_openai(model, conv, temperature=0, max_tokens=2048)
 
     if judge.prompt_template["output_format"] == "[[A]]":
         if "[[A]]" in judgment:
@@ -297,7 +262,7 @@ def run_judge_pair(question, answer_a, answer_b, judge, ref_answer, multi_turn=F
             winner = "tie"
         else:
             winner = "error"
-    elif judge.prompt_template["output_format"] == "[[rating_a,rating_b]]":
+    else:  # judge.prompt_template["output_format"] == "[[rating_a,rating_b]]"
         match = re.search(two_score_pattern, judgment)
         if not match:
             match = re.search(two_score_pattern_backup, judgment)
@@ -311,15 +276,14 @@ def run_judge_pair(question, answer_a, answer_b, judge, ref_answer, multi_turn=F
                 winner = "B"
         else:
             winner = "error"
-    else:
-        raise ValueError(
-            f"invalid output format: {judge.prompt_template['output_format']}"
-        )
 
     return winner, user_prompt, judgment
 
 
 def play_a_match_pair(match: MatchPair, output_file: str):
+    if match.judge.prompt_template["type"] not in {"pairwise", "single"}:
+        raise ValueError(f"invalid judge type: {match.judge.prompt_template['type']}")
+
     question, model_1, model_2, answer_1, answer_2, judge, ref_answer, multi_turn = (
         match.question,
         match.model_1,
@@ -361,17 +325,17 @@ def play_a_match_pair(match: MatchPair, output_file: str):
             "tstamp": time.time(),
         }
 
-        print(
+        logger.info(
             f"question: {question_id}, turn: {turn}, model_1: {model_1}, model_2: {model_2}, "
             f"g1_winner: {g1_winner}, g2_winner: {g2_winner}, "
             f"judge: {(judge.model_name, judge.prompt_template['name'])}"
         )
-    elif judge.prompt_template["type"] == "single":
+    else:  # judge.prompt_template["type"] == "single"
         m1_score, m1_user_prompt, m1_judgment = run_judge_single(
-            question, answer_1, judge
+            question, answer_1, judge, ref_answer
         )
         m2_score, m2_user_prompt, m2_judgment = run_judge_single(
-            question, answer_2, judge
+            question, answer_2, judge, ref_answer
         )
 
         if abs(m1_score - m2_score) <= TIE_DELTA:
@@ -397,13 +361,11 @@ def play_a_match_pair(match: MatchPair, output_file: str):
             "m2_score": m2_score,
             "tstamp": time.time(),
         }
-        print(
+        logger.info(
             f"question: {question_id}, model_1: {model_1}, model_2: {model_2}, "
             f"winner: {winner}, m1_score: {m1_score}, m2_score: {m2_score}, "
             f"judge: {(judge.model_name, judge.prompt_template['name'])}"
         )
-    else:
-        raise ValueError(f"invalid judge type: {judge['type']}")
 
     if output_file:
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
@@ -418,7 +380,7 @@ def chat_compeletion_openai(model, conv, temperature, max_tokens):
     for _ in range(API_MAX_RETRY):
         try:
             messages = conv.to_openai_api_messages()
-            print(messages)
+            logger.debug(messages)
             response = openai.ChatCompletion.create(
                 model=model,
                 messages=messages,
@@ -429,7 +391,7 @@ def chat_compeletion_openai(model, conv, temperature, max_tokens):
             output = response["choices"][0]["message"]["content"]
             break
         except openai.error.OpenAIError as e:
-            print(type(e), e)
+            logger.warning(e)
             time.sleep(API_RETRY_SLEEP)
 
     return output

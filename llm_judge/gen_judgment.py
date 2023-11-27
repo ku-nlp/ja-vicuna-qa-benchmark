@@ -246,7 +246,7 @@ if __name__ == "__main__":
 
     logger.info("Load questions")
     question_file = BENCHMARK_FILE_MAP[args.bench_name]
-    questions = load_questions(question_file, None, None)
+    questions = load_questions(question_file)
     if args.first_n:
         logger.warning(f"Only run the first {args.first_n} judgments")
         questions = questions[: args.first_n]
