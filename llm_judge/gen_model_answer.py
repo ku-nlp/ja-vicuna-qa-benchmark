@@ -182,7 +182,7 @@ if __name__ == "__main__":
     prediction_dir = PREDICTION_DIR_MAP[args.bench_name]
     prediction_dir.mkdir(parents=True, exist_ok=True)
     prediction_file = prediction_dir / f"{model_id}.jsonl"
-    with open(prediction_file, "w") as f:
+    with open(prediction_file, "w", encoding="utf-8") as f:
         for result in results:
             f.write(json.dumps(result, ensure_ascii=False) + "\n")
     logger.info(f"Saved the results to {prediction_file}")
