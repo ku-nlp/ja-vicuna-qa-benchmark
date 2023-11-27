@@ -77,7 +77,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, required=True, help="config file")
     parser.add_argument(
-        "--benchmark",
+        "--bench-name",
         default="jp_bench",
         type=str,
         help="A file that contains instructions (one instruction per line)",
@@ -138,7 +138,7 @@ if __name__ == "__main__":
 
     # test data
     logger.info("Load the data")
-    data_file = BENCHMARK_FILE_MAP[args.benchmark]
+    data_file = BENCHMARK_FILE_MAP[args.bench_name]
     with open(data_file, "r") as f:
         questions = [json.loads(line) for line in tqdm(f)]
 
@@ -179,7 +179,7 @@ if __name__ == "__main__":
         )
 
     logger.info("Save the results")
-    prediction_dir = PREDICTION_DIR_MAP[args.benchmark]
+    prediction_dir = PREDICTION_DIR_MAP[args.bench_name]
     prediction_dir.mkdir(parents=True, exist_ok=True)
     prediction_file = prediction_dir / f"{model_id}.jsonl"
     with open(prediction_file, "w") as f:
