@@ -1,6 +1,6 @@
 # Japanese Vicuna QA Benchmark
 
- We released Japanese Vicuna QA Benchmark for measuring comprehensive capabilities of Japanese LLMs, which consists of 80 diverse questions in 10 categories (generic, coding, roleplay, writing, etc.)
+We released Japanese Vicuna QA Benchmark for measuring comprehensive capabilities of Japanese LLMs, which consists of 80 diverse questions in 10 categories (generic, coding, roleplay, writing, etc.)
 You can leverage this package to evaluate the answers of your Japanese LLM models in a reference-free manner with LLM-as-a-judge.
 To automate the evaluation process, we prompt strong LLMs like GPT-4 to act as judges and assess the quality of the models' responses.
 
@@ -18,22 +18,18 @@ To be clarified, such zero-shot QA-style evaluation might be more suitable for t
 git clone https://github.com/hitoshizuku7/LLM_Judge_ku.git
 cd LLM_Judge_ku
 pip install -e .
-cd llm_judge
 ```
-
 
 ## Evaluate a model with Japanese Vicuna QA Benchmark
 
 #### Step 1. Generate model answers to Japanese Vicuna QA questions (noted as jp-bench).
 
 ```
-python llm_judge/gen_model_answer.py --config <CONFIG-PATH> [--seed <SEED>] [--verbose]
+python llm_judge/gen_model_answer.py --config <CONFIG-PATH>
 ```
 
-Arguments:
+Arguments & Options:
   - `<CONFIG-PATH>` is the path to a configuration file. Examples are in `configs/`.
-  - `<SEED>` is an optional argument for reproducibility.
-  - `--verbose` is an optional argument for showing debug logs.
 
 For example:
 
@@ -44,84 +40,91 @@ python gen_model_answer.py --config configs/rinna--japanese-gpt-neox-3.6b-instru
 The answers will be saved to `data/jp_bench/model_answer`.
 
 #### Step 2. Generate GPT-4 judgments
-There are several options to use GPT-4 as a judge, such as pairwise win-rate and single-answer grading. We show an example of the pairwise win-rate evaluation of instruction fine-tuned models (rinna-3.6b-sft-v2, rinna-3.6b-ppo, and japanese-alpaca-lora-7b) at the bottom.
+
+There are several options to use GPT-4 as a judge, such as pairwise win-rate and single-answer grading.
+We show an example of the pairwise win-rate evaluation of instruction fine-tuned models (rinna-3.6b-sft-v2, rinna-3.6b-ppo, and japanese-alpaca-lora-7b) at the bottom.
 
 ```
-OPENAI_API_KEY=[YOUR-KEY] python -B gen_judgment.py \
---bench-name "jp_bench" \
---mode [pairwise-all, single, pairwise-baseline] \
---model-list [LIST-OF-MODEL-ID] \
---parallel [num-concurrent-api-call]
+OPENAI_API_KEY=<YOUR-KEY> python gen_judgment.py \
+    --mode {single|pairwise-baseline|pairwise-all} \
+    [--model-list <LIST-OF-MODEL-IDS>]
 ```
 
-e.g.,
+Arguments & Options:
+- `--mode {single|pairwise-baseline|pairwise-all}` is the mode of judgment.
+    - `single`: run score-based single-model grading.
+    - `pairwise-baseline`: run pairwise comparison against a baseline model.
+    - `pairwise-all`: run pairwise comparison between all model pairs.
+- `--model-list <LIST-OF-MODEL-IDS>` is a list of model IDs to be evaluated. If not specified, all models in `data/jp_bench/model_answer` will be evaluated.
+
+For example:
+
 ```
-OPENAI_API_KEY=[YOUR-KEY] python -B gen_judgment.py \
---bench-name "jp_bench" \
---mode pairwise-all \
---model-list rinna-3.6b-sft-v2 rinna-3.6b-ppo japanese-alpaca-lora-7b \
---parallel 2
+OPENAI_API_KEY=<YOUR-KEY> python gen_judgment.py \
+    --mode pairwise-all \
+    --model-list rinna-3.6b-sft-v2 rinna-3.6b-ppo japanese-alpaca-lora-7b
 ```
-`pairwise-all`: run pairwise comparison between all model pairs.
+
 The judgments will be saved to `data/jp_bench/model_judgment/gpt-4_pair.jsonl`
 
 #### Step 3. Show jp-bench scores
 
-- Show the scores for selected models
-  ```
-  python show_result.py \
-  --bench-name "jp_bench" \
-  --mode pairwise-all \
-  --model-list rinna-3.6b-sft-v2 rinna-3.6b-ppo japanese-alpaca-lora-7b
-  ```
+Show the scores for selected models.
+
+```
+python show_result.py \
+    --mode pairwise-all \
+    --model-list rinna-3.6b-sft-v2 rinna-3.6b-ppo japanese-alpaca-lora-7b
+```
 
 ---
 
-### Other grading options
-For GPT-4 judgments, besides score-based single-answer grading, we also support two additional grading options based on win rates:
-- `pariwise-baseline`: run pairwise comparison against a baseline model.
-- `single`: run score-based single-model grading.
+#### Pairwise comparison against a baseline (default: gpt-3.5-turbo)
 
-#### Option 2: pairwise comparison against a baseline (default: gpt-3.5-turbo)
+The `pairwise-baseline` mode runs pairwise comparison against a baseline model.
 
-- Generate GPT-4 judgments
+Generate GPT-4 judgments:
+
 ```
-OPENAI_API_KEY=[YOUR-KEY] python -B gen_judgment.py \
---bench-name "jp_bench" \
---mode pairwise-baseline \
---model-list [LIST-OF-MODEL-ID] \
---baseline-model [name-of-baseline-model] \
---parallel [num-concurrent-api-call]
+OPENAI_API_KEY=<YOUR-KEY> python gen_judgment.py \
+  --mode pairwise-baseline \
+  [--model-list <LIST-OF-MODEL-IDS>] \
+  [--baseline-model <name-of-baseline-model>]
 ```
+
 The judgments will be saved to `data/jp_bench/model_judgment/gpt-4_pair.jsonl`
 
-- Show results
+Show results:
+
 ```
 python show_result.py \
---bench-name "jp_bench" \
---mode pairwise-baseline \
---model-list [LIST-OF-MODEL-ID] \
+  --bench-name "jp_bench" \
+  --mode pairwise-baseline \
+  [--model-list <LIST-OF-MODEL-IDS>]
 ```
 
-#### Option 3: Run GPT-4 judge with the single model
+#### Run GPT-4 judge with the single model
 
 The `single` mode grades models by asking GPT-4 to grade and give a score to model's answer directly without pairwise comparison.
 
+Generate GPT-4 judgments:
+
 ```
-OPENAI_API_KEY=[YOUR-KEY] python -B gen_judgment.py \
---bench-name "jp_bench" \
---mode single \
---model-list [LIST-OF-MODEL-ID] \
---parallel [num-concurrent-api-call]
+OPENAI_API_KEY=<YOUR-KEY> python gen_judgment.py \
+  --mode single \
+  [--model-list <LIST-OF-MODEL-IDS>]
 ```
+
+The judgments will be saved to `data/jp_bench/model_judgment/gpt-4_single.jsonl`
+
+Show results:
 
 ```
 python show_result.py \
---bench-name "jp_bench" \
---mode single
---model-list [LIST-OF-MODEL-ID] \
+  --bench-name "jp_bench" \
+  --mode single \
+  [--model-list <LIST-OF-MODEL-IDS>]
 ```
-
 
 ## Sample Outputs
 
