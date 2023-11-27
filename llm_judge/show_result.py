@@ -11,12 +11,6 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-BENCHMARK_FILE_MAP = {
-    "jp_bench": DATA_DIR / "jp_bench" / "question.jsonl",
-}
-PREDICTION_DIR_MAP = {
-    "jp_bench": DATA_DIR / "jp_bench" / "model_answer",
-}
 JUDGEMENT_DIR_MAP = {
     "jp_bench": DATA_DIR / "jp_bench" / "model_judgment",
 }
