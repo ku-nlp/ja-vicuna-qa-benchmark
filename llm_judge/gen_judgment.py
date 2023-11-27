@@ -5,6 +5,7 @@ python gen_judgment.py --model-list [LIST-OF-MODEL-ID] --parallel [num-concurren
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 import json
+import logging
 import os
 import numpy as np
 from tqdm import tqdm
@@ -24,6 +25,7 @@ from common import (
     NEED_REF_CATS,
 )
 
+logger = logging.getLogger(__name__)
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -213,7 +215,20 @@ if __name__ == "__main__":
     parser.add_argument(
         "--first-n", type=int, help="A debug option. Only run the first `n` judgments."
     )
+    parser.add_argument(
+        "-v", "--verbose", action="count", default=0, help="verbosity level"
+    )
     args = parser.parse_args()
+
+    if args.verbose == 0:
+        level = logging.INFO
+    else:
+        level = logging.DEBUG
+    logging.basicConfig(
+        format="| %(asctime)s | %(levelname)s | %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        level=level,
+    )
 
     question_file = f"data/{args.bench_name}/question.jsonl"
     answer_dir = f"data/{args.bench_name}/model_answer"
@@ -305,8 +320,8 @@ if __name__ == "__main__":
     match_stat["output_path"] = output_file
 
     # Show match stats and prompt enter to continue
-    print("Stats:")
-    print(json.dumps(match_stat, indent=4))
+    logger.info("Stats:")
+    logger.info(json.dumps(match_stat, indent=4))
     input("Press Enter to confirm...")
 
     # Play matches
