@@ -6,7 +6,6 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor
 import json
 import logging
-import os
 import numpy as np
 from tqdm import tqdm
 from dotenv import load_dotenv
@@ -28,8 +27,6 @@ from common import (
 logger = logging.getLogger(__name__)
 
 load_dotenv()  # Load environment variables from .env file
-
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 
 def make_match(
