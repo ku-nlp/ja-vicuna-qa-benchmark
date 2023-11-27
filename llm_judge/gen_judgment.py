@@ -11,7 +11,6 @@ from pathlib import Path
 
 import numpy as np
 from tqdm import tqdm
-from dotenv import load_dotenv
 
 from common import (
     load_questions,
@@ -39,8 +38,6 @@ PREDICTION_DIR_MAP = {
 JUDGEMENT_DIR_MAP = {
     "jp_bench": DATA_DIR / "jp_bench" / "model_judgment",
 }
-
-load_dotenv()  # Load environment variables from .env file
 
 
 def make_match(
@@ -157,35 +154,35 @@ def make_match_single(
 
 
 def make_judge_pairwise(judge_model, judge_prompts):
-    judges = {}
-    judges["default"] = Judge(judge_model, judge_prompts["pair-v2"])
-    judges["math"] = Judge(judge_model, judge_prompts["pair-math-v1"], ref_based=True)
-    judges["default-mt"] = Judge(
-        judge_model, judge_prompts["pair-v2-multi-turn"], multi_turn=True
-    )
-    judges["math-mt"] = Judge(
-        judge_model,
-        judge_prompts["pair-math-v1-multi-turn"],
-        ref_based=True,
-        multi_turn=True,
-    )
-    return judges
+    return {
+        "default": Judge(judge_model, judge_prompts["pair-v2"]),
+        "math": Judge(judge_model, judge_prompts["pair-math-v1"], ref_based=True),
+        "default-mt": Judge(
+            judge_model, judge_prompts["pair-v2-multi-turn"], multi_turn=True
+        ),
+        "math-mt": Judge(
+            judge_model,
+            judge_prompts["pair-math-v1-multi-turn"],
+            ref_based=True,
+            multi_turn=True,
+        ),
+    }
 
 
 def make_judge_single(judge_model, judge_prompts):
-    judges = {}
-    judges["default"] = Judge(judge_model, judge_prompts["single-v1"])
-    judges["math"] = Judge(judge_model, judge_prompts["single-math-v1"], ref_based=True)
-    judges["default-mt"] = Judge(
-        judge_model, judge_prompts["single-v1-multi-turn"], multi_turn=True
-    )
-    judges["math-mt"] = Judge(
-        judge_model,
-        judge_prompts["single-math-v1-multi-turn"],
-        ref_based=True,
-        multi_turn=True,
-    )
-    return judges
+    return {
+        "default": Judge(judge_model, judge_prompts["single-v1"]),
+        "math": Judge(judge_model, judge_prompts["single-math-v1"], ref_based=True),
+        "default-mt": Judge(
+            judge_model, judge_prompts["single-v1-multi-turn"], multi_turn=True
+        ),
+        "math-mt": Judge(
+            judge_model,
+            judge_prompts["single-math-v1-multi-turn"],
+            ref_based=True,
+            multi_turn=True,
+        ),
+    }
 
 
 if __name__ == "__main__":
