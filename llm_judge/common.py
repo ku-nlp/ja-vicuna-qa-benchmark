@@ -222,9 +222,7 @@ def run_judge_pair(question, answer_a, answer_b, judge, ref_answer, multi_turn=F
     kwargs = {}
     if ref_answer is not None:
         kwargs["ref_answer_1"] = ref_answer["choices"][0]["turns"][0]
-        logger.debug(f"参考回答1: {ref_answer['choices'][0]['turns'][0]}")
         kwargs["ref_answer_2"] = ref_answer["choices"][0]["turns"][1]
-        logger.debug(f"参考回答2: {ref_answer['choices'][0]['turns'][1]}")
 
     if multi_turn:
         system_prompt = judge.prompt_template["system_prompt"]
@@ -380,7 +378,6 @@ def chat_compeletion_openai(model, conv, temperature, max_tokens):
     for _ in range(API_MAX_RETRY):
         try:
             messages = conv.to_openai_api_messages()
-            logger.debug(messages)
             response = openai.ChatCompletion.create(
                 model=model,
                 messages=messages,
@@ -578,8 +575,6 @@ def check_data(questions, model_answers, ref_answers, models, judges):
         for q in questions:
             if q["category"] not in NEED_REF_CATS:
                 continue
-            # print(q["question_id"])
-            # print(ref_answers[jg.model_name])
             assert (
                 int(q["question_id"]) in ref_answers[jg.model_name]
             ), f"Missing reference answer to Question {q['question_id']} for judge {jg.model_name}"
