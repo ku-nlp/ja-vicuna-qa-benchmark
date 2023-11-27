@@ -7,6 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 import json
 import logging
 import random
+from functools import partial
 from pathlib import Path
 
 import numpy as np
@@ -345,12 +346,8 @@ if __name__ == "__main__":
         for match in tqdm(matches):
             play_a_match_func(match, output_file=output_file)
     else:
-
-        def play_a_match_wrapper(match):
-            play_a_match_func(match, output_file=output_file)
-
         np.random.shuffle(matches)
-
+        play_a_match_wrapper = partial(play_a_match_func, output_file=output_file)
         with ThreadPoolExecutor(args.parallel) as executor:
             for match in tqdm(
                 executor.map(play_a_match_wrapper, matches), total=len(matches)
