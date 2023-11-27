@@ -7,6 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 import json
 import logging
 import random
+from pathlib import Path
 
 import numpy as np
 from tqdm import tqdm
@@ -27,6 +28,17 @@ from common import (
 )
 
 logger = logging.getLogger(__name__)
+
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+BENCHMARK_FILE_MAP = {
+    "jp_bench": DATA_DIR / "jp_bench" / "question.jsonl",
+}
+PREDICTION_DIR_MAP = {
+    "jp_bench": DATA_DIR / "jp_bench" / "model_answer",
+}
+JUDGEMENT_DIR_MAP = {
+    "jp_bench": DATA_DIR / "jp_bench" / "model_judgment",
+}
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -237,16 +249,17 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    question_file = f"data/{args.bench_name}/question.jsonl"
-    answer_dir = f"data/{args.bench_name}/model_answer"
-    ref_answer_dir = f"data/{args.bench_name}/reference_answer"
+    question_file = BENCHMARK_FILE_MAP[args.bench_name]
+    answer_dir = PREDICTION_DIR_MAP[args.bench_name]
+    reference_dir = JUDGEMENT_DIR_MAP[args.bench_name]
+    output_dir = JUDGEMENT_DIR_MAP[args.bench_name]
 
     # Load questions
     questions = load_questions(question_file, None, None)
 
     # Load answers
     model_answers = load_model_answers(answer_dir)
-    ref_answers = load_model_answers(ref_answer_dir)
+    ref_answers = load_model_answers(reference_dir)
 
     # Load judge
     judge_prompts = load_judge_prompts(args.judge_file)
@@ -262,17 +275,13 @@ if __name__ == "__main__":
     if args.mode == "single":
         judges = make_judge_single(args.judge_model, judge_prompts)
         play_a_match_func = play_a_match_single
-        output_file = (
-            f"data/{args.bench_name}/model_judgment/{args.judge_model}_single.jsonl"
-        )
+        output_file = output_dir / f"{args.judge_model}_single.jsonl"
         make_match_func = make_match_single
         baseline_model = None
     else:
-        judges = make_judge_pairwise(args.judge_model, judge_prompts)  ################
+        judges = make_judge_pairwise(args.judge_model, judge_prompts)
         play_a_match_func = play_a_match_pair
-        output_file = (
-            f"data/{args.bench_name}/model_judgment/{args.judge_model}_pair.jsonl"
-        )
+        output_file = output_dir / f"{args.judge_model}_pair.jsonl"
         if args.mode == "pairwise-all":
             make_match_func = make_match_all_pairs
             baseline_model = None
@@ -324,7 +333,7 @@ if __name__ == "__main__":
     match_stat["model_list"] = models
     match_stat["total_num_questions"] = len(questions)
     match_stat["total_num_matches"] = len(matches)
-    match_stat["output_path"] = output_file
+    match_stat["output_path"] = str(output_file)
 
     # Show match stats and prompt enter to continue
     logger.info("Stats:")
