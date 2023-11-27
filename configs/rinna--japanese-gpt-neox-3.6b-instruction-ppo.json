@@ -6,7 +6,7 @@
   "prompt_template": "ユーザー: {instruction}<NL>システム: ",
   "generation_config": {
     "do_sample": true,
-    "max_new_tokens": 512,
+    "max_length": 2048,
     "temperature": 0.7,
     "repetition_penalty": 1.1
   },

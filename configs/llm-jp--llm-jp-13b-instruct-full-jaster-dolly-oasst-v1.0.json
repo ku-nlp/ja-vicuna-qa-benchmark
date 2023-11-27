@@ -6,9 +6,9 @@
   "prompt_template": "{instruction} ### 回答：",
   "generation_config": {
     "do_sample": true,
-    "max_new_tokens": 512,
+    "max_length": 2048,
     "temperature": 0.7,
-    "top_p": 0.9
+    "top_p": 0.95
   },
   "special_token_map": {}
 }
