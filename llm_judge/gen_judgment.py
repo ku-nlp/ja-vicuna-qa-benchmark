@@ -6,6 +6,8 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor
 import json
 import logging
+import random
+
 import numpy as np
 from tqdm import tqdm
 from dotenv import load_dotenv
@@ -213,6 +215,9 @@ if __name__ == "__main__":
         "--first-n", type=int, help="A debug option. Only run the first `n` judgments."
     )
     parser.add_argument(
+        "--seed", default=0, type=int, help="random seed for reproducibility"
+    )
+    parser.add_argument(
         "-v", "--verbose", action="count", default=0, help="verbosity level"
     )
     args = parser.parse_args()
@@ -226,6 +231,11 @@ if __name__ == "__main__":
         datefmt="%Y-%m-%d %H:%M:%S",
         level=level,
     )
+
+    logger.info(f"Set random seed to {args.seed}")
+    seed = args.seed
+    random.seed(seed)
+    np.random.seed(seed)
 
     question_file = f"data/{args.bench_name}/question.jsonl"
     answer_dir = f"data/{args.bench_name}/model_answer"
@@ -330,7 +340,6 @@ if __name__ == "__main__":
         def play_a_match_wrapper(match):
             play_a_match_func(match, output_file=output_file)
 
-        np.random.seed(0)
         np.random.shuffle(matches)
 
         with ThreadPoolExecutor(args.parallel) as executor:
