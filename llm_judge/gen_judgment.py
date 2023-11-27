@@ -36,6 +36,9 @@ BENCHMARK_FILE_MAP = {
 PREDICTION_DIR_MAP = {
     "jp_bench": DATA_DIR / "jp_bench" / "model_answer",
 }
+REFERENCE_DIR_MAP = {
+    "jp_bench": DATA_DIR / "jp_bench" / "reference_answer",
+}
 JUDGEMENT_DIR_MAP = {
     "jp_bench": DATA_DIR / "jp_bench" / "model_judgment",
 }
@@ -256,7 +259,7 @@ if __name__ == "__main__":
     model_answers = load_model_answers(answer_dir)
 
     logger.info("Load reference answers")
-    reference_dir = JUDGEMENT_DIR_MAP[args.bench_name]
+    reference_dir = REFERENCE_DIR_MAP[args.bench_name]
     ref_answers = load_model_answers(reference_dir)
 
     # Load judge
