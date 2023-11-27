@@ -25,36 +25,22 @@ cd llm_judge
 ## Evaluate a model with Japanese Vicuna QA Benchmark
 
 #### Step 1. Generate model answers to Japanese Vicuna QA questions (noted as jp-bench).
+
 ```
-python gen_model_answer.py \
---base_model [MODEL-PATH] \
---lora_model [LORA-PATH] \
---model-id [MODEL-ID] \
---with_prompt \
---gpus [GPU_Num] \
---max_new_tokens [NUM of NEW TOKENS] \
---benchmark jp_bench
+python llm_judge/gen_model_answer.py --config <CONFIG-PATH> [--seed <SEED>]
 ```
+
 Arguments:
-  - `[MODEL-PATH]` is the path to the weights, which can be a local folder or a Hugging Face repo ID.
-  - `[LORA-PATH]` is the path to the lora weights if needed.
-  - `[MODEL-ID]` is a name you give to the model.
-  - `[GPU_Num]` denotes which GPU you decide to use
+  - `<CONFIG-PATH>` is the path to a configuration file. Examples are in `configs/`.
+  - `<SEED>` is an optional argument for reproducibility.
 
+For example:
 
-e.g.,
 ```
-python gen_model_answer.py \
---model-path rinna/japanese-gpt-neox-3.6b-instruction-ppo \
---model-id rinna-3.6b-ppo \
---with_prompt \
---gpus 0 \
---max_new_tokens 2048 \
---benchmark jp_bench
+python gen_model_answer.py --config configs/rinna--japanese-gpt-neox-3.6b-instruction-ppo.json
 ```
-The answers will be saved to `data/jp_bench/model_answer/[MODEL-ID].jsonl`.
 
-You can also specify `--num-gpus-per-model` for model parallelism (needed for large 65B models) and `--num-gpus-total` to parallelize answer generation with multiple GPUs.
+The answers will be saved to `data/jp_bench/model_answer`.
 
 #### Step 2. Generate GPT-4 judgments
 There are several options to use GPT-4 as a judge, such as pairwise win-rate and single-answer grading. We show an example of the pairwise win-rate evaluation of instruction fine-tuned models (rinna-3.6b-sft-v2, rinna-3.6b-ppo, and japanese-alpaca-lora-7b) at the bottom.
