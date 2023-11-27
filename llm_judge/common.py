@@ -18,6 +18,7 @@ from model_adapter import get_conversation_template
 load_dotenv()  # Load environment variables from .env file
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
+openai.organization = os.getenv("OPENAI_ORGANIZATION")
 
 # API setting constants
 API_MAX_RETRY = 16
