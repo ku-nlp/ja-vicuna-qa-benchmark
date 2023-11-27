@@ -4,7 +4,6 @@ python gen_judgment.py --model-list [LIST-OF-MODEL-ID] --parallel [num-concurren
 """
 import argparse
 from concurrent.futures import ThreadPoolExecutor
-import json
 import logging
 import random
 from functools import partial
@@ -56,6 +55,9 @@ def make_match(
     matches = []
     for q in questions:
         if multi_turn and len(q["turns"]) != 2:
+            logger.warning(
+                f"Skip question {q['question_id']} because it has {len(q['turns'])} turns"
+            )
             continue
         for i in range(len(models)):
             q_id = q["question_id"]
@@ -250,28 +252,31 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
+    logger.info("Load questions")
     question_file = BENCHMARK_FILE_MAP[args.bench_name]
-    answer_dir = PREDICTION_DIR_MAP[args.bench_name]
-    reference_dir = JUDGEMENT_DIR_MAP[args.bench_name]
-    output_dir = JUDGEMENT_DIR_MAP[args.bench_name]
-
-    # Load questions
     questions = load_questions(question_file, None, None)
+    if args.first_n:
+        logger.warning(f"Only run the first {args.first_n} judgments")
+        questions = questions[: args.first_n]
 
-    # Load answers
+    logger.info("Load answers")
+    answer_dir = PREDICTION_DIR_MAP[args.bench_name]
     model_answers = load_model_answers(answer_dir)
+
+    logger.info("Load reference answers")
+    reference_dir = JUDGEMENT_DIR_MAP[args.bench_name]
     ref_answers = load_model_answers(reference_dir)
 
     # Load judge
+    logger.info("Load judge prompts")
     judge_prompts = load_judge_prompts(args.judge_file)
-
-    if args.first_n:
-        questions = questions[: args.first_n]
 
     if args.model_list is None:
         models = get_model_list(answer_dir)
     else:
         models = args.model_list
+
+    output_dir = JUDGEMENT_DIR_MAP[args.bench_name]
 
     if args.mode == "single":
         judges = make_judge_single(args.judge_model, judge_prompts)
@@ -326,19 +331,14 @@ if __name__ == "__main__":
         multi_turn=True,
     )
 
-    match_stat = {}
-    match_stat["bench_name"] = args.bench_name
-    match_stat["mode"] = args.mode
-    match_stat["judge"] = args.judge_model
-    match_stat["baseline"] = baseline_model
-    match_stat["model_list"] = models
-    match_stat["total_num_questions"] = len(questions)
-    match_stat["total_num_matches"] = len(matches)
-    match_stat["output_path"] = str(output_file)
-
-    # Show match stats and prompt enter to continue
-    logger.info("Stats:")
-    logger.info(json.dumps(match_stat, indent=4))
+    logger.info(f"Benchmark: {args.bench_name}")
+    logger.info(f"Mode: {args.mode}")
+    logger.info(f"Judge model: {args.judge_model}")
+    logger.info(f"Baseline model: {baseline_model}")
+    logger.info(f"Models: {models}")
+    logger.info(f"Total number of questions: {len(questions)}")
+    logger.info(f"Total number of matches: {len(matches)}")
+    logger.info(f"Output file: {output_file}")
     input("Press Enter to confirm...")
 
     # Play matches
