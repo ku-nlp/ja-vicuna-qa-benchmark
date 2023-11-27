@@ -27,12 +27,13 @@ cd llm_judge
 #### Step 1. Generate model answers to Japanese Vicuna QA questions (noted as jp-bench).
 
 ```
-python llm_judge/gen_model_answer.py --config <CONFIG-PATH> [--seed <SEED>]
+python llm_judge/gen_model_answer.py --config <CONFIG-PATH> [--seed <SEED>] [--verbose]
 ```
 
 Arguments:
   - `<CONFIG-PATH>` is the path to a configuration file. Examples are in `configs/`.
   - `<SEED>` is an optional argument for reproducibility.
+  - `--verbose` is an optional argument for showing debug logs.
 
 For example:
 
