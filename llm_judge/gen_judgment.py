@@ -6,6 +6,7 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor
 import logging
 import random
+from itertools import combinations
 from functools import partial
 from pathlib import Path
 
@@ -50,37 +51,31 @@ def make_match(
     multi_turn=False,
 ):
     matches = []
-    for q in questions:
-        if multi_turn and len(q["turns"]) != 2:
+    for question in questions:
+        if multi_turn and len(question["turns"]) != 2:
             logger.warning(
-                f"Skip question {q['question_id']} because it has {len(q['turns'])} turns"
+                f"Skip question {question['question_id']} because it has {len(question['turns'])} turns"
             )
             continue
-        for i in range(len(models)):
-            q_id = q["question_id"]
-            m_1 = models[i]
-            m_2 = baseline_model
-            if m_1 == m_2:
+        qid = question["question_id"]
+        ref_answer = ref_answers[judge.model_name][qid] if ref_answers else None
+        for model in models:
+            if model == baseline_model:
                 continue
-            a_1 = model_answers[m_1][q_id]
-            a_2 = model_answers[baseline_model][q_id]
-            if ref_answers is not None:
-                ref = ref_answers[judge.model_name][q_id]
-                match = MatchPair(
-                    dict(q),
-                    m_1,
-                    m_2,
-                    a_1,
-                    a_2,
+            answer = model_answers[model][qid]
+            answer_baseline = model_answers[baseline_model][qid]
+            matches.append(
+                MatchPair(
+                    dict(question),
+                    model,
+                    baseline_model,
+                    answer,
+                    answer_baseline,
                     judge,
-                    ref_answer=ref,
+                    ref_answer=ref_answer,
                     multi_turn=multi_turn,
                 )
-            else:
-                match = MatchPair(
-                    dict(q), m_1, m_2, a_1, a_2, judge, multi_turn=multi_turn
-                )
-            matches.append(match)
+            )
     return matches
 
 
@@ -94,33 +89,29 @@ def make_match_all_pairs(
     multi_turn=False,
 ):
     matches = []
-    for q in questions:
-        if multi_turn and len(q["turns"]) != 2:
+    for question in questions:
+        if multi_turn and len(question["turns"]) != 2:
+            logger.warning(
+                f"Skip question {question['question_id']} because it has {len(question['turns'])} turns"
+            )
             continue
-        for i in range(len(models)):
-            for j in range(i + 1, len(models)):
-                q_id = q["question_id"]
-                m_1 = models[i]
-                m_2 = models[j]
-                a_1 = model_answers[m_1][q_id]
-                a_2 = model_answers[m_2][q_id]
-                if ref_answers is not None:
-                    ref = ref_answers[judge.model_name][q_id]
-                    match = MatchPair(
-                        dict(q),
-                        m_1,
-                        m_2,
-                        a_1,
-                        a_2,
-                        judge,
-                        ref_answer=ref,
-                        multi_turn=multi_turn,
-                    )
-                else:
-                    match = MatchPair(
-                        dict(q), m_1, m_2, a_1, a_2, judge, multi_turn=multi_turn
-                    )
-                matches.append(match)
+        qid = question["question_id"]
+        ref_answer = ref_answers[judge.model_name][qid] if ref_answers else None
+        for model_1, model_2 in combinations(models, 2):
+            answer_1 = model_answers[model_1][qid]
+            answer_2 = model_answers[model_2][qid]
+            matches.append(
+                MatchPair(
+                    dict(question),
+                    model_1,
+                    model_2,
+                    answer_1,
+                    answer_2,
+                    judge,
+                    ref_answer=ref_answer,
+                    multi_turn=multi_turn,
+                )
+            )
     return matches
 
 
@@ -134,22 +125,26 @@ def make_match_single(
     multi_turn=False,
 ):
     matches = []
-    for q in questions:
-        if multi_turn and len(q["turns"]) != 2:
+    for question in questions:
+        if multi_turn and len(question["turns"]) != 2:
+            logger.warning(
+                f"Skip question {question['question_id']} because it has {len(question['turns'])} turns"
+            )
             continue
-        for i in range(len(models)):
-            q_id = q["question_id"]
-            m = models[i]
-            a = model_answers[m][q_id]
-            if ref_answers is not None:
-                ref = ref_answers[judge.model_name][q_id]
-                matches.append(
-                    MatchSingle(
-                        dict(q), m, a, judge, ref_answer=ref, multi_turn=multi_turn
-                    )
+        qid = question["question_id"]
+        ref_answer = ref_answers[judge.model_name][qid] if ref_answers else None
+        for model in models:
+            answer = model_answers[model][qid]
+            matches.append(
+                MatchSingle(
+                    dict(question),
+                    model,
+                    answer,
+                    judge,
+                    ref_answer=ref_answer,
+                    multi_turn=multi_turn,
                 )
-            else:
-                matches.append(MatchSingle(dict(q), m, a, judge, multi_turn=multi_turn))
+            )
     return matches
 
 
