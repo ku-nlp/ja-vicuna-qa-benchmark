@@ -183,6 +183,18 @@ def make_judge_single(judge_model, judge_prompts):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "--mode",
+        type=str,
+        required=True,
+        choices=["pairwise-baseline", "pairwise-all", "single"],
+        help=(
+            "Evaluation mode. "
+            "`pairwise-baseline` runs pairwise comparision against a baseline. "
+            "`pairwise-all` runs pairwise comparision between all pairs. "
+            "`single` runs single answer grading."
+        ),
+    )
+    parser.add_argument(
         "--bench-name",
         type=str,
         default="jp_bench",
@@ -196,18 +208,6 @@ if __name__ == "__main__":
     )
     parser.add_argument("--judge-model", type=str, default="gpt-4")
     parser.add_argument("--baseline-model", type=str, default="gpt-3.5-turbo-16k-0613")
-    parser.add_argument(
-        "--mode",
-        type=str,
-        default="single",
-        choices=["pairwise-baseline", "pairwise-all", "single"],
-        help=(
-            "Evaluation mode. "
-            "`pairwise-baseline` runs pairwise comparision against a baseline. "
-            "`pairwise-all` runs pairwise comparision between all pairs. "
-            "`single` runs single answer grading."
-        ),
-    )
     parser.add_argument(
         "--model-list",
         type=str,
