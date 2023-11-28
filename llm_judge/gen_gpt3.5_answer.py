@@ -161,7 +161,7 @@ if __name__ == "__main__":
                 "tstamp": time.time(),
             }
         )
-    predictions_file = "./data/jp_bench/model_answer/gpt-3.5-davinci1.jsonl"
+    predictions_file = "./data/jp_bench/model_answer/gpt-3.5-davinci.jsonl"
     dirname = os.path.dirname(predictions_file)
     os.makedirs(dirname, exist_ok=True)
     with open(predictions_file, "w") as f:
