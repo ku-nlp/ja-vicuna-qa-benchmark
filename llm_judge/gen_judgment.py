@@ -51,15 +51,9 @@ def make_match(
     judge,
     baseline_model,
     ref_answers=None,
-    multi_turn=False,
 ):
     matches = []
     for question in questions:
-        if multi_turn and len(question["turns"]) != 2:
-            logger.warning(
-                f"Skip question {question['question_id']} because it has {len(question['turns'])} turns"
-            )
-            continue
         qid = question["question_id"]
         ref_answer = ref_answers[judge.model_name][qid] if ref_answers else None
         for model in models:
@@ -76,7 +70,6 @@ def make_match(
                     answer_baseline,
                     judge,
                     ref_answer=ref_answer,
-                    multi_turn=multi_turn,
                 )
             )
     return matches
@@ -89,15 +82,9 @@ def make_match_all_pairs(
     judge,
     baseline_model=None,
     ref_answers=None,
-    multi_turn=False,
 ):
     matches = []
     for question in questions:
-        if multi_turn and len(question["turns"]) != 2:
-            logger.warning(
-                f"Skip question {question['question_id']} because it has {len(question['turns'])} turns"
-            )
-            continue
         qid = question["question_id"]
         ref_answer = ref_answers[judge.model_name][qid] if ref_answers else None
         for model_1, model_2 in combinations(models, 2):
@@ -112,7 +99,6 @@ def make_match_all_pairs(
                     answer_2,
                     judge,
                     ref_answer=ref_answer,
-                    multi_turn=multi_turn,
                 )
             )
     return matches
@@ -125,15 +111,9 @@ def make_match_single(
     judge,
     baseline_model=None,
     ref_answers=None,
-    multi_turn=False,
 ):
     matches = []
     for question in questions:
-        if multi_turn and len(question["turns"]) != 2:
-            logger.warning(
-                f"Skip question {question['question_id']} because it has {len(question['turns'])} turns"
-            )
-            continue
         qid = question["question_id"]
         ref_answer = ref_answers[judge.model_name][qid] if ref_answers else None
         for model in models:
@@ -145,7 +125,6 @@ def make_match_single(
                     answer,
                     judge,
                     ref_answer=ref_answer,
-                    multi_turn=multi_turn,
                 )
             )
     return matches
@@ -155,15 +134,6 @@ def make_judge_pairwise(judge_model, judge_prompts):
     return {
         "default": Judge(judge_model, judge_prompts["pair-v2"]),
         "math": Judge(judge_model, judge_prompts["pair-math-v1"], ref_based=True),
-        "default-mt": Judge(
-            judge_model, judge_prompts["pair-v2-multi-turn"], multi_turn=True
-        ),
-        "math-mt": Judge(
-            judge_model,
-            judge_prompts["pair-math-v1-multi-turn"],
-            ref_based=True,
-            multi_turn=True,
-        ),
     }
 
 
@@ -171,15 +141,6 @@ def make_judge_single(judge_model, judge_prompts):
     return {
         "default": Judge(judge_model, judge_prompts["single-v1"]),
         "math": Judge(judge_model, judge_prompts["single-math-v1"], ref_based=True),
-        "default-mt": Judge(
-            judge_model, judge_prompts["single-v1-multi-turn"], multi_turn=True
-        ),
-        "math-mt": Judge(
-            judge_model,
-            judge_prompts["single-math-v1-multi-turn"],
-            ref_based=True,
-            multi_turn=True,
-        ),
     }
 
 
@@ -307,23 +268,6 @@ if __name__ == "__main__":
         judges["math"],
         baseline_model,
         ref_answers,
-    )
-    matches += make_match_func(
-        question_default,
-        models,
-        model_answers,
-        judges["default-mt"],
-        baseline_model,
-        multi_turn=True,
-    )
-    matches += make_match_func(
-        question_math,
-        models,
-        model_answers,
-        judges["math-mt"],
-        baseline_model,
-        ref_answers,
-        multi_turn=True,
     )
 
     logger.info(f"Benchmark: {args.bench_name}")

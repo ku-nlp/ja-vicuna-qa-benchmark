@@ -50,7 +50,6 @@ class Judge:
     model_name: str
     prompt_template: dict
     ref_based: bool = False
-    multi_turn: bool = False
 
 
 @dataclasses.dataclass
@@ -60,7 +59,6 @@ class MatchSingle:
     answer: dict
     judge: Judge
     ref_answer: dict = None
-    multi_turn: bool = False
 
 
 @dataclasses.dataclass
@@ -72,7 +70,6 @@ class MatchPair:
     answer_2: dict
     judge: Judge
     ref_answer: dict = None
-    multi_turn: bool = False
 
 
 def load_questions(question_file: str) -> list[dict]:
@@ -115,7 +112,7 @@ def load_judge_prompts(prompt_file: str):
     return prompts
 
 
-def run_judge_single(question, answer, judge, ref_answer, multi_turn=False):
+def run_judge_single(question, answer, judge, ref_answer):
     model = judge.model_name
     if model not in {"gpt-3.5-turbo", "gpt-4"}:
         raise ValueError(f"Invalid judge model name: {model}")
@@ -129,20 +126,11 @@ def run_judge_single(question, answer, judge, ref_answer, multi_turn=False):
     if ref_answer is not None:
         kwargs["ref_answer_1"] = ref_answer["choices"][0]["turns"][0]
 
-    if multi_turn:
-        user_prompt = judge.prompt_template["prompt_template"].format(
-            question_1=question["turns"][0],
-            question_2=question["turns"][1],
-            answer_1=answer["choices"][0]["turns"][0],
-            answer_2=answer["choices"][0]["turns"][1],
-            **kwargs,
-        )
-    else:
-        user_prompt = judge.prompt_template["prompt_template"].format(
-            question=question["turns"][0],
-            answer=answer["choices"][0]["turns"][0],
-            **kwargs,
-        )
+    user_prompt = judge.prompt_template["prompt_template"].format(
+        question=question["turns"][0],
+        answer=answer["choices"][0]["turns"][0],
+        **kwargs,
+    )
 
     system_prompt = judge.prompt_template["system_prompt"]
     conv = get_conversation_template(model)
@@ -170,21 +158,18 @@ def play_a_match_single(match: MatchSingle, output_file: str):
     if match.judge.prompt_template["type"] != "single":
         raise ValueError(f"invalid judge type: {match.judge.prompt_template['type']}")
 
-    question, model, answer, judge, ref_answer, multi_turn = (
+    question, model, answer, judge, ref_answer = (
         match.question,
         match.model,
         match.answer,
         match.judge,
         match.ref_answer,
-        match.multi_turn,
     )
 
-    score, user_prompt, judgment = run_judge_single(
-        question, answer, judge, ref_answer, multi_turn=multi_turn
-    )
+    score, user_prompt, judgment = run_judge_single(question, answer, judge, ref_answer)
 
     question_id = question["question_id"]
-    turn = 1 if not multi_turn else 2
+    turn = 1
     result = {
         "question_id": question_id,
         "model": model,
@@ -209,7 +194,7 @@ def play_a_match_single(match: MatchSingle, output_file: str):
     return result
 
 
-def run_judge_pair(question, answer_a, answer_b, judge, ref_answer, multi_turn=False):
+def run_judge_pair(question, answer_a, answer_b, judge, ref_answer):
     model = judge.model_name
     if model not in {"gpt-3.5-turbo", "gpt-4"}:
         raise ValueError(f"Invalid judge model name: {model}")
@@ -223,25 +208,13 @@ def run_judge_pair(question, answer_a, answer_b, judge, ref_answer, multi_turn=F
     if ref_answer is not None:
         kwargs["ref_answer_1"] = ref_answer["choices"][0]["turns"][0]
 
-    if multi_turn:
-        system_prompt = judge.prompt_template["system_prompt"]
-        user_prompt = judge.prompt_template["prompt_template"].format(
-            question_1=question["turns"][0],
-            question_2=question["turns"][1],
-            answer_a_1=answer_a["choices"][0]["turns"][0],
-            answer_b_1=answer_b["choices"][0]["turns"][0],
-            answer_a_2=answer_a["choices"][0]["turns"][1],
-            answer_b_2=answer_b["choices"][0]["turns"][1],
-            **kwargs,
-        )
-    else:
-        system_prompt = judge.prompt_template["system_prompt"]
-        user_prompt = judge.prompt_template["prompt_template"].format(
-            question=question["turns"][0],
-            answer_a=answer_a["choices"][0]["turns"][0],
-            answer_b=answer_b["choices"][0]["turns"][0],
-            **kwargs,
-        )
+    system_prompt = judge.prompt_template["system_prompt"]
+    user_prompt = judge.prompt_template["prompt_template"].format(
+        question=question["turns"][0],
+        answer_a=answer_a["choices"][0]["turns"][0],
+        answer_b=answer_b["choices"][0]["turns"][0],
+        **kwargs,
+    )
 
     conv = get_conversation_template(model)
     conv.append_message(conv.roles[0], user_prompt)
@@ -281,7 +254,7 @@ def play_a_match_pair(match: MatchPair, output_file: str):
     if match.judge.prompt_template["type"] not in {"pairwise", "single"}:
         raise ValueError(f"invalid judge type: {match.judge.prompt_template['type']}")
 
-    question, model_1, model_2, answer_1, answer_2, judge, ref_answer, multi_turn = (
+    question, model_1, model_2, answer_1, answer_2, judge, ref_answer = (
         match.question,
         match.model_1,
         match.model_2,
@@ -289,15 +262,14 @@ def play_a_match_pair(match: MatchPair, output_file: str):
         match.answer_2,
         match.judge,
         match.ref_answer,
-        match.multi_turn,
     )
 
     if judge.prompt_template["type"] == "pairwise":
         g1_winner, g1_user_prompt, g1_judgment = run_judge_pair(
-            question, answer_1, answer_2, judge, ref_answer, multi_turn=multi_turn
+            question, answer_1, answer_2, judge, ref_answer
         )
         g2_winner, g2_user_prompt, g2_judgment = run_judge_pair(
-            question, answer_2, answer_1, judge, ref_answer, multi_turn=multi_turn
+            question, answer_2, answer_1, judge, ref_answer
         )
 
         g1_map = {"A": "model_1", "B": "model_2"}
@@ -305,7 +277,7 @@ def play_a_match_pair(match: MatchPair, output_file: str):
         g1_winner = g1_map.get(g1_winner, g1_winner)
         g2_winner = g2_map.get(g2_winner, g2_winner)
         question_id = question["question_id"]
-        turn = 1 if not multi_turn else 2
+        turn = 1
 
         result = {
             "question_id": question_id,
@@ -373,6 +345,7 @@ def play_a_match_pair(match: MatchPair, output_file: str):
 
 
 def chat_compeletion_openai(model, conv, temperature, max_tokens):
+    return "ERROR"
     output = API_ERROR_OUTPUT
     for _ in range(API_MAX_RETRY):
         try:
@@ -486,14 +459,9 @@ def load_single_model_judgments(filename: str):
 
 
 def resolve_pairwise_judgment_dict(
-    question, model_judgments_normal, model_judgments_math, multi_turn=False
+    question, model_judgments_normal, model_judgments_math
 ):
     """Return the correct pairwise judge."""
-    if multi_turn:
-        if question["category"] in NEED_REF_CATS:
-            return model_judgments_math[("gpt-4", "pair-math-v1-multi-turn")]
-        return model_judgments_normal[("gpt-4", "pair-v2-multi-turn")]
-
     if question["category"] in NEED_REF_CATS:
         return model_judgments_math[("gpt-4", "pair-math-v1")]
     else:
@@ -501,14 +469,9 @@ def resolve_pairwise_judgment_dict(
 
 
 def resolve_single_judgment_dict(
-    question, model_judgments_normal, model_judgments_math, multi_turn=False
+    question, model_judgments_normal, model_judgments_math
 ):
     """Return the correct single answer grading judge."""
-    if multi_turn:
-        if question["category"] in NEED_REF_CATS:
-            return model_judgments_math[("gpt-4", "single-math-v1-multi-turn")]
-        return model_judgments_normal[("gpt-4", "single-v1-multi-turn")]
-
     if question["category"] in NEED_REF_CATS:
         return model_judgments_math[("gpt-4", "single-math-v1")]
     else:

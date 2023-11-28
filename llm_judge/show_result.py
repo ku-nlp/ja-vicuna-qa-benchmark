@@ -35,15 +35,6 @@ def display_result_single(args):
     df_1 = df[df["turn"] == 1].groupby(["model", "turn"]).mean()
     print(df_1.sort_values(by="score", ascending=False))
 
-    if args.bench_name == "mt_bench":
-        print("\n########## Second turn ##########")
-        df_2 = df[df["turn"] == 2].groupby(["model", "turn"]).mean()
-        print(df_2.sort_values(by="score", ascending=False))
-
-        print("\n########## Average ##########")
-        df_3 = df[["model", "score"]].groupby(["model"]).mean()
-        print(df_3.sort_values(by="score", ascending=False))
-
 
 def display_result_pairwise(args):
     if args.input_file is None:
