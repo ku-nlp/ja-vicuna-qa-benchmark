@@ -49,7 +49,7 @@ def run_gpt3(prompt_list):
     demo = GPT3_Demo(
         engine="text-davinci-003",  # text-davinci-003: best, text-ada-001: lowest price
         temperature=0,  # control randomness: lowring results in less random completion (0 ~ 1.0)
-        max_tokens=8,  # max number of tokens to generate (1 ~ 4,000)
+        max_tokens=2048,  # max number of tokens to generate (1 ~ 4,000)
         top_p=1,  # control diversity (0 ~ 1.0)
         frequency_penalty=0,  # how to penalize new tokens based on their existing frequency (0 ~ 2.0)
         presence_penalty=0,  # 这个是对于词是否已经出现过的惩罚，文档上说这个值调高可以增大谈论新topic的概率 (0 ~ 2.0)
@@ -140,13 +140,13 @@ def run_chatgpt(user_prompt_list):
 
 if __name__ == "__main__":
     question = []
-    data_file = "./data/question_Japanese_ver.jsonl"
+    data_file = "./data/jp_bench/question.jsonl"
     with open(data_file, "r") as f:
         instruction_list = []
         for line in tqdm(f.read().splitlines()):
             tmp_dict = json.loads(line)
             question.append(tmp_dict)
-            instruction_list.append(tmp_dict["text"][0:])
+            instruction_list.append(tmp_dict["turns"][0:])
         # examples = [l.strip() for l in instruction_list]
         examples = instruction_list
     results = []
@@ -161,7 +161,7 @@ if __name__ == "__main__":
                 "tstamp": time.time(),
             }
         )
-    predictions_file = "./data/jp_bench/model_answer/gpt-3.5-davinci.jsonl"
+    predictions_file = "./data/jp_bench/model_answer/gpt-3.5-davinci1.jsonl"
     dirname = os.path.dirname(predictions_file)
     os.makedirs(dirname, exist_ok=True)
     with open(predictions_file, "w") as f:
