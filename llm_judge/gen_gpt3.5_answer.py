@@ -139,32 +139,27 @@ def run_chatgpt(user_prompt_list):
 
 
 if __name__ == "__main__":
-    question = []
     data_file = "./data/jp_bench/question.jsonl"
-    with open(data_file, "r") as f:
-        instruction_list = []
-        for line in tqdm(f.read().splitlines()):
-            tmp_dict = json.loads(line)
-            question.append(tmp_dict)
-            instruction_list.append(tmp_dict["turns"][0:])
-        # examples = [l.strip() for l in instruction_list]
-        examples = instruction_list
+    with open(data_file) as f:
+        questions = [json.loads(line) for line in tqdm(f)]
+
     results = []
-    for index, example in tqdm(enumerate(examples)):
-        response = run_gpt3(example)
+    for question in tqdm(questions):
+        instruction = question["turns"][0]
+        response = run_gpt3(instruction)
         results.append(
             {
-                "question_id": question[index]["question_id"],
+                "question_id": question["question_id"],
                 "answer_id": shortuuid.uuid(),
                 "model_id": "gpt-3.5-davinci",
                 "choices": [{"index": 0, "turns": [response]}],
                 "tstamp": time.time(),
             }
         )
-    predictions_file = "./data/jp_bench/model_answer/gpt-3.5-davinci.jsonl"
+
+    predictions_file = "./data/jp_bench/model_answer/openai--gpt-3.5-davinci.json"
     dirname = os.path.dirname(predictions_file)
     os.makedirs(dirname, exist_ok=True)
-    with open(predictions_file, "w") as f:
+    with open(predictions_file, "w", encoding="utf-8") as f:
         for result in results:
-            json_line = json.dumps(result, ensure_ascii=False)
-            f.write(json_line + "\n")
+            f.write(json.dumps(result, ensure_ascii=False) + "\n")
