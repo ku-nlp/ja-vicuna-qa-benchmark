@@ -60,7 +60,7 @@ def run_gpt3(prompt_list):
         top_p=1,  # control diversity (0 ~ 1.0)
         frequency_penalty=0,  # how to penalize new tokens based on their existing frequency (0 ~ 2.0)
         presence_penalty=0,  # 这个是对于词是否已经出现过的惩罚，文档上说这个值调高可以增大谈论新topic的概率 (0 ~ 2.0)
-        best_of=3,  # 这个是说从多少个里选最好的，如果这里是10，就会生成10个然后选最好的，但是这样会更贵(1 ~ 20)
+        best_of=1,  # 这个是说从多少个里选最好的，如果这里是10，就会生成10个然后选最好的，但是这样会更贵(1 ~ 20)
         logprobs=1,
     )
     results = demo.get_multiple_sample(prompt_list)
