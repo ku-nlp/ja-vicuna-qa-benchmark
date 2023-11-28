@@ -66,6 +66,7 @@ def run_gpt3(prompt_list):
     results = demo.get_multiple_sample(prompt_list)
     return results
 
+
 if __name__ == "__main__":
     data_file = "./data/jp_bench/question.jsonl"
     with open(data_file) as f:
