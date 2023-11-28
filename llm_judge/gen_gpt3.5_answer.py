@@ -159,7 +159,7 @@ if __name__ == "__main__":
                 "question_id": question["question_id"],
                 "answer_id": shortuuid.uuid(),
                 "model_id": "gpt-3.5-davinci",
-                "choices": [{"index": 0, "turns": [response]}],
+                "choices": [{"index": 0, "turns": response}],
                 "tstamp": time.time(),
             }
         )
