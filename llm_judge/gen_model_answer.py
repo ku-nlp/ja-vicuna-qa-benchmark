@@ -107,7 +107,10 @@ if __name__ == "__main__":
     torch.manual_seed(seed)
 
     if torch.cuda.is_available():
-        torch_dtype = torch.float16
+        if torch.cuda.is_bf16_supported():
+            torch_dtype = torch.bfloat16
+        else:
+            torch_dtype = torch.float16
     else:
         torch_dtype = torch.float32
 
