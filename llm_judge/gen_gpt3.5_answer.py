@@ -86,7 +86,7 @@ if __name__ == "__main__":
             }
         )
 
-    predictions_file = "./data/jp_bench/model_answer/openai--gpt-3.5-davinci.json"
+    predictions_file = "./data/jp_bench/model_answer/openai--gpt-3.5-davinci.jsonl"
     dirname = os.path.dirname(predictions_file)
     os.makedirs(dirname, exist_ok=True)
     with open(predictions_file, "w", encoding="utf-8") as f:
