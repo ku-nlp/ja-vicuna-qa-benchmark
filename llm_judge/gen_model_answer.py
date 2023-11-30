@@ -47,7 +47,7 @@ def generate_response(
         generation_config (Optional[dict]): Generation config.
         special_token_map (Optional[dict]): Special token map used to replace special tokens.
     """
-    inputs = tokenizer(input_text, return_tensors="pt", add_special_tokens=False, return_token_type_ids=False)
+    inputs = tokenizer(input_text, return_tensors="pt", add_special_tokens=False)
     inputs = inputs.to(model.device)
 
     input_token_ids = inputs["input_ids"]
