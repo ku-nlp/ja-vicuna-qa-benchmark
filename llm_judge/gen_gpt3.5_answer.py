@@ -80,13 +80,13 @@ if __name__ == "__main__":
             {
                 "question_id": question["question_id"],
                 "answer_id": shortuuid.uuid(),
-                "model_id": "gpt-3.5-davinci",
+                "model_id": "openai--text-davinci-003",
                 "choices": [{"index": 0, "turns": response}],
                 "tstamp": time.time(),
             }
         )
 
-    predictions_file = "./data/jp_bench/model_answer/openai--gpt-3.5-davinci.json"
+    predictions_file = "./data/jp_bench/model_answer/openai--text-davinci-003.jsonl"
     dirname = os.path.dirname(predictions_file)
     os.makedirs(dirname, exist_ok=True)
     with open(predictions_file, "w", encoding="utf-8") as f:
