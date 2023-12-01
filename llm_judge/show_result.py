@@ -47,7 +47,7 @@ def display_result_pairwise(args):
     print(f"Input file: {input_file}")
     df_all = pd.read_json(input_file, lines=True)
     print(args.model_list)
-    pd.set_option('display.max_colwidth', 1000)
+    pd.set_option("display.max_colwidth", 1000)
     list_res = []
     # traverse df row by row
     for index, row in df_all.iterrows():
@@ -102,7 +102,7 @@ if __name__ == "__main__":
     parser.add_argument("--judge-model", type=str, default="gpt-4")
     parser.add_argument("--baseline-model", type=str, default="gpt-3.5-turbo")
     parser.add_argument(
-        "--model_list",
+        "--model-list",
         type=str,
         nargs="+",
         default=None,
