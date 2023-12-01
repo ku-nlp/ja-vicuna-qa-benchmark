@@ -15,6 +15,8 @@ JUDGEMENT_DIR_MAP = {
     "jp_bench": DATA_DIR / "jp_bench" / "model_judgment",
 }
 
+pd.set_option("display.max_colwidth", 1000)
+
 
 def display_result_single(args):
     if args.input_file is None:
@@ -47,7 +49,6 @@ def display_result_pairwise(args):
     print(f"Input file: {input_file}")
     df_all = pd.read_json(input_file, lines=True)
     print(args.model_list)
-    pd.set_option('display.max_colwidth', 1000)
     list_res = []
     # traverse df row by row
     for index, row in df_all.iterrows():
