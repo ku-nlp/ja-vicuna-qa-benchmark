@@ -103,7 +103,7 @@ if __name__ == "__main__":
     parser.add_argument("--judge-model", type=str, default="gpt-4")
     parser.add_argument("--baseline-model", type=str, default="gpt-3.5-turbo")
     parser.add_argument(
-        "--model_list",
+        "--model-list",
         type=str,
         nargs="+",
         default=None,
