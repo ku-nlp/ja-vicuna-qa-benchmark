@@ -345,8 +345,6 @@ def play_a_match_pair(match: MatchPair, output_file: str):
 
 
 def chat_compeletion_openai(model, conv, temperature, max_tokens):
-    return "ERROR"
-    output = API_ERROR_OUTPUT
     for _ in range(API_MAX_RETRY):
         try:
             messages = conv.to_openai_api_messages()
