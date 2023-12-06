@@ -3,7 +3,7 @@
   "model_name_or_path": "cyberagent/calm2-7b-chat",
   "lora_model_name_or_path": null,
   "tokenizer_name_or_path": null,
-  "prompt_template": "USER:{instruction} ASSISTANT:",
+  "prompt_template": "USER: {instruction}\nASSISTANT: ",
   "generation_config": {
     "do_sample": true,
     "max_length": 2048,
