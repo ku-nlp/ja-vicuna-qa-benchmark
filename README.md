@@ -15,8 +15,6 @@ To be clarified, such zero-shot QA-style evaluation might be more suitable for t
 
 ## Install
 ```
-git clone https://github.com/hitoshizuku7/LLM_Judge_ku.git
-cd LLM_Judge_ku
 pip install -e .
 ```
 

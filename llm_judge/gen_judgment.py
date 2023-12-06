@@ -171,7 +171,9 @@ if __name__ == "__main__":
         help="The file of judge prompts.",
     )
     parser.add_argument("--judge-model", type=str, default="gpt-4")
-    parser.add_argument("--baseline-model", type=str, default="gpt-3.5-turbo-16k-0613")
+    parser.add_argument(
+        "--baseline-model", type=str, default="openai--text-davinci-003"
+    )
     parser.add_argument(
         "--model-list",
         type=str,
