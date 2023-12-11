@@ -148,16 +148,12 @@ python show_result.py \
 
 ## Pairwise win-rate compared with GPT-3.5-davinci-003
 | Model                                                    | Win | Loss | Tie | Win Rate | Loss Rate | Win Rate Adjusted |
-|:---------------------------------------------------------|----:|-----:|----:|---------:|----------:|------------------:|
-| llm-jp--llm-jp-13b-instruct-lora-jaster-dolly-oasst-v1.0 |  65 |  146 |  26 | 0.274262 | 0.616034  |          0.329114 |
-| rinna--japanese-gpt-neox-3.6b-instruction-ppo            |   8 |   62 |  10 | 0.100000 | 0.775000  |          0.162500 |
-| rinna--japanese-gpt-neox-3.6b-instruction-sft-v2         |   7 |   65 |   8 | 0.087500 | 0.812500  |          0.137500 |
-| cyberagent--calm2-7b-chat                                |   6 |   68 |   7 | 0.074074 | 0.839506  |          0.117284 |
-| llm-jp--llm-jp-13b-instruct-full-jaster-dolly-oasst-v1.0 |   5 |   66 |   8 | 0.063291 | 0.835443  |          0.113924 |
-
-
-
-
+|----------------------------------------------------------|-----|------|-----|----------|-----------|-------------------|
+| llm-jp--llm-jp-13b-instruct-lora-jaster-dolly-oasst-v1.0 |  22 |   48 |  10 | 0.2750   | 0.6000    | 0.33750           |
+| rinna--japanese-gpt-neox-3.6b-instruction-ppo            |  10 |   61 |   9 | 0.1250   | 0.7625    | 0.18125           |
+| llm-jp--llm-jp-13b-instruct-full-jaster-dolly-oasst-v1.0 |   7 |   65 |   8 | 0.0875   | 0.8125    | 0.13750           |
+| rinna--japanese-gpt-neox-3.6b-instruction-sft-v2         |   8 |   69 |   3 | 0.1000   | 0.8625    | 0.11875           |
+| cyberagent--calm2-7b-chat                                |   5 |   67 |   8 | 0.0625   | 0.8375    | 0.11250           |
 
 The GPT4 judgments is placed in `data/jp_bench/model_judgment/gpt-4_pair.jsonl`.
 
