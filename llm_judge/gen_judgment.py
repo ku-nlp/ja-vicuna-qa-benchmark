@@ -4,8 +4,11 @@ python gen_judgment.py --model-list [LIST-OF-MODEL-ID] --parallel [num-concurren
 """
 import argparse
 from concurrent.futures import ThreadPoolExecutor
-import json
-import sys
+import logging
+import random
+from itertools import combinations
+from functools import partial
+from pathlib import Path
 
 import numpy as np
 from tqdm import tqdm
@@ -24,6 +27,22 @@ from common import (
     NEED_REF_CATS,
 )
 
+logger = logging.getLogger(__name__)
+
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+BENCHMARK_FILE_MAP = {
+    "jp_bench": DATA_DIR / "jp_bench" / "question.jsonl",
+}
+PREDICTION_DIR_MAP = {
+    "jp_bench": DATA_DIR / "jp_bench" / "model_answer",
+}
+REFERENCE_DIR_MAP = {
+    "jp_bench": DATA_DIR / "jp_bench" / "reference_answer",
+}
+JUDGEMENT_DIR_MAP = {
+    "jp_bench": DATA_DIR / "jp_bench" / "model_judgment",
+}
+
 
 def make_match(
     questions,
@@ -32,37 +51,27 @@ def make_match(
     judge,
     baseline_model,
     ref_answers=None,
-    multi_turn=False,
 ):
     matches = []
-    for q in questions:
-        if multi_turn and len(q["turns"]) != 2:
-            continue
-        for i in range(len(models)):
-            q_id = q["question_id"]
-            m_1 = models[i]
-            m_2 = baseline_model
-            if m_1 == m_2:
+    for question in questions:
+        qid = question["question_id"]
+        ref_answer = ref_answers[judge.model_name][qid] if ref_answers else None
+        for model in models:
+            if model == baseline_model:
                 continue
-            a_1 = model_answers[m_1][q_id]
-            a_2 = model_answers[baseline_model][q_id]
-            if ref_answers is not None:
-                ref = ref_answers[judge.model_name][q_id]
-                match = MatchPair(
-                    dict(q),
-                    m_1,
-                    m_2,
-                    a_1,
-                    a_2,
+            answer = model_answers[model][qid]
+            answer_baseline = model_answers[baseline_model][qid]
+            matches.append(
+                MatchPair(
+                    dict(question),
+                    model,
+                    baseline_model,
+                    answer,
+                    answer_baseline,
                     judge,
-                    ref_answer=ref,
-                    multi_turn=multi_turn,
+                    ref_answer=ref_answer,
                 )
-            else:
-                match = MatchPair(
-                    dict(q), m_1, m_2, a_1, a_2, judge, multi_turn=multi_turn
-                )
-            matches.append(match)
+            )
     return matches
 
 
@@ -73,36 +82,25 @@ def make_match_all_pairs(
     judge,
     baseline_model=None,
     ref_answers=None,
-    multi_turn=False,
 ):
     matches = []
-    for q in questions:
-        if multi_turn and len(q["turns"]) != 2:
-            continue
-        for i in range(len(models)):
-            for j in range(i + 1, len(models)):
-                q_id = q["question_id"]
-                m_1 = models[i]
-                m_2 = models[j]
-                a_1 = model_answers[m_1][q_id]
-                a_2 = model_answers[m_2][q_id]
-                if ref_answers is not None:
-                    ref = ref_answers[judge.model_name][q_id]
-                    match = MatchPair(
-                        dict(q),
-                        m_1,
-                        m_2,
-                        a_1,
-                        a_2,
-                        judge,
-                        ref_answer=ref,
-                        multi_turn=multi_turn,
-                    )
-                else:
-                    match = MatchPair(
-                        dict(q), m_1, m_2, a_1, a_2, judge, multi_turn=multi_turn
-                    )
-                matches.append(match)
+    for question in questions:
+        qid = question["question_id"]
+        ref_answer = ref_answers[judge.model_name][qid] if ref_answers else None
+        for model_1, model_2 in combinations(models, 2):
+            answer_1 = model_answers[model_1][qid]
+            answer_2 = model_answers[model_2][qid]
+            matches.append(
+                MatchPair(
+                    dict(question),
+                    model_1,
+                    model_2,
+                    answer_1,
+                    answer_2,
+                    judge,
+                    ref_answer=ref_answer,
+                )
+            )
     return matches
 
 
@@ -113,62 +111,53 @@ def make_match_single(
     judge,
     baseline_model=None,
     ref_answers=None,
-    multi_turn=False,
 ):
     matches = []
-    for q in questions:
-        if multi_turn and len(q["turns"]) != 2:
-            continue
-        for i in range(len(models)):
-            q_id = q["question_id"]
-            m = models[i]
-            a = model_answers[m][q_id]
-            if ref_answers is not None:
-                ref = ref_answers[judge.model_name][q_id]
-                matches.append(
-                    MatchSingle(
-                        dict(q), m, a, judge, ref_answer=ref, multi_turn=multi_turn
-                    )
+    for question in questions:
+        qid = question["question_id"]
+        ref_answer = ref_answers[judge.model_name][qid] if ref_answers else None
+        for model in models:
+            answer = model_answers[model][qid]
+            matches.append(
+                MatchSingle(
+                    dict(question),
+                    model,
+                    answer,
+                    judge,
+                    ref_answer=ref_answer,
                 )
-            else:
-                matches.append(MatchSingle(dict(q), m, a, judge, multi_turn=multi_turn))
+            )
     return matches
 
 
 def make_judge_pairwise(judge_model, judge_prompts):
-    judges = {}
-    judges["default"] = Judge(judge_model, judge_prompts["pair-v2"])
-    judges["math"] = Judge(judge_model, judge_prompts["pair-math-v1"], ref_based=True)
-    judges["default-mt"] = Judge(
-        judge_model, judge_prompts["pair-v2-multi-turn"], multi_turn=True
-    )
-    judges["math-mt"] = Judge(
-        judge_model,
-        judge_prompts["pair-math-v1-multi-turn"],
-        ref_based=True,
-        multi_turn=True,
-    )
-    return judges
+    return {
+        "default": Judge(judge_model, judge_prompts["pair-v2"]),
+        "math": Judge(judge_model, judge_prompts["pair-math-v1"], ref_based=True),
+    }
 
 
 def make_judge_single(judge_model, judge_prompts):
-    judges = {}
-    judges["default"] = Judge(judge_model, judge_prompts["single-v1"])
-    judges["math"] = Judge(judge_model, judge_prompts["single-math-v1"], ref_based=True)
-    judges["default-mt"] = Judge(
-        judge_model, judge_prompts["single-v1-multi-turn"], multi_turn=True
-    )
-    judges["math-mt"] = Judge(
-        judge_model,
-        judge_prompts["single-math-v1-multi-turn"],
-        ref_based=True,
-        multi_turn=True,
-    )
-    return judges
+    return {
+        "default": Judge(judge_model, judge_prompts["single-v1"]),
+        "math": Judge(judge_model, judge_prompts["single-math-v1"], ref_based=True),
+    }
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--mode",
+        type=str,
+        required=True,
+        choices=["pairwise-baseline", "pairwise-all", "single"],
+        help=(
+            "Evaluation mode. "
+            "`pairwise-baseline` runs pairwise comparision against a baseline. "
+            "`pairwise-all` runs pairwise comparision between all pairs. "
+            "`single` runs single answer grading."
+        ),
+    )
     parser.add_argument(
         "--bench-name",
         type=str,
@@ -178,22 +167,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--judge-file",
         type=str,
-        default="data/judge_prompts_jp2.jsonl",
+        default="data/judge_prompts_jp.jsonl",
         help="The file of judge prompts.",
     )
     parser.add_argument("--judge-model", type=str, default="gpt-4")
-    parser.add_argument("--baseline-model", type=str, default="gpt-3.5-turbo-16k-0613")
     parser.add_argument(
-        "--mode",
-        type=str,
-        default="single",
-        choices=["pairwise-baseline", "pairwise-all", "single"],
-        help=(
-            "Evaluation mode. "
-            "`pairwise-baseline` runs pairwise comparision against a baseline. "
-            "`pairwise-all` runs pairwise comparision between all pairs. "
-            "`single` runs single answer grading."
-        ),
+        "--baseline-model", type=str, default="openai--text-davinci-003"
     )
     parser.add_argument(
         "--model-list",
@@ -208,45 +187,65 @@ if __name__ == "__main__":
     parser.add_argument(
         "--first-n", type=int, help="A debug option. Only run the first `n` judgments."
     )
+    parser.add_argument(
+        "--seed", default=0, type=int, help="random seed for reproducibility"
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="count", default=0, help="verbosity level"
+    )
     args = parser.parse_args()
 
-    question_file = f"data/{args.bench_name}/question.jsonl"
-    answer_dir = f"data/{args.bench_name}/model_answer"
-    ref_answer_dir = f"data/{args.bench_name}/reference_answer"
+    if args.verbose == 0:
+        level = logging.INFO
+    else:
+        level = logging.DEBUG
+    logging.basicConfig(
+        format="| %(asctime)s | %(levelname)s | %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        level=level,
+    )
 
-    # Load questions
-    questions = load_questions(question_file, None, None)
+    logger.info(f"Set random seed to {args.seed}")
+    seed = args.seed
+    random.seed(seed)
+    np.random.seed(seed)
 
-    # Load answers
+    logger.info("Load questions")
+    question_file = BENCHMARK_FILE_MAP[args.bench_name]
+    questions = load_questions(question_file)
+    if args.first_n:
+        logger.warning(f"Only run the first {args.first_n} judgments")
+        questions = questions[: args.first_n]
+
+    logger.info("Load answers")
+    answer_dir = PREDICTION_DIR_MAP[args.bench_name]
     model_answers = load_model_answers(answer_dir)
-    ref_answers = load_model_answers(ref_answer_dir)
 
+    logger.info("Load reference answers")
+    reference_dir = REFERENCE_DIR_MAP[args.bench_name]
+    ref_answers = load_model_answers(reference_dir)
 
     # Load judge
+    logger.info("Load judge prompts")
     judge_prompts = load_judge_prompts(args.judge_file)
-
-    if args.first_n:
-        questions = questions[: args.first_n]
 
     if args.model_list is None:
         models = get_model_list(answer_dir)
     else:
         models = args.model_list
 
+    output_dir = JUDGEMENT_DIR_MAP[args.bench_name]
+
     if args.mode == "single":
         judges = make_judge_single(args.judge_model, judge_prompts)
         play_a_match_func = play_a_match_single
-        output_file = (
-            f"data/{args.bench_name}/model_judgment/{args.judge_model}_single.jsonl"
-        )
+        output_file = output_dir / f"{args.judge_model}_single.jsonl"
         make_match_func = make_match_single
         baseline_model = None
     else:
-        judges = make_judge_pairwise(args.judge_model, judge_prompts)################
+        judges = make_judge_pairwise(args.judge_model, judge_prompts)
         play_a_match_func = play_a_match_pair
-        output_file = (
-            f"data/{args.bench_name}/model_judgment/{args.judge_model}_pair.jsonl"
-        )
+        output_file = output_dir / f"{args.judge_model}_pair.jsonl"
         if args.mode == "pairwise-all":
             make_match_func = make_match_all_pairs
             baseline_model = None
@@ -272,37 +271,15 @@ if __name__ == "__main__":
         baseline_model,
         ref_answers,
     )
-    matches += make_match_func(
-        question_default,
-        models,
-        model_answers,
-        judges["default-mt"],
-        baseline_model,
-        multi_turn=True,
-    )
-    matches += make_match_func(
-        question_math,
-        models,
-        model_answers,
-        judges["math-mt"],
-        baseline_model,
-        ref_answers,
-        multi_turn=True,
-    )
 
-    match_stat = {}
-    match_stat["bench_name"] = args.bench_name
-    match_stat["mode"] = args.mode
-    match_stat["judge"] = args.judge_model
-    match_stat["baseline"] = baseline_model
-    match_stat["model_list"] = models
-    match_stat["total_num_questions"] = len(questions)
-    match_stat["total_num_matches"] = len(matches)
-    match_stat["output_path"] = output_file
-
-    # Show match stats and prompt enter to continue
-    print("Stats:")
-    print(json.dumps(match_stat, indent=4))
+    logger.info(f"Benchmark: {args.bench_name}")
+    logger.info(f"Mode: {args.mode}")
+    logger.info(f"Judge model: {args.judge_model}")
+    logger.info(f"Baseline model: {baseline_model}")
+    logger.info(f"Models: {models}")
+    logger.info(f"Total number of questions: {len(questions)}")
+    logger.info(f"Total number of matches: {len(matches)}")
+    logger.info(f"Output file: {output_file}")
     input("Press Enter to confirm...")
 
     # Play matches
@@ -310,13 +287,8 @@ if __name__ == "__main__":
         for match in tqdm(matches):
             play_a_match_func(match, output_file=output_file)
     else:
-
-        def play_a_match_wrapper(match):
-            play_a_match_func(match, output_file=output_file)
-
-        np.random.seed(0)
         np.random.shuffle(matches)
-
+        play_a_match_wrapper = partial(play_a_match_func, output_file=output_file)
         with ThreadPoolExecutor(args.parallel) as executor:
             for match in tqdm(
                 executor.map(play_a_match_wrapper, matches), total=len(matches)
