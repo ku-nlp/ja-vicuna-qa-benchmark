@@ -32,7 +32,7 @@ Arguments & Options:
 For example:
 
 ```
-python gen_model_answer.py --config configs/rinna--japanese-gpt-neox-3.6b-instruction-ppo.json
+python llm_judge/gen_model_answer.py --config configs/rinna--japanese-gpt-neox-3.6b-instruction-ppo.json
 ```
 
 The answers will be saved to `data/jp_bench/model_answer`.
@@ -43,7 +43,7 @@ There are several options to use GPT-4 as a judge, such as pairwise win-rate and
 We show an example of the pairwise win-rate evaluation of instruction fine-tuned models (rinna-3.6b-sft-v2, rinna-3.6b-ppo, and japanese-alpaca-lora-7b) at the bottom.
 
 ```
-OPENAI_API_KEY=<YOUR-KEY> python gen_judgment.py \
+OPENAI_API_KEY=<YOUR-KEY> python llm_judge/gen_judgment.py \
     --mode {single|pairwise-baseline|pairwise-all} \
     [--model-list <LIST-OF-MODEL-IDS>]
 ```
@@ -58,7 +58,7 @@ Arguments & Options:
 For example:
 
 ```
-OPENAI_API_KEY=<YOUR-KEY> python gen_judgment.py \
+OPENAI_API_KEY=<YOUR-KEY> python llm_judge/gen_judgment.py \
     --mode pairwise-all \
     --model-list rinna-3.6b-sft-v2 rinna-3.6b-ppo japanese-alpaca-lora-7b
 ```
@@ -70,7 +70,7 @@ The judgments will be saved to `data/jp_bench/model_judgment/gpt-4_pair.jsonl`
 Show the scores for selected models.
 
 ```
-python show_result.py \
+python llm_judge/show_result.py \
     --mode pairwise-all \
     --model-list rinna-3.6b-sft-v2 rinna-3.6b-ppo japanese-alpaca-lora-7b
 ```
@@ -84,7 +84,7 @@ The `pairwise-baseline` mode runs pairwise comparison against a baseline model.
 Generate GPT-4 judgments:
 
 ```
-OPENAI_API_KEY=<YOUR-KEY> python gen_judgment.py \
+OPENAI_API_KEY=<YOUR-KEY> python llm_judge/gen_judgment.py \
   --mode pairwise-baseline \
   [--model-list <LIST-OF-MODEL-IDS>] \
   [--baseline-model <name-of-baseline-model>]
@@ -95,7 +95,7 @@ The judgments will be saved to `data/jp_bench/model_judgment/gpt-4_pair.jsonl`
 Show results:
 
 ```
-python show_result.py \
+python llm_judge/show_result.py \
   --bench-name "jp_bench" \
   --mode pairwise-baseline \
   [--model-list <LIST-OF-MODEL-IDS>]
@@ -108,7 +108,7 @@ The `single` mode grades models by asking GPT-4 to grade and give a score to mod
 Generate GPT-4 judgments:
 
 ```
-OPENAI_API_KEY=<YOUR-KEY> python gen_judgment.py \
+OPENAI_API_KEY=<YOUR-KEY> python llm_judge/gen_judgment.py \
   --mode single \
   [--model-list <LIST-OF-MODEL-IDS>]
 ```
@@ -118,7 +118,7 @@ The judgments will be saved to `data/jp_bench/model_judgment/gpt-4_single.jsonl`
 Show results:
 
 ```
-python show_result.py \
+python llm_judge/show_result.py \
   --bench-name "jp_bench" \
   --mode single \
   [--model-list <LIST-OF-MODEL-IDS>]
