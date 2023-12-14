@@ -13,7 +13,6 @@ from pathlib import Path
 
 import openai
 from dotenv import load_dotenv
-from model_adapter import get_conversation_template
 
 logger = logging.getLogger(__name__)
 
@@ -54,17 +53,18 @@ class Judge:
     prompt_template: dict
 
     def judge(self, **kwargs):
-        conv = get_conversation_template(self.model_name)
-        conv.system = self.prompt_template["system_prompt"]
-        conv.append_message(
-            conv.roles[0], self.prompt_template["prompt_template"].format(**kwargs)
-        )
-
+        messages = [
+            {"role": "system", "content": self.prompt_template["system_prompt"]},
+            {
+                "role": "user",
+                "content": self.prompt_template["prompt_template"].format(**kwargs),
+            },
+        ]
         for _ in range(API_MAX_RETRY):
             try:
                 response = openai.ChatCompletion.create(
                     model=self.model_name,
-                    messages=conv.to_openai_api_messages(),
+                    messages=messages,
                     temperature=0,
                     max_tokens=2048,
                 )

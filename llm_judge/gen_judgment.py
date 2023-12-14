@@ -243,7 +243,7 @@ if __name__ == "__main__":
         output_file = output_dir / f"{match_id}.jsonl"
         results = []
         if args.parallel == 1:
-            for match in matches:
+            for match in tqdm(matches):
                 results.append(match.play())
         else:
             with ThreadPoolExecutor(args.parallel) as executor:
