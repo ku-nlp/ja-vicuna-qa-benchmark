@@ -6,7 +6,7 @@ import time
 
 import openai
 import shortuuid
-from common import PREDICTION_DIR, QUESTION_FILE
+from common import PREDICTION_DIR, QUESTION_FILE, load_questions
 from dotenv import load_dotenv
 from tqdm import tqdm
 
@@ -46,8 +46,7 @@ if __name__ == "__main__":
     logger.debug(config)
 
     logger.info("Load the data")
-    with open(QUESTION_FILE) as f:
-        questions = [json.loads(line) for line in tqdm(f)]
+    questions = load_questions(str(QUESTION_FILE))
 
     logger.info("Start inference.")
     model_id = config["model_id"]

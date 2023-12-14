@@ -7,7 +7,7 @@ import time
 import numpy as np
 import shortuuid
 import torch
-from common import PREDICTION_DIR, QUESTION_FILE
+from common import PREDICTION_DIR, QUESTION_FILE, load_questions
 from peft import PeftModel
 from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -133,8 +133,7 @@ if __name__ == "__main__":
 
     # test data
     logger.info("Load the data")
-    with open(QUESTION_FILE, "r") as f:
-        questions = [json.loads(line) for line in tqdm(f)]
+    questions = load_questions(str(QUESTION_FILE))
 
     logger.info("Start inference.")
     model_id = config["model_id"]
