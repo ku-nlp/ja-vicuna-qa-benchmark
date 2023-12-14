@@ -27,13 +27,12 @@ logger = logging.getLogger(__name__)
 
 def make_match_single(
     questions,
-    models,
     model_answers,
     judge,
     baseline_model=None,
     ref_answers=None,
 ):
-    for model in models:
+    for model in model_answers:
         matches = []
         for question in questions:
             qid = question["question_id"]
@@ -53,13 +52,12 @@ def make_match_single(
 
 def make_match_pairwise(
     questions,
-    models,
     model_answers,
     judge,
     baseline_model=None,
     ref_answers=None,
 ):
-    for model_1, model_2 in combinations(models, 2):
+    for model_1, model_2 in combinations(model_answers, 2):
         if baseline_model and baseline_model not in {model_1, model_2}:
             continue
         matches = []
@@ -155,24 +153,26 @@ if __name__ == "__main__":
     questions_default = [q for q in questions if q["category"] not in NEED_REF_CATS]
 
     logger.info("Load answers")
-    model_answers = load_model_answers(str(PREDICTION_DIR))
-    for answers in model_answers.values():
-        for question in questions:
-            assert question["question_id"] in answers
-
-    logger.info("Load reference answers")
-    ref_answers = load_model_answers(str(REFERENCE_DIR))
-    assert args.judge_model in ref_answers
-    for question in filter(lambda x: x["category"] in NEED_REF_CATS, questions):
-        assert question["question_id"] in ref_answers[args.judge_model]
-
-    logger.info("Load judge prompts")
-    judge_prompts = load_judge_prompts(args.judge_file)
-
     if args.model_list is None:
         models = get_model_list(str(PREDICTION_DIR))
     else:
         models = args.model_list
+    model_answers = {}
+    for model in models:
+        answers = load_model_answers(str(PREDICTION_DIR / f"{model}.jsonl"))
+        for question in questions:
+            assert question["question_id"] in answers
+        model_answers[model] = answers
+
+    logger.info("Load reference answers")
+    judge_model = args.judge_model
+    answers = load_model_answers(str(REFERENCE_DIR / f"{judge_model}.jsonl"))
+    for question in filter(lambda x: x["category"] in NEED_REF_CATS, questions):
+        assert question["question_id"] in answers[args.judge_model]
+    ref_answers = {judge_model: answers}
+
+    logger.info("Load judge prompts")
+    judge_prompts = load_judge_prompts(args.judge_file)
 
     logger.info("Make matches")
     match_groups = {}
@@ -197,11 +197,11 @@ if __name__ == "__main__":
         else:
             baseline_model = args.baseline_model
     for match_id, matches in make_match_func(
-        questions_default, models, model_answers, judge_default, baseline_model
+        questions_default, model_answers, judge_default, baseline_model
     ):
         match_groups[match_id] = matches
     for match_id, matches in make_match_func(
-        questions_math, models, model_answers, judge_math, baseline_model
+        questions_math, model_answers, judge_math, baseline_model
     ):
         match_groups[match_id] += matches
     target_match_ids = set()
@@ -221,7 +221,7 @@ if __name__ == "__main__":
     logger.info(f"Mode: {args.mode}")
     logger.info(f"Judge model: {args.judge_model}")
     logger.info(f"Baseline model: {baseline_model}")
-    logger.info(f"Models: {models}")
+    logger.info(f"Models: {list(model_answers.keys())}")
     logger.info(f"Total number of questions: {len(questions):,}")
     logger.info(
         f"Total number of matches: {sum(len(m) for m in match_groups.values()):,}"

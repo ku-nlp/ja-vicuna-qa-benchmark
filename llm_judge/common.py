@@ -217,32 +217,19 @@ def load_questions(question_file: str) -> list[dict]:
         return [json.loads(line) for line in fin]
 
 
-def load_model_answers(answer_dir: str):
-    """Load model answers.
-
-    The return value is a python dict of type:
-    Dict[model_name: str -> Dict[question_id: int -> answer: dict]]
-    """
-    filenames = glob.glob(os.path.join(answer_dir, "*.jsonl"))
-    model_answers = {}
-    for filename in sorted(filenames):
-        logger.debug(f"Loading model answers from {filename}")
-        model_name, _ = os.path.splitext(os.path.basename(filename))
-        answer = {}
-        with open(filename, "r") as fin:
-            for line in fin:
-                line = json.loads(line)
-                answer[line["question_id"]] = line
-        model_answers[model_name] = answer
-    return model_answers
+def load_model_answers(answer_file: str):
+    """Load model answers."""
+    model_name, _ = os.path.splitext(os.path.basename(answer_file))
+    answers = {}
+    with open(answer_file, "r") as fin:
+        for line in fin:
+            line = json.loads(line)
+            answers[line["question_id"]] = line
+    return answers
 
 
 def load_judge_prompts(prompt_file: str):
-    """Load judge prompts.
-
-    The return value is a python dict of type:
-    Dict[judge_name: str -> dict]
-    """
+    """Load judge prompts."""
     prompts = {}
     with open(prompt_file) as fin:
         for line in fin:
