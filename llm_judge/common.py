@@ -69,7 +69,6 @@ def chat_completion_openai(model, conv, temperature, max_tokens):
 class Judge:
     model_name: str
     prompt_template: dict
-    ref_based: bool = False
 
 
 @dataclasses.dataclass
