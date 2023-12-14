@@ -190,7 +190,7 @@ if __name__ == "__main__":
         "--seed", default=0, type=int, help="random seed for reproducibility"
     )
     parser.add_argument(
-        "-v", "--verbose", action="count", default=0, help="verbosity level"
+        "--verbose", "-v", action="count", default=0, help="verbosity level"
     )
     parser.add_argument(
         "--yes", "-y", action="store_true", help="Skip confirmation and run."
