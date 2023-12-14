@@ -109,7 +109,13 @@ if __name__ == "__main__":
         default="data/judge_prompts_jp.jsonl",
         help="The file of judge prompts.",
     )
-    parser.add_argument("--judge-model", type=str, default="gpt-4")
+    parser.add_argument(
+        "--judge-model",
+        type=str,
+        default="gpt-4",
+        choices=["gpt-4", "gpt-3.5-turbo"],
+        help="The judge model.",
+    )
     parser.add_argument(
         "--baseline-model", type=str, default="openai--text-davinci-003"
     )
