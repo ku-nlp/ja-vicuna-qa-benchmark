@@ -177,9 +177,9 @@ if __name__ == "__main__":
     logger.info("Make matches")
     match_groups = {}
     if args.mode == "single":
-        judge_default = Judge(args.judge_model, judge_prompts["single-v1"])
+        judge_default = Judge(args.judge_model, judge_prompts["single"])
         judge_math = Judge(
-            args.judge_model, judge_prompts["single-math-v1"], ref_based=True
+            args.judge_model, judge_prompts["single-math"], ref_based=True
         )
         play_a_match_func = play_a_match_single
         output_dir = JUDGEMENT_DIR / "single" / args.judge_model
@@ -187,10 +187,8 @@ if __name__ == "__main__":
         baseline_model = None
     else:
         assert args.mode in {"pairwise-baseline", "pairwise-all"}
-        judge_default = Judge(args.judge_model, judge_prompts["pair-v2"])
-        judge_math = Judge(
-            args.judge_model, judge_prompts["pair-math-v1"], ref_based=True
-        )
+        judge_default = Judge(args.judge_model, judge_prompts["pair"])
+        judge_math = Judge(args.judge_model, judge_prompts["pair-math"], ref_based=True)
         play_a_match_func = play_a_match_pair
         output_dir = JUDGEMENT_DIR / "pairwise" / args.judge_model
         make_match_func = make_match_pairwise
