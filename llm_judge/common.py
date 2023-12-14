@@ -519,27 +519,6 @@ def get_single_judge_explanation(gamekey, judgment_dict):
         return "N/A"
 
 
-def check_data(questions, model_answers, ref_answers, models, judges):
-    # check model answers
-    for m in models:
-        assert m in model_answers, f"Missing model answer for {m}"
-        m_answer = model_answers[m]
-        for q in questions:
-            assert (
-                q["question_id"] in m_answer
-            ), f"Missing model {m}'s answer to Question {q['question_id']}"
-    # check ref answers
-    for jg in judges.values():
-        if not jg.ref_based:
-            continue
-        for q in questions:
-            if q["category"] not in NEED_REF_CATS:
-                continue
-            assert (
-                int(q["question_id"]) in ref_answers[jg.model_name]
-            ), f"Missing reference answer to Question {q['question_id']} for judge {jg.model_name}"
-
-
 def get_model_list(answer_dir):
     file_paths = glob.glob(f"{answer_dir}/*.jsonl")
     file_names = [os.path.splitext(os.path.basename(f))[0] for f in file_paths]
