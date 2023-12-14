@@ -3,10 +3,10 @@ import json
 import logging
 import os
 import time
-from pathlib import Path
 
 import openai
 import shortuuid
+from common import PREDICTION_DIR, QUESTION_FILE
 from dotenv import load_dotenv
 from tqdm import tqdm
 
@@ -15,10 +15,6 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 openai.organization = os.getenv("OPENAI_ORGANIZATION")
-
-JP_BENCH_DIR = Path(__file__).resolve().parent.parent / "data" / "jp_bench"
-QUESTION_FILE = JP_BENCH_DIR / "question.jsonl"
-PREDICTION_DIR = JP_BENCH_DIR / "model_answer"
 
 
 def generate_response(input_text, generation_config) -> str:

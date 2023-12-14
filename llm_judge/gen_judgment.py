@@ -3,10 +3,13 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 from itertools import combinations
-from pathlib import Path
 
 from common import (
+    JUDGEMENT_DIR,
     NEED_REF_CATS,
+    PREDICTION_DIR,
+    QUESTION_FILE,
+    REFERENCE_DIR,
     Judge,
     MatchPair,
     MatchSingle,
@@ -20,12 +23,6 @@ from common import (
 from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
-
-JP_BENCH_DIR = Path(__file__).resolve().parent.parent / "data" / "jp_bench"
-QUESTION_FILE = JP_BENCH_DIR / "question.jsonl"
-PREDICTION_DIR = JP_BENCH_DIR / "model_answer"
-REFERENCE_DIR = JP_BENCH_DIR / "reference_answer"
-JUDGEMENT_DIR = JP_BENCH_DIR / "model_judgment"
 
 
 def make_match_single(

@@ -3,20 +3,16 @@ import json
 import logging
 import random
 import time
-from pathlib import Path
 
 import numpy as np
 import shortuuid
 import torch
+from common import PREDICTION_DIR, QUESTION_FILE
 from peft import PeftModel
 from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 logger = logging.getLogger(__name__)
-
-JP_BENCH_DIR = Path(__file__).resolve().parent.parent / "data" / "jp_bench"
-QUESTION_FILE = JP_BENCH_DIR / "question.jsonl"
-PREDICTION_DIR = JP_BENCH_DIR / "model_answer"
 
 DEFAULT_TEMPERATURE_MAP = {
     "writing": 0.7,

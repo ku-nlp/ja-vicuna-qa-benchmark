@@ -9,6 +9,7 @@ import logging
 import os
 import re
 import time
+from pathlib import Path
 
 import openai
 from dotenv import load_dotenv
@@ -17,9 +18,15 @@ from model_adapter import get_conversation_template
 logger = logging.getLogger(__name__)
 
 load_dotenv()
-
 openai.api_key = os.getenv("OPENAI_API_KEY")
 openai.organization = os.getenv("OPENAI_ORGANIZATION")
+
+# Data paths
+JP_BENCH_DIR = Path(__file__).resolve().parent.parent / "data" / "jp_bench"
+QUESTION_FILE = JP_BENCH_DIR / "question.jsonl"
+PREDICTION_DIR = JP_BENCH_DIR / "model_answer"
+REFERENCE_DIR = JP_BENCH_DIR / "reference_answer"
+JUDGEMENT_DIR = JP_BENCH_DIR / "model_judgment"
 
 # API setting constants
 API_MAX_RETRY = 16
