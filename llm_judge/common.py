@@ -48,27 +48,30 @@ one_score_pattern_another_format2 = re.compile(r"\[\[rating: (\d+)]]")
 reverse_model_map = {"model_1": "model_2", "model_2": "model_1"}
 
 
-def chat_completion_openai(model, conv, temperature, max_tokens):
-    for _ in range(API_MAX_RETRY):
-        try:
-            messages = conv.to_openai_api_messages()
-            response = openai.ChatCompletion.create(
-                model=model,
-                messages=messages,
-                n=1,
-                temperature=temperature,
-                max_tokens=max_tokens,
-            )
-            return response["choices"][0]["message"]["content"]
-        except openai.error.OpenAIError as e:
-            logger.warning(e)
-            time.sleep(API_RETRY_SLEEP)
-
-
 @dataclasses.dataclass
 class Judge:
     model_name: str
     prompt_template: dict
+
+    def judge(self, **kwargs):
+        conv = get_conversation_template(self.model_name)
+        conv.system = self.prompt_template["system_prompt"]
+        conv.append_message(
+            conv.roles[0], self.prompt_template["prompt_template"].format(**kwargs)
+        )
+
+        for _ in range(API_MAX_RETRY):
+            try:
+                response = openai.ChatCompletion.create(
+                    model=self.model_name,
+                    messages=conv.to_openai_api_messages(),
+                    temperature=0,
+                    max_tokens=2048,
+                )
+                return response["choices"][0]["message"]["content"]
+            except openai.error.OpenAIError as e:
+                logger.warning(e)
+                time.sleep(API_RETRY_SLEEP)
 
 
 @dataclasses.dataclass
@@ -91,24 +94,13 @@ class MatchSingle:
             )
 
     def play(self):
-        system_prompt = self.judge.prompt_template["system_prompt"]
-
-        kwargs = {}
+        kwargs = {
+            "question": self.question["turns"][0],
+            "answer": self.answer["choices"][0]["turns"][0],
+        }
         if self.ref_answer is not None:
             kwargs["ref_answer_1"] = self.ref_answer["choices"][0]["turns"][0]
-        user_prompt = self.judge.prompt_template["prompt_template"].format(
-            question=self.question["turns"][0],
-            answer=self.answer["choices"][0]["turns"][0],
-            **kwargs,
-        )
-
-        conv = get_conversation_template(self.judge.model_name)
-        conv.system = system_prompt
-        conv.append_message(conv.roles[0], user_prompt)
-
-        judgment = chat_completion_openai(
-            self.judge.model_name, conv, temperature=0, max_tokens=2048
-        )
+        judgment = self.judge.judge(**kwargs)
         match = (
             re.search(one_score_pattern, judgment)
             or re.search(one_score_pattern_another_format, judgment)
@@ -123,7 +115,6 @@ class MatchSingle:
             "question_id": self.question["question_id"],
             "model": self.model,
             "judge": (self.judge.model_name, self.judge.prompt_template["name"]),
-            "user_prompt": user_prompt,
             "judgment": judgment,
             "score": score,
             "turn": 1,
@@ -154,25 +145,14 @@ class MatchPair:
 
     def play(self):
         def play(answer_a, answer_b):
-            system_prompt = self.judge.prompt_template["system_prompt"]
-
-            kwargs = {}
+            kwargs = {
+                "question": self.question["turns"][0],
+                "answer_a": answer_a["choices"][0]["turns"][0],
+                "answer_b": answer_b["choices"][0]["turns"][0],
+            }
             if self.ref_answer is not None:
                 kwargs["ref_answer_1"] = self.ref_answer["choices"][0]["turns"][0]
-            user_prompt = self.judge.prompt_template["prompt_template"].format(
-                question=self.question["turns"][0],
-                answer_a=answer_a["choices"][0]["turns"][0],
-                answer_b=answer_b["choices"][0]["turns"][0],
-                **kwargs,
-            )
-
-            conv = get_conversation_template(self.judge.model_name)
-            conv.system = system_prompt
-            conv.append_message(conv.roles[0], user_prompt)
-
-            judgment = chat_completion_openai(
-                self.judge.model_name, conv, temperature=0, max_tokens=2048
-            )
+            judgment = self.judge.judge(**kwargs)
 
             if "[[A]]" in judgment:
                 winner = "A"
@@ -183,10 +163,10 @@ class MatchPair:
             else:
                 winner = "error"
 
-            return winner, user_prompt, judgment
+            return winner, judgment
 
-        g1_winner, g1_user_prompt, g1_judgment = play(self.answer_1, self.answer_2)
-        g2_winner, g2_user_prompt, g2_judgment = play(self.answer_2, self.answer_1)
+        g1_winner, g1_judgment = play(self.answer_1, self.answer_2)
+        g2_winner, g2_judgment = play(self.answer_2, self.answer_1)
 
         g1_map = {"A": "model_1", "B": "model_2"}
         g2_map = {"A": "model_2", "B": "model_1"}
@@ -200,9 +180,7 @@ class MatchPair:
             "g1_winner": g1_winner,
             "g2_winner": g2_winner,
             "judge": (self.judge.model_name, self.judge.prompt_template["name"]),
-            "g1_user_prompt": g1_user_prompt,
             "g1_judgment": g1_judgment,
-            "g2_user_prompt": g2_user_prompt,
             "g2_judgment": g2_judgment,
             "turn": 1,
             "tstamp": time.time(),
