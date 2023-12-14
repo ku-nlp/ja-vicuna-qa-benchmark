@@ -168,8 +168,10 @@ if __name__ == "__main__":
         models = get_model_list(str(PREDICTION_DIR))
     else:
         models = args.model_list
+        if args.mode == "pairwise-baseline" and args.baseline_model not in models:
+            models.append(args.baseline_model)
     model_answers = {}
-    for model in models:
+    for model in sorted(models):
         answers = load_model_answers(str(PREDICTION_DIR / f"{model}.jsonl"))
         for question in questions:
             assert question["question_id"] in answers
