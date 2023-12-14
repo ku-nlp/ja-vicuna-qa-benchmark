@@ -37,14 +37,19 @@ def make_match_single(
         for question in questions:
             qid = question["question_id"]
             answer = model_answers[model][qid]
-            ref_answer = ref_answers[judge.model_name][qid] if ref_answers else None
+            is_ref_needed = question["category"] in NEED_REF_CATS
+            if is_ref_needed:
+                assert ref_answers
+                ref_answer = ref_answers[judge.model_name][qid]
+            else:
+                ref_answer = None
             matches.append(
                 MatchSingle(
                     dict(question),
                     model,
                     answer,
                     judge,
-                    ref_answer=ref_answer,
+                    ref_answer,
                 )
             )
         yield model, matches
@@ -65,7 +70,12 @@ def make_match_pairwise(
             qid = question["question_id"]
             answer_1 = model_answers[model_1][qid]
             answer_2 = model_answers[model_2][qid]
-            answer_ref = ref_answers[judge.model_name][qid] if ref_answers else None
+            is_ref_needed = question["category"] in NEED_REF_CATS
+            if is_ref_needed:
+                assert ref_answers
+                ref_answer = ref_answers[judge.model_name][qid]
+            else:
+                ref_answer = None
             matches.append(
                 MatchPair(
                     dict(question),
@@ -74,7 +84,7 @@ def make_match_pairwise(
                     answer_1,
                     answer_2,
                     judge,
-                    ref_answer=answer_ref,
+                    ref_answer=ref_answer,
                 )
             )
         yield f"{model_1}_{model_2}", matches
@@ -168,7 +178,7 @@ if __name__ == "__main__":
     judge_model = args.judge_model
     answers = load_model_answers(str(REFERENCE_DIR / f"{judge_model}.jsonl"))
     for question in filter(lambda x: x["category"] in NEED_REF_CATS, questions):
-        assert question["question_id"] in answers[args.judge_model]
+        assert question["question_id"] in answers
     ref_answers = {judge_model: answers}
 
     logger.info("Load judge prompts")
@@ -199,7 +209,7 @@ if __name__ == "__main__":
     ):
         match_groups[match_id] = matches
     for match_id, matches in make_match_func(
-        questions_math, model_answers, judge_math, baseline_model
+        questions_math, model_answers, judge_math, baseline_model, ref_answers
     ):
         match_groups[match_id] += matches
     target_match_ids = set()
