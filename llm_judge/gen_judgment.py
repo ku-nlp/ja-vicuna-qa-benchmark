@@ -1,7 +1,3 @@
-"""
-Usage:
-python gen_judgment.py --model-list [LIST-OF-MODEL-ID] --parallel [num-concurrent-api-call] --mode [single|pairwise-baseline|pairwise-all]
-"""
 import argparse
 import logging
 from concurrent.futures import ThreadPoolExecutor
@@ -138,6 +134,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--yes", "-y", action="store_true", help="Skip confirmation and run."
     )
+    parser.add_argument(
+        "--overwrite", action="store_true", help="Overwrite existing judgment files."
+    )
     args = parser.parse_args()
 
     if args.verbose == 0:
@@ -210,6 +209,19 @@ if __name__ == "__main__":
         questions_math, models, model_answers, judge_math, baseline_model
     ):
         match_groups[match_id] += matches
+    target_match_ids = set()
+    for match_id in match_groups:
+        output_file = output_dir / f"{match_id}.jsonl"
+        if output_file.exists():
+            if args.overwrite:
+                output_file.unlink()
+            else:
+                logger.info(
+                    f"Skip evaluating {match_id}; to overwrite, use --overwrite"
+                )
+                continue
+        target_match_ids.add(match_id)
+    match_groups = {k: v for k, v in match_groups.items() if k in target_match_ids}
 
     logger.info(f"Mode: {args.mode}")
     logger.info(f"Judge model: {args.judge_model}")
