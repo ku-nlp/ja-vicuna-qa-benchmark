@@ -145,6 +145,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "--overwrite", action="store_true", help="Overwrite existing judgment files."
     )
+    parser.add_argument(
+        "--wandb",
+        action="store_true",
+        help="Log to wandb.",
+    )
     args = parser.parse_args()
 
     if args.verbose == 0:
@@ -156,6 +161,12 @@ if __name__ == "__main__":
         datefmt="%Y-%m-%d %H:%M:%S",
         level=level,
     )
+
+    if args.wandb:
+        import wandb
+
+        wandb.login()
+        wandb.init()
 
     logger.info("Load questions")
     questions = load_questions(str(QUESTION_FILE))
