@@ -14,13 +14,9 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 logger = logging.getLogger(__name__)
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-BENCHMARK_FILE_MAP = {
-    "jp_bench": DATA_DIR / "jp_bench" / "question.jsonl",
-}
-PREDICTION_DIR_MAP = {
-    "jp_bench": DATA_DIR / "jp_bench" / "model_answer",
-}
+JP_BENCH_DIR = Path(__file__).resolve().parent.parent / "data" / "jp_bench"
+QUESTION_FILE = JP_BENCH_DIR / "question.jsonl"
+PREDICTION_DIR = JP_BENCH_DIR / "model_answer"
 
 DEFAULT_TEMPERATURE_MAP = {
     "writing": 0.7,
@@ -141,8 +137,7 @@ if __name__ == "__main__":
 
     # test data
     logger.info("Load the data")
-    data_file = BENCHMARK_FILE_MAP[args.bench_name]
-    with open(data_file, "r") as f:
+    with open(QUESTION_FILE, "r") as f:
         questions = [json.loads(line) for line in tqdm(f)]
 
     logger.info("Start inference.")
@@ -182,9 +177,8 @@ if __name__ == "__main__":
         )
 
     logger.info("Save the results")
-    prediction_dir = PREDICTION_DIR_MAP[args.bench_name]
-    prediction_dir.mkdir(parents=True, exist_ok=True)
-    prediction_file = prediction_dir / f"{model_id}.jsonl"
+    PREDICTION_DIR.mkdir(parents=True, exist_ok=True)
+    prediction_file = PREDICTION_DIR / f"{model_id}.jsonl"
     with open(prediction_file, "w", encoding="utf-8") as f:
         for result in results:
             f.write(json.dumps(result, ensure_ascii=False) + "\n")

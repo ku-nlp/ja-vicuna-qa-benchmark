@@ -28,19 +28,11 @@ from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-BENCHMARK_FILE_MAP = {
-    "jp_bench": DATA_DIR / "jp_bench" / "question.jsonl",
-}
-PREDICTION_DIR_MAP = {
-    "jp_bench": DATA_DIR / "jp_bench" / "model_answer",
-}
-REFERENCE_DIR_MAP = {
-    "jp_bench": DATA_DIR / "jp_bench" / "reference_answer",
-}
-JUDGEMENT_DIR_MAP = {
-    "jp_bench": DATA_DIR / "jp_bench" / "model_judgment",
-}
+JP_BENCH_DIR = Path(__file__).resolve().parent.parent / "data" / "jp_bench"
+QUESTION_FILE = JP_BENCH_DIR / "question.jsonl"
+PREDICTION_DIR = JP_BENCH_DIR / "model_answer"
+REFERENCE_DIR = JP_BENCH_DIR / "reference_answer"
+JUDGEMENT_DIR = JP_BENCH_DIR / "model_judgment"
 
 
 def make_match(
@@ -213,41 +205,36 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     logger.info("Load questions")
-    question_file = BENCHMARK_FILE_MAP[args.bench_name]
-    questions = load_questions(question_file)
+    questions = load_questions(str(QUESTION_FILE))
     if args.first_n:
         logger.warning(f"Only run the first {args.first_n} judgments")
         questions = questions[: args.first_n]
 
     logger.info("Load answers")
-    answer_dir = PREDICTION_DIR_MAP[args.bench_name]
-    model_answers = load_model_answers(answer_dir)
+    model_answers = load_model_answers(str(PREDICTION_DIR))
 
     logger.info("Load reference answers")
-    reference_dir = REFERENCE_DIR_MAP[args.bench_name]
-    ref_answers = load_model_answers(reference_dir)
+    ref_answers = load_model_answers(str(REFERENCE_DIR))
 
     # Load judge
     logger.info("Load judge prompts")
     judge_prompts = load_judge_prompts(args.judge_file)
 
     if args.model_list is None:
-        models = get_model_list(answer_dir)
+        models = get_model_list(str(PREDICTION_DIR))
     else:
         models = args.model_list
-
-    output_dir = JUDGEMENT_DIR_MAP[args.bench_name]
 
     if args.mode == "single":
         judges = make_judge_single(args.judge_model, judge_prompts)
         play_a_match_func = play_a_match_single
-        output_file = output_dir / f"{args.judge_model}_single.jsonl"
+        output_file = JUDGEMENT_DIR / f"{args.judge_model}_single.jsonl"
         make_match_func = make_match_single
         baseline_model = None
     else:
         judges = make_judge_pairwise(args.judge_model, judge_prompts)
         play_a_match_func = play_a_match_pair
-        output_file = output_dir / f"{args.judge_model}_pair.jsonl"
+        output_file = JUDGEMENT_DIR / f"{args.judge_model}_pair.jsonl"
         if args.mode == "pairwise-all":
             make_match_func = make_match_all_pairs
             baseline_model = None
@@ -289,10 +276,10 @@ if __name__ == "__main__":
     # Play matches
     if args.parallel == 1:
         for match in tqdm(matches):
-            play_a_match_func(match, output_file=output_file)
+            play_a_match_func(match, output_file=str(output_file))
     else:
         np.random.shuffle(matches)
-        play_a_match_wrapper = partial(play_a_match_func, output_file=output_file)
+        play_a_match_wrapper = partial(play_a_match_func, output_file=str(output_file))
         with ThreadPoolExecutor(args.parallel) as executor:
             for match in tqdm(
                 executor.map(play_a_match_wrapper, matches), total=len(matches)
