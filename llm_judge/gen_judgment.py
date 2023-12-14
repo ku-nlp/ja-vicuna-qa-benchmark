@@ -192,6 +192,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "-v", "--verbose", action="count", default=0, help="verbosity level"
     )
+    parser.add_argument(
+        "--yes", "-y", action="store_true", help="Skip confirmation and run."
+    )
     args = parser.parse_args()
 
     if args.verbose == 0:
@@ -279,7 +282,9 @@ if __name__ == "__main__":
     logger.info(f"Total number of questions: {len(questions)}")
     logger.info(f"Total number of matches: {len(matches)}")
     logger.info(f"Output file: {output_file}")
-    input("Press Enter to confirm...")
+
+    if not args.yes:
+        input("Press Enter to confirm...")
 
     # Play matches
     if args.parallel == 1:
