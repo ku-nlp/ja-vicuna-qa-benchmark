@@ -9,9 +9,9 @@ import logging
 import os
 import re
 import time
+
 import openai
 from dotenv import load_dotenv
-
 from model_adapter import get_conversation_template
 
 logger = logging.getLogger(__name__)

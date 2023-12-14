@@ -8,12 +8,8 @@ if sys.version_info >= (3, 9):
 else:
     from functools import lru_cache as cache
 
-from transformers import (
-    AutoModelForCausalLM,
-    AutoTokenizer,
-)
-
 from conversation import Conversation, get_conv_template
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 
 class BaseModelAdapter:

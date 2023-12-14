@@ -2,15 +2,15 @@ import argparse
 import json
 import logging
 import random
-import shortuuid
 import time
 from pathlib import Path
-from tqdm import tqdm
 
 import numpy as np
+import shortuuid
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
+from tqdm import tqdm
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 logger = logging.getLogger(__name__)
 

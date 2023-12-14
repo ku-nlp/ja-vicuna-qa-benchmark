@@ -3,29 +3,28 @@ Usage:
 python gen_judgment.py --model-list [LIST-OF-MODEL-ID] --parallel [num-concurrent-api-call] --mode [single|pairwise-baseline|pairwise-all]
 """
 import argparse
-from concurrent.futures import ThreadPoolExecutor
 import logging
 import random
-from itertools import combinations
+from concurrent.futures import ThreadPoolExecutor
 from functools import partial
+from itertools import combinations
 from pathlib import Path
 
 import numpy as np
-from tqdm import tqdm
-
 from common import (
-    load_questions,
-    load_model_answers,
-    load_judge_prompts,
-    check_data,
-    play_a_match_pair,
-    play_a_match_single,
-    get_model_list,
+    NEED_REF_CATS,
     Judge,
     MatchPair,
     MatchSingle,
-    NEED_REF_CATS,
+    check_data,
+    get_model_list,
+    load_judge_prompts,
+    load_model_answers,
+    load_questions,
+    play_a_match_pair,
+    play_a_match_single,
 )
+from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
