@@ -237,34 +237,6 @@ def load_judge_prompts(prompt_file: str):
     return prompts
 
 
-def play_a_match_single(match: MatchSingle, output_file: str):
-    result = match.play()
-    logger.debug(
-        f"Question: {result['question_id']}, "
-        f"Model: {result['model']}, "
-        f"Score: {result['score']}"
-    )
-    os.makedirs(os.path.dirname(output_file), exist_ok=True)
-    with open(output_file, "a") as f:
-        f.write(json.dumps(result, ensure_ascii=False) + "\n")
-    return result
-
-
-def play_a_match_pair(match: MatchPair, output_file: str):
-    result = match.play()
-    logger.debug(
-        f"Question: {result['question_id']}, "
-        f"Model 1: {result['model_1']}, "
-        f"Model 2: {result['model_2']}, "
-        f"Winner 1: {result['g1_winner']}, "
-        f"Winner 2: {result['g2_winner']}"
-    )
-    os.makedirs(os.path.dirname(output_file), exist_ok=True)
-    with open(output_file, "a") as fout:
-        fout.write(json.dumps(result, ensure_ascii=False) + "\n")
-    return result
-
-
 def get_model_list(answer_dir):
     file_paths = glob.glob(f"{answer_dir}/*.jsonl")
     file_names = [os.path.splitext(os.path.basename(f))[0] for f in file_paths]

@@ -1,7 +1,7 @@
 import argparse
+import json
 import logging
 from concurrent.futures import ThreadPoolExecutor
-from functools import partial
 from itertools import combinations
 
 from common import (
@@ -17,8 +17,6 @@ from common import (
     load_judge_prompts,
     load_model_answers,
     load_questions,
-    play_a_match_pair,
-    play_a_match_single,
 )
 from tqdm import tqdm
 
@@ -28,10 +26,9 @@ logger = logging.getLogger(__name__)
 def make_match_single(
     questions,
     model_answers,
+    ref_answers,
     judge_default,
     judge_math,
-    ref_answers,
-    baseline_model=None,
 ):
     for model in model_answers:
         matches = []
@@ -61,9 +58,9 @@ def make_match_single(
 def make_match_pairwise(
     questions,
     model_answers,
+    ref_answers,
     judge_default,
     judge_math,
-    ref_answers=None,
     baseline_model=None,
 ):
     for model_1, model_2 in combinations(model_answers, 2):
@@ -191,44 +188,44 @@ if __name__ == "__main__":
     logger.info("Make matches")
     match_groups = {}
     if args.mode == "single":
-        judge_default = Judge(args.judge_model, judge_prompts["single"])
-        judge_math = Judge(args.judge_model, judge_prompts["single-math"])
-        play_a_match_func = play_a_match_single
+        for match_id, matches in make_match_single(
+            questions,
+            model_answers,
+            ref_answers=ref_answers,
+            judge_default=Judge(args.judge_model, judge_prompts["single"]),
+            judge_math=Judge(args.judge_model, judge_prompts["single-math"]),
+        ):
+            match_groups[match_id] = matches
         output_dir = JUDGEMENT_DIR / "single" / args.judge_model
-        make_match_func = make_match_single
-        baseline_model = None
     else:
         assert args.mode in {"pairwise-baseline", "pairwise-all"}
-        judge_default = Judge(args.judge_model, judge_prompts["pair"])
-        judge_math = Judge(args.judge_model, judge_prompts["pair-math"])
-        play_a_match_func = play_a_match_pair
-        output_dir = JUDGEMENT_DIR / "pairwise" / args.judge_model
-        make_match_func = make_match_pairwise
         if args.mode == "pairwise-all":
             baseline_model = None
         else:
             baseline_model = args.baseline_model
-    for match_id, matches in make_match_func(
-        questions, model_answers, judge_default, judge_math, ref_answers, baseline_model
-    ):
-        match_groups[match_id] = matches
+        for match_id, matches in make_match_pairwise(
+            questions,
+            model_answers,
+            ref_answers=ref_answers,
+            judge_default=Judge(args.judge_model, judge_prompts["pair"]),
+            judge_math=Judge(args.judge_model, judge_prompts["pair-math"]),
+            baseline_model=args.baseline_model,
+        ):
+            match_groups[match_id] = matches
+        output_dir = JUDGEMENT_DIR / "pairwise" / args.judge_model
     target_match_ids = set()
     for match_id in match_groups:
         output_file = output_dir / f"{match_id}.jsonl"
         if output_file.exists():
-            if args.overwrite:
-                output_file.unlink()
-            else:
-                logger.info(
-                    f"Skip evaluating {match_id}; to overwrite, use --overwrite"
-                )
+            if not args.overwrite:
+                logger.info(f"Skip {match_id}; to overwrite, use --overwrite")
                 continue
         target_match_ids.add(match_id)
     match_groups = {k: v for k, v in match_groups.items() if k in target_match_ids}
 
     logger.info(f"Mode: {args.mode}")
     logger.info(f"Judge model: {args.judge_model}")
-    logger.info(f"Baseline model: {baseline_model}")
+    logger.info(f"Baseline model: {args.baseline_model}")
     logger.info(f"Models: {list(model_answers.keys())}")
     logger.info(f"Total number of questions: {len(questions):,}")
     logger.info(
@@ -242,15 +239,17 @@ if __name__ == "__main__":
     logger.info("Play matches")
     for match_id, matches in match_groups.items():
         output_file = output_dir / f"{match_id}.jsonl"
+        results = []
         if args.parallel == 1:
-            for match in tqdm(matches):
-                play_a_match_func(match, output_file=str(output_file))
+            for match in matches:
+                results.append(match.play())
         else:
-            play_a_match_wrapper = partial(
-                play_a_match_func, output_file=str(output_file)
-            )
             with ThreadPoolExecutor(args.parallel) as executor:
-                for match in tqdm(
-                    executor.map(play_a_match_wrapper, matches), total=len(matches)
-                ):
-                    pass
+                futures = [executor.submit(match.play) for match in matches]
+                for future in tqdm(futures):
+                    results.append(future.result())
+        logger.info(f"Write {len(results)} judgments to {output_file}")
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(output_file, "w") as fout:
+            for result in results:
+                fout.write(json.dumps(result, ensure_ascii=False) + "\n")
