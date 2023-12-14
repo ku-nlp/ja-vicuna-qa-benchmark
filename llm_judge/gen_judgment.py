@@ -28,9 +28,10 @@ logger = logging.getLogger(__name__)
 def make_match_single(
     questions,
     model_answers,
-    judge,
+    judge_default,
+    judge_math,
+    ref_answers,
     baseline_model=None,
-    ref_answers=None,
 ):
     for model in model_answers:
         matches = []
@@ -39,9 +40,11 @@ def make_match_single(
             answer = model_answers[model][qid]
             is_ref_needed = question["category"] in NEED_REF_CATS
             if is_ref_needed:
+                judge = judge_math
                 assert ref_answers
                 ref_answer = ref_answers[judge.model_name][qid]
             else:
+                judge = judge_default
                 ref_answer = None
             matches.append(
                 MatchSingle(
@@ -58,9 +61,10 @@ def make_match_single(
 def make_match_pairwise(
     questions,
     model_answers,
-    judge,
-    baseline_model=None,
+    judge_default,
+    judge_math,
     ref_answers=None,
+    baseline_model=None,
 ):
     for model_1, model_2 in combinations(model_answers, 2):
         if baseline_model and baseline_model not in {model_1, model_2}:
@@ -72,9 +76,11 @@ def make_match_pairwise(
             answer_2 = model_answers[model_2][qid]
             is_ref_needed = question["category"] in NEED_REF_CATS
             if is_ref_needed:
+                judge = judge_math
                 assert ref_answers
                 ref_answer = ref_answers[judge.model_name][qid]
             else:
+                judge = judge_default
                 ref_answer = None
             matches.append(
                 MatchPair(
@@ -159,8 +165,6 @@ if __name__ == "__main__":
     if args.first_n:
         logger.warning(f"Only run the first {args.first_n} judgments")
         questions = questions[: args.first_n]
-    questions_math = [q for q in questions if q["category"] in NEED_REF_CATS]
-    questions_default = [q for q in questions if q["category"] not in NEED_REF_CATS]
 
     logger.info("Load answers")
     if args.model_list is None:
@@ -205,13 +209,9 @@ if __name__ == "__main__":
         else:
             baseline_model = args.baseline_model
     for match_id, matches in make_match_func(
-        questions_default, model_answers, judge_default, baseline_model
+        questions, model_answers, judge_default, judge_math, ref_answers, baseline_model
     ):
         match_groups[match_id] = matches
-    for match_id, matches in make_match_func(
-        questions_math, model_answers, judge_math, baseline_model, ref_answers
-    ):
-        match_groups[match_id] += matches
     target_match_ids = set()
     for match_id in match_groups:
         output_file = output_dir / f"{match_id}.jsonl"
