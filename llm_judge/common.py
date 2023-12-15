@@ -203,9 +203,20 @@ def load_model_answers(answer_dir: str):
     answers = {}
     with open(Path(answer_dir) / "results.jsonl", "r") as fin:
         for line in fin:
-            line = json.loads(line)
-            answers[line["question_id"]] = line
+            answer = json.loads(line)
+            answers[answer["question_id"]] = answer
     return answers
+
+
+def load_judgements(judgement_dir: str):
+    """Load judgements."""
+    judgements = {}
+    for path in Path(judgement_dir).glob("*.jsonl"):
+        with open(path, "r") as fin:
+            for line in fin:
+                judgement = json.loads(line)
+                judgements[path.stem] = judgement
+    return judgements
 
 
 def load_judge_prompts(prompt_file: str):

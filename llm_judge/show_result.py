@@ -18,6 +18,26 @@ JUDGEMENT_DIR_MAP = {
 pd.set_option("display.max_colwidth", 1000)
 
 
+def calculate_win_rate(results):
+    """Calculate win rate and adjusted win rate."""
+    num_win = 0
+    num_tie = 0
+    for result in results:
+        if result["g1_winner"] == "tie" or result["g1_winner"] != result["g2_winner"]:
+            num_tie += 1
+        elif result["g1_winner"] == "model_1":
+            num_win += 1
+    win_rate = num_win / len(results)
+    adjusted_win_rate = (num_win + 0.5 * num_tie) / len(results)
+    return {
+        "model_1": {"win_rate": win_rate, "adjusted_win_rate": adjusted_win_rate},
+        "model_2": {
+            "win_rate": 1 - win_rate,
+            "adjusted_win_rate": 1 - adjusted_win_rate,
+        },
+    }
+
+
 def display_result_single(args):
     if args.input_file is None:
         input_file = (

@@ -4,7 +4,6 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 from itertools import combinations
 
-import pandas as pd
 from common import (
     JUDGEMENT_DIR,
     NEED_REF_CATS,
@@ -20,6 +19,7 @@ from common import (
     load_questions,
 )
 from tqdm import tqdm
+from upload_result import upload_results
 
 logger = logging.getLogger(__name__)
 
@@ -274,43 +274,4 @@ if __name__ == "__main__":
                 fout.write(json.dumps(result, ensure_ascii=False) + "\n")
 
         if args.wandb:
-            project = f"ja-vicuna-qa-benchmark|{args.mode}"
-            if args.mode == "pairwise-baseline":
-                project += f"|{args.baseline_model}"
-            run = wandb.init(project=project, name=match_id, reinit=True)
-
-            if args.mode == "pairwise-baseline":
-                match = matches[0]
-                if args.baseline_model == match.model_1:
-                    model = match.model_2
-                    baseline_model = match.model_1
-                else:
-                    model = match.model_1
-                    baseline_model = match.model_2
-
-                num_win = 0
-                num_tie = 0
-                for result in results:
-                    if (
-                        result["g1_winner"] == "tie"
-                        or result["g1_winner"] != result["g2_winner"]
-                    ):
-                        num_tie += 1
-                    elif result["g1_winner"] == "model_1":
-                        num_win += 1
-                win_rate = num_win / len(results)
-                adjusted_win_rate = (num_win + 0.5 * num_tie) / len(results)
-
-                leaderboard_table = wandb.Table(
-                    columns=[
-                        "model",
-                        "baseline_model",
-                        "win_rate",
-                        "adjusted_win_rate",
-                    ],
-                    data=[[model, baseline_model, win_rate, adjusted_win_rate]],
-                )
-                run.log({"leaderboard": leaderboard_table})
-
-            outputs_table = wandb.Table(dataframe=pd.DataFrame(results))
-            run.log({"outputs": outputs_table})
+            upload_results(args.mode, match_id, results, args.baseline_model)
