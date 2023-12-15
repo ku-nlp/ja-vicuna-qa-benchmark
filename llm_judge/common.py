@@ -1,6 +1,3 @@
-"""
-Common data structures and utilities.
-"""
 import ast
 import dataclasses
 import json
@@ -9,6 +6,7 @@ import os
 import re
 import time
 from pathlib import Path
+from typing import Union, Optional
 
 import openai
 from dotenv import load_dotenv
@@ -25,13 +23,11 @@ QUESTION_FILE = JP_BENCH_DIR / "question.jsonl"
 PREDICTION_DIR = JP_BENCH_DIR / "model_answer"
 REFERENCE_DIR = JP_BENCH_DIR / "reference_answer"
 JUDGEMENT_DIR = JP_BENCH_DIR / "model_judgment"
+JUDGEMENT_PROMPT_FILE = JP_BENCH_DIR / "judge_prompts.jsonl"
 
 # API setting constants
 API_MAX_RETRY = 16
 API_RETRY_SLEEP = 10
-API_ERROR_OUTPUT = "$ERROR$"
-
-TIE_DELTA = 0.1
 
 # Categories that need reference answers
 NEED_REF_CATS = ["math", "reasoning", "coding"]
@@ -43,12 +39,10 @@ one_score_pattern = re.compile(r"\[\[(\d+\.?\d*)]]")
 one_score_pattern_another_format = re.compile(r"\[\[rating:(\d+)]]")
 one_score_pattern_another_format2 = re.compile(r"\[\[rating: (\d+)]]")
 
-reverse_model_map = {"model_1": "model_2", "model_2": "model_1"}
-
 
 @dataclasses.dataclass
 class Judge:
-    model_name: str
+    model: str
     prompt_template: dict
 
     def judge(self, **kwargs):
@@ -62,14 +56,14 @@ class Judge:
         for _ in range(API_MAX_RETRY):
             try:
                 response = openai.ChatCompletion.create(
-                    model=self.model_name,
+                    model=self.model,
                     messages=messages,
                     temperature=0,
                     max_tokens=2048,
                 )
                 return response["choices"][0]["message"]["content"]
             except openai.error.OpenAIError as e:
-                logger.warning(e)
+                logger.warning(f"OpenAI API error: {e}")
                 time.sleep(API_RETRY_SLEEP)
 
 
@@ -79,25 +73,25 @@ class MatchSingle:
     model: str
     answer: dict
     judge: Judge
-    ref_answer: dict = None
+    ref_answer: Optional[dict] = None
 
     def __post_init__(self) -> None:
         if self.judge.prompt_template["type"] != "single":
             raise ValueError(
                 f"invalid judge type: {self.judge.prompt_template['type']}"
             )
-
         if self.judge.prompt_template["output_format"] != "[[rating]]":
             raise ValueError(
                 f"Invalid output format: {self.judge.prompt_template['output_format']}"
             )
 
     def play(self):
+        """Play a single match."""
         kwargs = {
             "question": self.question["turns"][0],
             "answer": self.answer["choices"][0]["turns"][0],
         }
-        if self.ref_answer is not None:
+        if self.ref_answer:
             kwargs["ref_answer_1"] = self.ref_answer["choices"][0]["turns"][0]
         judgment = self.judge.judge(**kwargs)
         match = (
@@ -109,7 +103,6 @@ class MatchSingle:
             score = ast.literal_eval(match.groups()[0])
         else:
             score = -1
-
         return {
             "model": self.model,
             "question_id": self.question["question_id"],
@@ -117,7 +110,7 @@ class MatchSingle:
             "answer": self.answer["choices"][0]["turns"][0],
             "judgment": judgment,
             "score": score,
-            "judge_model": self.judge.model_name,
+            "judge_model": self.judge.model,
             "judge_prompt": self.judge.prompt_template["name"],
             "tstamp": time.time(),
         }
@@ -131,20 +124,21 @@ class MatchPair:
     answer_1: dict
     answer_2: dict
     judge: Judge
-    ref_answer: dict = None
+    ref_answer: Optional[dict] = None
 
     def __post_init__(self) -> None:
         if self.judge.prompt_template["type"] != "pairwise":
             raise ValueError(
                 f"invalid judge type: {self.judge.prompt_template['type']}"
             )
-
         if self.judge.prompt_template["output_format"] != "[[A]]":
             raise ValueError(
                 f"Invalid output format: {self.judge.prompt_template['output_format']}"
             )
 
     def play(self):
+        """Play a pairwise match."""
+
         def play(answer_a, answer_b):
             kwargs = {
                 "question": self.question["turns"][0],
@@ -167,12 +161,10 @@ class MatchPair:
             return winner, judgment
 
         g1_winner, g1_judgment = play(self.answer_1, self.answer_2)
-        g2_winner, g2_judgment = play(self.answer_2, self.answer_1)
+        g1_winner = "model_1" if g1_winner == "A" else "model_2"
 
-        g1_map = {"A": "model_1", "B": "model_2"}
-        g2_map = {"A": "model_2", "B": "model_1"}
-        g1_winner = g1_map.get(g1_winner, g1_winner)
-        g2_winner = g2_map.get(g2_winner, g2_winner)
+        g2_winner, g2_judgment = play(self.answer_2, self.answer_1)
+        g2_winner = "model_2" if g2_winner == "A" else "model_1"
 
         result = {
             "model_1": self.model_1,
@@ -185,21 +177,38 @@ class MatchPair:
             "g2_judgment": g2_judgment,
             "g1_winner": g1_winner,
             "g2_winner": g2_winner,
-            "judge_model": self.judge.model_name,
+            "judge_model": self.judge.model,
             "judge_prompt": self.judge.prompt_template["name"],
             "tstamp": time.time(),
         }
         return result
 
 
-def load_questions(question_file: str) -> list[dict]:
-    """Load questions from a file."""
+def load_questions(question_file: Union[str, Path]) -> list[dict]:
+    """Load questions from a file.
+
+    Args:
+        question_file (Union[str, Path]): The question file.
+    """
     with open(question_file, "r") as fin:
         return [json.loads(line) for line in fin]
 
 
-def load_model_answers(answer_dir: str):
-    """Load model answers."""
+def get_model_list(answer_dir: Union[str, Path]):
+    """Get model list from answer directory.
+
+    Args:
+        answer_dir (Union[str, Path]): The answer directory.
+    """
+    return [path.name for path in Path(answer_dir).iterdir()]
+
+
+def load_model_answers(answer_dir: Union[str, Path]):
+    """Load model answers.
+
+    Args:
+        answer_dir (Union[str, Path]): The answer directory.
+    """
     answers = {}
     with open(Path(answer_dir) / "results.jsonl", "r") as fin:
         for line in fin:
@@ -208,8 +217,12 @@ def load_model_answers(answer_dir: str):
     return answers
 
 
-def load_judgements(judgement_dir: str):
-    """Load judgements."""
+def load_judgements(judgement_dir: Union[str, Path]):
+    """Load judgements.
+
+    Args:
+        judgement_dir (Union[str, Path]): The judgement directory.
+    """
     judgements = {}
     for path in Path(judgement_dir).glob("*.jsonl"):
         with open(path, "r") as fin:
@@ -220,8 +233,29 @@ def load_judgements(judgement_dir: str):
     return judgements
 
 
-def filter_single_judgements(result_id_results_map, model_list=None):
-    """Filter results by model_list."""
+def load_judge_prompts(prompt_file: Union[str, Path]):
+    """Load judge prompts.
+
+    Args:
+        prompt_file (Union[str, Path]): The prompt file.
+    """
+    prompts = {}
+    with open(prompt_file) as fin:
+        for line in fin:
+            line = json.loads(line)
+            prompts[line["name"]] = line
+    return prompts
+
+
+def filter_single_judgements(
+    result_id_results_map: dict[str, list[dict]], model_list: Optional[list[str]] = None
+):
+    """Filter results by specified models.
+
+    Args:
+        result_id_results_map (dict[str, list[dict]]): A dict of results.
+        model_list (list[str], optional): A list of models. Defaults to None.
+    """
     if model_list is None:
         return result_id_results_map
     filtered_result_id_results_map = {}
@@ -233,9 +267,17 @@ def filter_single_judgements(result_id_results_map, model_list=None):
 
 
 def filter_pairwise_judgements(
-    result_id_results_map, model_list=None, baseline_model=None
+    result_id_results_map: dict[str, list[dict]],
+    model_list: Optional[list[str]] = None,
+    baseline_model: Optional[str] = None,
 ):
-    """Filter results by model_list."""
+    """Filter results by specified models.
+
+    Args:
+        result_id_results_map (dict[str, list[dict]]): A dict of results.
+        model_list (list[str], optional): A list of models. Defaults to None.
+        baseline_model (str, optional): The baseline model. Defaults to None.
+    """
     filtered_result_id_results_map = {}
     for result_id, results in result_id_results_map.items():
         result = results[0]
@@ -258,18 +300,3 @@ def filter_pairwise_judgements(
         else:
             filtered_result_id_results_map[result_id] = results
     return filtered_result_id_results_map
-
-
-def load_judge_prompts(prompt_file: str):
-    """Load judge prompts."""
-    prompts = {}
-    with open(prompt_file) as fin:
-        for line in fin:
-            line = json.loads(line)
-            prompts[line["name"]] = line
-    return prompts
-
-
-def get_model_list(answer_dir):
-    """Get model list from answer directory."""
-    return [path.name for path in Path(answer_dir).iterdir()]

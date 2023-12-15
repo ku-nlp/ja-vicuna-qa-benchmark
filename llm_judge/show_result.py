@@ -20,14 +20,22 @@ JUDGEMENT_DIR_MAP = {
 pd.set_option("display.max_colwidth", 1000)
 
 
-def calculate_average_score(results):
-    """Calculate average score."""
+def calculate_average_score(results: list[dict]):
+    """Calculate average score.
+
+    Args:
+        results: A list of results.
+    """
     score = sum([result["score"] for result in results]) / len(results)
     return score
 
 
-def calculate_win_rate(results):
-    """Calculate win rate and adjusted win rate."""
+def calculate_win_rate(results: list[dict]):
+    """Calculate win rate and adjusted win rate.
+
+    Args:
+        results: A list of results.
+    """
     num_win = 0
     num_tie = 0
     for result in results:
@@ -47,7 +55,11 @@ def calculate_win_rate(results):
 
 
 def display_result_single(result_id_results_map: dict[str, list[dict]]):
-    """Display single answer grading results."""
+    """Display single answer grading results.
+
+    Args:
+        result_id_results_map: A map from result id to a list of results.
+    """
     result_table = []
     for _, results in result_id_results_map.items():
         example = results[0]
@@ -65,7 +77,12 @@ def display_result_single(result_id_results_map: dict[str, list[dict]]):
 def display_result_pairwise(
     result_id_results_map: dict[str, list[dict]], baseline_model=None
 ):
-    """Display pairwise win rate results."""
+    """Display pairwise win rate results.
+
+    Args:
+        result_id_results_map: A map from result id to a list of results.
+        baseline_model: Baseline model. If not specified, all pairs will be compared.
+    """
     result_table = []
     for _, results in result_id_results_map.items():
         example = results[0]
@@ -108,14 +125,17 @@ if __name__ == "__main__":
         choices=["pairwise-baseline", "pairwise-all", "single"],
         help=(
             "Evaluation mode. "
-            "`pairwise-baseline` runs pairwise comparision against a baseline. "
-            "`pairwise-all` runs pairwise comparision between all pairs. "
+            "`pairwise-baseline` runs pairwise comparison against a baseline. "
+            "`pairwise-all` runs pairwise comparison between all pairs. "
             "`single` runs single answer grading."
         ),
     )
-    parser.add_argument("--judge-model", type=str, default="gpt-4")
+    parser.add_argument("--judge-model", type=str, default="gpt-4", help="Judge model")
     parser.add_argument(
-        "--baseline-model", type=str, default="openai--text-davinci-003"
+        "--baseline-model",
+        type=str,
+        default="openai--text-davinci-003",
+        help="Baseline model. Only used in `pairwise-baseline` mode.",
     )
     parser.add_argument(
         "--model-list",
@@ -125,7 +145,7 @@ if __name__ == "__main__":
         help="A list of models to be evaluated",
     )
     parser.add_argument(
-        "--verbose", "-v", action="count", default=0, help="verbosity level"
+        "--verbose", "-v", action="count", default=0, help="Verbosity level"
     )
     args = parser.parse_args()
 

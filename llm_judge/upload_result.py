@@ -21,6 +21,14 @@ def upload_results(
     results: list[dict],
     baseline_model: str = None,
 ):
+    """Upload results to wandb.
+
+    Args:
+        mode: Evaluation mode.
+        result_id: Result ID.
+        results: A list of results.
+        baseline_model: Baseline model name. Only used in `pairwise-baseline` mode.
+    """
     project = os.getenv("WANDB_PROJECT", "ja-vicuna-qa-benchmark")
     project += f"|{mode}"
     if mode == "pairwise-baseline":
@@ -65,8 +73,8 @@ if __name__ == "__main__":
         choices=["pairwise-baseline", "pairwise-all", "single"],
         help=(
             "Evaluation mode. "
-            "`pairwise-baseline` runs pairwise comparision against a baseline. "
-            "`pairwise-all` runs pairwise comparision between all pairs. "
+            "`pairwise-baseline` runs pairwise comparison against a baseline. "
+            "`pairwise-all` runs pairwise comparison between all pairs. "
             "`single` runs single answer grading."
         ),
     )

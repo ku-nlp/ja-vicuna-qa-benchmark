@@ -18,18 +18,26 @@ openai.organization = os.getenv("OPENAI_ORGANIZATION")
 
 
 def generate_response(input_text, generation_config) -> str:
+    """Generate a response from the input text.
+
+    Args:
+        input_text: The input text.
+        generation_config: The config for the generation.
+    """
     response = openai.Completion.create(prompt=input_text, **generation_config)
     return response.choices[0].text
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str, required=True, help="config file")
     parser.add_argument(
-        "-v", "--verbose", action="count", default=0, help="verbosity level"
+        "--config", type=str, required=True, help="Path to configuration file"
     )
     parser.add_argument(
-        "--overwrite", action="store_true", help="overwrite the existing results"
+        "-v", "--verbose", action="count", default=0, help="Verbosity level"
+    )
+    parser.add_argument(
+        "--overwrite", action="store_true", help="Overwrite the existing results"
     )
     args = parser.parse_args()
 
@@ -92,8 +100,10 @@ if __name__ == "__main__":
     with open(prediction_file, "w", encoding="utf-8") as f:
         for result in results:
             f.write(json.dumps(result, ensure_ascii=False) + "\n")
+    logger.info(f"Saved the results to {prediction_file}")
 
+    logger.info("Save the config")
     config_file = prediction_dir / "config.json"
     with open(config_file, "w", encoding="utf-8") as f:
         json.dump(config, f, ensure_ascii=False, indent=2)
-    logger.info(f"Saved the results to {prediction_file}")
+    logger.info(f"Saved the config to {config_file}")

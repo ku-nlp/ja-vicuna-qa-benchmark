@@ -67,21 +67,17 @@ def generate_response(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str, required=True, help="config file")
     parser.add_argument(
-        "--bench-name",
-        default="jp_bench",
-        type=str,
-        help="A file that contains instructions (one instruction per line)",
+        "--config", type=str, required=True, help="Path to configuration file"
     )
     parser.add_argument(
-        "--seed", default=0, type=int, help="random seed for reproducibility"
+        "--seed", default=0, type=int, help="Random seed for reproducibility"
     )
     parser.add_argument(
-        "-v", "--verbose", action="count", default=0, help="verbosity level"
+        "-v", "--verbose", action="count", default=0, help="Verbosity level"
     )
     parser.add_argument(
-        "--overwrite", action="store_true", help="overwrite the existing results"
+        "--overwrite", action="store_true", help="Overwrite the existing results"
     )
     args = parser.parse_args()
 
@@ -185,7 +181,10 @@ if __name__ == "__main__":
     with open(prediction_file, "w", encoding="utf-8") as f:
         for result in results:
             f.write(json.dumps(result, ensure_ascii=False) + "\n")
+    logger.info(f"Saved the results to {prediction_file}")
+
+    logger.info("Save the config")
     config_file = prediction_dir / "config.json"
     with open(config_file, "w", encoding="utf-8") as f:
         json.dump(config, f, ensure_ascii=False, indent=2)
-    logger.info(f"Saved the results to {prediction_file}")
+    logger.info(f"Saved the config to {config_file}")
