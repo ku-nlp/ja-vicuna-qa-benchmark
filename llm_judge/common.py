@@ -111,12 +111,13 @@ class MatchSingle:
             score = -1
 
         return {
-            "question_id": self.question["question_id"],
             "model": self.model,
-            "judge": (self.judge.model_name, self.judge.prompt_template["name"]),
+            "question_id": self.question["question_id"],
+            "question": self.question["turns"][0],
+            "answer": self.answer["choices"][0]["turns"][0],
             "judgment": judgment,
             "score": score,
-            "turn": 1,
+            "judge": (self.judge.model_name, self.judge.prompt_template["name"]),
             "tstamp": time.time(),
         }
 
@@ -173,15 +174,17 @@ class MatchPair:
         g2_winner = g2_map.get(g2_winner, g2_winner)
 
         result = {
-            "question_id": self.question["question_id"],
             "model_1": self.model_1,
             "model_2": self.model_2,
+            "question_id": self.question["question_id"],
+            "question": self.question["turns"][0],
+            "answer_1": self.answer_1["choices"][0]["turns"][0],
+            "answer_2": self.answer_2["choices"][0]["turns"][0],
+            "g1_judgment": g1_judgment,
+            "g2_judgment": g2_judgment,
             "g1_winner": g1_winner,
             "g2_winner": g2_winner,
             "judge": (self.judge.model_name, self.judge.prompt_template["name"]),
-            "g1_judgment": g1_judgment,
-            "g2_judgment": g2_judgment,
-            "turn": 1,
             "tstamp": time.time(),
         }
         return result
