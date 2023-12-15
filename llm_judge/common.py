@@ -117,7 +117,8 @@ class MatchSingle:
             "answer": self.answer["choices"][0]["turns"][0],
             "judgment": judgment,
             "score": score,
-            "judge": (self.judge.model_name, self.judge.prompt_template["name"]),
+            "judge_model": self.judge.model_name,
+            "judge_prompt": self.judge.prompt_template["name"],
             "tstamp": time.time(),
         }
 
@@ -184,7 +185,8 @@ class MatchPair:
             "g2_judgment": g2_judgment,
             "g1_winner": g1_winner,
             "g2_winner": g2_winner,
-            "judge": (self.judge.model_name, self.judge.prompt_template["name"]),
+            "judge_model": self.judge.model_name,
+            "judge_prompt": self.judge.prompt_template["name"],
             "tstamp": time.time(),
         }
         return result

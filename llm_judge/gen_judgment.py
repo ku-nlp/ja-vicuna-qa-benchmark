@@ -4,6 +4,7 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 from itertools import combinations
 
+import pandas as pd
 from common import (
     JUDGEMENT_DIR,
     NEED_REF_CATS,
@@ -166,7 +167,6 @@ if __name__ == "__main__":
         import wandb
 
         wandb.login()
-        wandb.init()
 
     logger.info("Load questions")
     questions = load_questions(str(QUESTION_FILE))
@@ -261,8 +261,14 @@ if __name__ == "__main__":
                 futures = [executor.submit(match.play) for match in matches]
                 for future in tqdm(futures):
                     results.append(future.result())
+
         logger.info(f"Write {len(results)} judgments to {output_file}")
         output_file.parent.mkdir(parents=True, exist_ok=True)
         with open(output_file, "w") as fout:
             for result in results:
                 fout.write(json.dumps(result, ensure_ascii=False) + "\n")
+
+        if args.wandb:
+            run = wandb.init(name=f"{args.mode}/{match_id}", reinit=True)
+            raw_results_table = wandb.Table(dataframe=pd.DataFrame(results))
+            run.log({"Raw Results": raw_results_table})
