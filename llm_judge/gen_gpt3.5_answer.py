@@ -28,6 +28,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "-v", "--verbose", action="count", default=0, help="verbosity level"
     )
+    parser.add_argument(
+        "--overwrite", action="store_true", help="overwrite the existing results"
+    )
     args = parser.parse_args()
 
     if args.verbose == 0:
@@ -57,6 +60,13 @@ if __name__ == "__main__":
         raise ValueError("prompt_template must contain {instruction}")
     generation_config = config["generation_config"]
 
+    PREDICTION_DIR.mkdir(parents=True, exist_ok=True)
+    prediction_file = PREDICTION_DIR / f"{model_id}.jsonl"
+    if prediction_file.exists() and not args.overwrite:
+        raise FileExistsError(
+            f"{prediction_file} already exists. Use --overwrite to overwrite."
+        )
+
     results = []
     for question in tqdm(questions):
         instruction = question["turns"][0]
@@ -78,9 +88,9 @@ if __name__ == "__main__":
         )
 
     logger.info("Save the results")
-    PREDICTION_DIR.mkdir(parents=True, exist_ok=True)
-    prediction_file = PREDICTION_DIR / f"{model_id}.json"
     with open(prediction_file, "w", encoding="utf-8") as f:
         for result in results:
             f.write(json.dumps(result, ensure_ascii=False) + "\n")
+    with open(prediction_file.with_suffix(".json"), "w", encoding="utf-8") as f:
+        json.dump(config, f, ensure_ascii=False, indent=2)
     logger.info(f"Saved the results to {prediction_file}")

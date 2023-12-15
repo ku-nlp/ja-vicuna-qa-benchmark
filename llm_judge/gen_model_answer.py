@@ -80,6 +80,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "-v", "--verbose", action="count", default=0, help="verbosity level"
     )
+    parser.add_argument(
+        "--overwrite", action="store_true", help="overwrite the existing results"
+    )
     args = parser.parse_args()
 
     if args.verbose == 0:
@@ -131,7 +134,6 @@ if __name__ == "__main__":
     )
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_name_or_path)
 
-    # test data
     logger.info("Load the data")
     questions = load_questions(str(QUESTION_FILE))
 
@@ -141,6 +143,14 @@ if __name__ == "__main__":
     if "{instruction}" not in prompt_template:
         raise ValueError("prompt_template must contain {instruction}")
     special_token_map = config.get("special_token_map", {})
+
+    PREDICTION_DIR.mkdir(parents=True, exist_ok=True)
+    prediction_file = PREDICTION_DIR / f"{model_id}.json"
+    if prediction_file.exists() and not args.overwrite:
+        raise FileExistsError(
+            f"{prediction_file} already exists. Use --overwrite to overwrite."
+        )
+
     results = []
     for index, question in tqdm(enumerate(questions)):
         instruction = question["turns"][0]
@@ -172,9 +182,9 @@ if __name__ == "__main__":
         )
 
     logger.info("Save the results")
-    PREDICTION_DIR.mkdir(parents=True, exist_ok=True)
-    prediction_file = PREDICTION_DIR / f"{model_id}.jsonl"
     with open(prediction_file, "w", encoding="utf-8") as f:
         for result in results:
             f.write(json.dumps(result, ensure_ascii=False) + "\n")
+    with open(prediction_file.with_suffix(".json"), "w", encoding="utf-8") as f:
+        json.dump(config, f, ensure_ascii=False, indent=2)
     logger.info(f"Saved the results to {prediction_file}")
