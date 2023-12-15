@@ -213,10 +213,51 @@ def load_judgements(judgement_dir: str):
     judgements = {}
     for path in Path(judgement_dir).glob("*.jsonl"):
         with open(path, "r") as fin:
+            results = []
             for line in fin:
-                judgement = json.loads(line)
-                judgements[path.stem] = judgement
+                results.append(json.loads(line))
+            judgements[path.stem] = results
     return judgements
+
+
+def filter_single_judgements(result_id_results_map, model_list=None):
+    """Filter results by model_list."""
+    if model_list is None:
+        return result_id_results_map
+    filtered_result_id_results_map = {}
+    for result_id, results in result_id_results_map.items():
+        result = results[0]
+        if result["model"] in model_list:
+            filtered_result_id_results_map[result_id] = results
+    return filtered_result_id_results_map
+
+
+def filter_pairwise_judgements(
+    result_id_results_map, model_list=None, baseline_model=None
+):
+    """Filter results by model_list."""
+    filtered_result_id_results_map = {}
+    for result_id, results in result_id_results_map.items():
+        result = results[0]
+        if model_list and baseline_model:
+            if (
+                result["model_1"] in model_list and result["model_2"] == baseline_model
+            ) or (
+                result["model_2"] in model_list and result["model_1"] == baseline_model
+            ):
+                filtered_result_id_results_map[result_id] = results
+        elif model_list and baseline_model is None:
+            if result["model_1"] in model_list and result["model_2"] in model_list:
+                filtered_result_id_results_map[result_id] = results
+        elif model_list is None and baseline_model:
+            if (
+                result["model_1"] == baseline_model
+                or result["model_2"] == baseline_model
+            ):
+                filtered_result_id_results_map[result_id] = results
+        else:
+            filtered_result_id_results_map[result_id] = results
+    return filtered_result_id_results_map
 
 
 def load_judge_prompts(prompt_file: str):

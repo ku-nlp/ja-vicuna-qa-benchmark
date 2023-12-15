@@ -4,7 +4,12 @@ import os
 
 import pandas as pd
 import wandb
-from common import JUDGEMENT_DIR, load_judgements
+from common import (
+    JUDGEMENT_DIR,
+    load_judgements,
+    filter_single_judgements,
+    filter_pairwise_judgements,
+)
 from show_result import calculate_win_rate
 
 logger = logging.getLogger(__name__)
@@ -103,14 +108,21 @@ if __name__ == "__main__":
     mode = "single" if args.mode == "single" else "pairwise"
     judgement_dir = JUDGEMENT_DIR / mode / args.judge_model
     result_id_results_map = load_judgements(judgement_dir)
+    if args.mode == "single":
+        result_id_results_map = filter_single_judgements(
+            result_id_results_map, args.model_list
+        )
+    elif args.mode == "pairwise-baseline":
+        result_id_results_map = filter_pairwise_judgements(
+            result_id_results_map, args.model_list, args.baseline_model
+        )
+    else:
+        result_id_results_map = filter_pairwise_judgements(
+            result_id_results_map, args.model_list
+        )
 
     logger.info("Log results to wandb")
     for result_id, results in result_id_results_map.items():
-        if args.mode == "pairwise-baseline":
-            assert args.baseline_model is not None
-            example = results[0]
-            if args.baseline not in {example["model_1"], example["model_2"]}:
-                continue
         upload_results(
             mode=args.mode,
             result_id=result_id,
