@@ -168,9 +168,8 @@ if __name__ == "__main__":
             special_token_map=special_token_map,
         )
 
-        logger.debug(f"======={index}=======")
-        logger.debug(f"Input: {instruction}")
-        logger.debug(f"Output: {output}")
+        logger.debug(f"{instruction}\n\n{output}")
+
         results.append(
             {
                 "question_id": int(question["question_id"]),
