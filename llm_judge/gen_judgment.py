@@ -183,14 +183,14 @@ if __name__ == "__main__":
             models.append(args.baseline_model)
     model_answers = {}
     for model in sorted(models):
-        answers = load_model_answers(str(PREDICTION_DIR / f"{model}.jsonl"))
+        answers = load_model_answers(str(PREDICTION_DIR / model))
         for question in questions:
             assert question["question_id"] in answers
         model_answers[model] = answers
 
     logger.info("Load reference answers")
     judge_model = args.judge_model
-    answers = load_model_answers(str(REFERENCE_DIR / f"{judge_model}.jsonl"))
+    answers = load_model_answers(str(REFERENCE_DIR / judge_model))
     for question in filter(lambda x: x["category"] in NEED_REF_CATS, questions):
         assert question["question_id"] in answers
     ref_answers = {judge_model: answers}
@@ -244,7 +244,7 @@ if __name__ == "__main__":
     logger.info(
         f"Total number of matches: {sum(len(m) for m in match_groups.values()):,}"
     )
-    logger.info(f"Output file: {output_dir}")
+    logger.info(f"Output directory: {output_dir}")
 
     if not args.yes:
         input("Press Enter to confirm...")

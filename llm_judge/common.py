@@ -3,7 +3,6 @@ Common data structures and utilities.
 """
 import ast
 import dataclasses
-import glob
 import json
 import logging
 import os
@@ -194,11 +193,10 @@ def load_questions(question_file: str) -> list[dict]:
         return [json.loads(line) for line in fin]
 
 
-def load_model_answers(answer_file: str):
+def load_model_answers(answer_dir: str):
     """Load model answers."""
-    model_name, _ = os.path.splitext(os.path.basename(answer_file))
     answers = {}
-    with open(answer_file, "r") as fin:
+    with open(Path(answer_dir) / "results.jsonl", "r") as fin:
         for line in fin:
             line = json.loads(line)
             answers[line["question_id"]] = line
@@ -216,6 +214,5 @@ def load_judge_prompts(prompt_file: str):
 
 
 def get_model_list(answer_dir):
-    file_paths = glob.glob(f"{answer_dir}/*.jsonl")
-    file_names = [os.path.splitext(os.path.basename(f))[0] for f in file_paths]
-    return file_names
+    """Get model list from answer directory."""
+    return [path.name for path in Path(answer_dir).iterdir()]
