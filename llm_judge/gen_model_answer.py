@@ -144,8 +144,8 @@ if __name__ == "__main__":
         raise ValueError("prompt_template must contain {instruction}")
     special_token_map = config.get("special_token_map", {})
 
-    PREDICTION_DIR.mkdir(parents=True, exist_ok=True)
-    prediction_file = PREDICTION_DIR / f"{model_id}.json"
+    prediction_dir = PREDICTION_DIR / model_id
+    prediction_file = prediction_dir / "results.jsonl"
     if prediction_file.exists() and not args.overwrite:
         raise FileExistsError(
             f"{prediction_file} already exists. Use --overwrite to overwrite."
@@ -182,9 +182,11 @@ if __name__ == "__main__":
         )
 
     logger.info("Save the results")
+    prediction_dir.mkdir(parents=True, exist_ok=True)
     with open(prediction_file, "w", encoding="utf-8") as f:
         for result in results:
             f.write(json.dumps(result, ensure_ascii=False) + "\n")
-    with open(prediction_file.with_suffix(".json"), "w", encoding="utf-8") as f:
+    config_file = prediction_dir / "config.json"
+    with open(config_file, "w", encoding="utf-8") as f:
         json.dump(config, f, ensure_ascii=False, indent=2)
     logger.info(f"Saved the results to {prediction_file}")
