@@ -257,7 +257,6 @@ if __name__ == "__main__":
     logger.info(f"Mode: {args.mode}")
     logger.info(f"Judge model: {args.judge_model}")
     logger.info(f"Baseline model: {args.baseline_model}")
-    logger.info(f"Models: {list(model_answers.keys())}")
     logger.info(f"Total number of questions: {len(questions):,}")
     logger.info(
         f"Total number of matches: {sum(len(matches) for matches in match_groups.values()):,}"
