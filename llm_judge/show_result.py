@@ -18,6 +18,7 @@ JUDGEMENT_DIR_MAP = {
 }
 
 pd.set_option("display.max_colwidth", 1000)
+pd.set_option("display.float_format", "{:.1f}".format)
 
 
 def calculate_average_score(results: list[dict]):
@@ -36,21 +37,23 @@ def calculate_win_rate(results: list[dict]):
     Args:
         results: A list of results.
     """
-    num_win = 0
+    num_win_1 = 0
+    num_win_2 = 0
     num_tie = 0
     for result in results:
         if result["g1_winner"] == "tie" or result["g1_winner"] != result["g2_winner"]:
             num_tie += 1
         elif result["g1_winner"] == "model_1":
-            num_win += 1
-    win_rate = num_win / len(results)
-    adjusted_win_rate = (num_win + 0.5 * num_tie) / len(results)
+            num_win_1 += 1
+        else:
+            num_win_2 += 1
+    win_rate_1 = num_win_1 / len(results)
+    adjusted_win_rate_1 = (num_win_1 + 0.5 * num_tie) / len(results)
+    win_rate_2 = num_win_2 / len(results)
+    adjusted_win_rate_2 = (num_win_2 + 0.5 * num_tie) / len(results)
     return {
-        "model_1": {"win_rate": win_rate, "adjusted_win_rate": adjusted_win_rate},
-        "model_2": {
-            "win_rate": 1 - win_rate,
-            "adjusted_win_rate": 1 - adjusted_win_rate,
-        },
+        "model_1": {"win_rate": win_rate_1, "adjusted_win_rate": adjusted_win_rate_1},
+        "model_2": {"win_rate": win_rate_2, "adjusted_win_rate": adjusted_win_rate_2},
     }
 
 
@@ -107,8 +110,8 @@ def display_result_pairwise(
             {
                 "model_1": model_1,
                 "model_2": model_2,
-                "win_rate": win_rate,
-                "adjusted_win_rate": adjusted_win_rate,
+                "win_rate": win_rate * 100,
+                "adjusted_win_rate": adjusted_win_rate * 100,
             }
         )
 
