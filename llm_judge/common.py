@@ -130,9 +130,9 @@ class MatchSingle:
             )
         num_output_tokens = 200  # Estimated from a few samples
         if self.judge.model == "gpt-4":
-            return 0.03 * num_input_tokens + 0.06 * num_output_tokens / 1_000
+            return (0.03 * num_input_tokens + 0.06 * num_output_tokens) / 1_000
         elif self.judge.model == "gpt-3.5-turbo":
-            return 0.001 * num_input_tokens + 0.002 * num_output_tokens / 1_000
+            return (0.001 * num_input_tokens + 0.002 * num_output_tokens) / 1_000
         raise AssertionError
 
 

@@ -241,7 +241,7 @@ if __name__ == "__main__":
             ref_answers=ref_answers,
             judge_default=Judge(args.judge_model, judge_prompts["pair"]),
             judge_math=Judge(args.judge_model, judge_prompts["pair-math"]),
-            baseline_model=args.baseline_model,
+            baseline_model=baseline_model,
         )
         output_dir = JUDGEMENT_DIR / "pairwise" / args.judge_model
     target_match_ids = set()
@@ -256,7 +256,8 @@ if __name__ == "__main__":
 
     logger.info(f"Mode: {args.mode}")
     logger.info(f"Judge model: {args.judge_model}")
-    logger.info(f"Baseline model: {args.baseline_model}")
+    if args.mode == "pairwise-baseline":
+        logger.info(f"Baseline model: {args.baseline_model}")
     logger.info(f"Total number of questions: {len(questions):,}")
     logger.info(
         f"Total number of matches: {sum(len(matches) for matches in match_groups.values()):,}"
