@@ -57,11 +57,11 @@ def upload_results(
         leaderboard_table = wandb.Table(
             columns=[
                 "model",
+                "adjusted_win_rate",
                 "win_rate",
                 "lose_rate",
-                "adjusted_win_rate",
             ],
-            data=[[model, win_rate, lose_rate, adjusted_win_rate]],
+            data=[[model, adjusted_win_rate, win_rate, lose_rate]],
         )
         run.log({"leaderboard": leaderboard_table})
 
