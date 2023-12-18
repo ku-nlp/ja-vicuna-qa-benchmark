@@ -121,7 +121,7 @@ python llm_judge/show_result.py \
 If you want to upload the results to W&B, you can run the following command:
 
 ```bash
-python llm_judge/upload_result.py \
+WANDB_ENTITY=<USER-NAME or ORGANIZATION-NAME> python llm_judge/upload_result.py \
     --mode {single|pairwise-baseline|pairwise-all} \
     [--baseline-model <BASELINE-MODEL-ID>] \
     [--model-list <LIST-OF-MODEL-IDS>]
