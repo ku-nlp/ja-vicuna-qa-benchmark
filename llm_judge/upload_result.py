@@ -46,19 +46,22 @@ def upload_results(
         if baseline_model == example["model_2"]:
             model = example["model_1"]
             win_rate = win_rate_map["model_1"]["win_rate"] * 100
+            lose_rate = win_rate_map["model_2"]["win_rate"] * 100
             adjusted_win_rate = win_rate_map["model_1"]["adjusted_win_rate"] * 100
         else:
             model = example["model_2"]
             win_rate = win_rate_map["model_2"]["win_rate"] * 100
+            lose_rate = win_rate_map["model_1"]["win_rate"] * 100
             adjusted_win_rate = win_rate_map["model_2"]["adjusted_win_rate"] * 100
 
         leaderboard_table = wandb.Table(
             columns=[
                 "model",
                 "win_rate",
+                "lose_rate",
                 "adjusted_win_rate",
             ],
-            data=[[model, win_rate, adjusted_win_rate]],
+            data=[[model, win_rate, lose_rate, adjusted_win_rate]],
         )
         run.log({"leaderboard": leaderboard_table})
 
