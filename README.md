@@ -144,13 +144,13 @@ Model outputs:
 
 ## Pairwise win-rate compared with GPT-3.5-davinci-003
 
-| Model                                                    | Win | Loss | Tie | Win Rate | Loss Rate | Win Rate Adjusted |
-|----------------------------------------------------------|-----|------|-----|----------|-----------|-------------------|
-| llm-jp--llm-jp-13b-instruct-lora-jaster-dolly-oasst-v1.0 |  22 |   48 |  10 | 0.2750   | 0.6000    | 0.33750           |
-| rinna--japanese-gpt-neox-3.6b-instruction-ppo            |  10 |   61 |   9 | 0.1250   | 0.7625    | 0.18125           |
-| llm-jp--llm-jp-13b-instruct-full-jaster-dolly-oasst-v1.0 |   7 |   65 |   8 | 0.0875   | 0.8125    | 0.13750           |
-| rinna--japanese-gpt-neox-3.6b-instruction-sft-v2         |   8 |   69 |   3 | 0.1000   | 0.8625    | 0.11875           |
-| cyberagent--calm2-7b-chat                                |   5 |   67 |   8 | 0.0625   | 0.8375    | 0.11250           |
+| Model                                                    | Win Rate | Loss Rate | Win Rate Adjusted |
+|----------------------------------------------------------|----------|-----------|-------------------|
+| llm-jp--llm-jp-13b-instruct-lora-jaster-dolly-oasst-v1.0 | 28.7     | 62.5      | 33.1              |
+| rinna--japanese-gpt-neox-3.6b-instruction-ppo            | 13.8     | 13.8      | 18.8              |
+| rinna--japanese-gpt-neox-3.6b-instruction-sft-v2         | 8.8      | 82.5      | 13.1              |
+| cyberagent--calm2-7b-chat                                | 6.2      | 81.2      | 12.5              |
+| llm-jp--llm-jp-13b-instruct-full-jaster-dolly-oasst-v1.0 | 10.0     | 87.5      | 11.2              |
 
 ## Supported baseline Models
 

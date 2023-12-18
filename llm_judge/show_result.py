@@ -95,22 +95,26 @@ def display_result_pairwise(
                 model_1 = example["model_1"]
                 model_2 = example["model_2"]
                 win_rate = win_rate_map["model_1"]["win_rate"]
+                lose_rate = win_rate_map["model_2"]["win_rate"]
                 adjusted_win_rate = win_rate_map["model_1"]["adjusted_win_rate"]
             else:
                 model_1 = example["model_2"]
                 model_2 = example["model_1"]
                 win_rate = win_rate_map["model_2"]["win_rate"]
+                lose_rate = win_rate_map["model_1"]["win_rate"]
                 adjusted_win_rate = win_rate_map["model_2"]["adjusted_win_rate"]
         else:
             model_1 = example["model_1"]
             model_2 = example["model_2"]
             win_rate = win_rate_map["model_1"]["win_rate"]
+            lose_rate = win_rate_map["model_2"]["win_rate"]
             adjusted_win_rate = win_rate_map["model_1"]["adjusted_win_rate"]
         result_table.append(
             {
                 "model_1": model_1,
                 "model_2": model_2,
                 "win_rate": win_rate * 100,
+                "lose_rate": lose_rate * 100,
                 "adjusted_win_rate": adjusted_win_rate * 100,
             }
         )
