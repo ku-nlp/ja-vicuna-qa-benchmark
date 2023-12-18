@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Union, Optional
 
 import openai
+import tiktoken
 from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
@@ -115,6 +116,25 @@ class MatchSingle:
             "tstamp": time.time(),
         }
 
+    def estimate_cost(self) -> float:
+        enc = tiktoken.encoding_for_model(self.judge.model)
+        num_input_tokens = (
+            len(enc.encode(self.question["turns"][0]))
+            + len(enc.encode(self.answer["choices"][0]["turns"][0]))
+            + len(enc.encode(self.judge.prompt_template["system_prompt"]))
+            + len(enc.encode(self.judge.prompt_template["prompt_template"]))
+        )
+        if self.ref_answer:
+            num_input_tokens += len(
+                enc.encode(self.ref_answer["choices"][0]["turns"][0])
+            )
+        num_output_tokens = 200  # Estimated from a few samples
+        if self.judge.model == "gpt-4":
+            return 0.03 * num_input_tokens + 0.06 * num_output_tokens / 1_000
+        elif self.judge.model == "gpt-3.5-turbo":
+            return 0.001 * num_input_tokens + 0.002 * num_output_tokens / 1_000
+        raise AssertionError
+
 
 @dataclasses.dataclass
 class MatchPair:
@@ -182,6 +202,26 @@ class MatchPair:
             "tstamp": time.time(),
         }
         return result
+
+    def estimate_cost(self) -> float:
+        enc = tiktoken.encoding_for_model(self.judge.model)
+        num_input_tokens = (
+            len(enc.encode(self.question["turns"][0]))
+            + len(enc.encode(self.answer_1["choices"][0]["turns"][0]))
+            + len(enc.encode(self.answer_2["choices"][0]["turns"][0]))
+            + len(enc.encode(self.judge.prompt_template["system_prompt"]))
+            + len(enc.encode(self.judge.prompt_template["prompt_template"]))
+        )
+        if self.ref_answer:
+            num_input_tokens += len(
+                enc.encode(self.ref_answer["choices"][0]["turns"][0])
+            )
+        num_output_tokens = 200  # Estimated from a few samples
+        if self.judge.model == "gpt-4":
+            return 2 * (0.03 * num_input_tokens + 0.06 * num_output_tokens) / 1_000
+        elif self.judge.model == "gpt-3.5-turbo":
+            return 2 * (0.001 * num_input_tokens + 0.002 * num_output_tokens) / 1_000
+        raise AssertionError
 
 
 def load_questions(question_file: Union[str, Path]) -> list[dict]:

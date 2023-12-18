@@ -260,8 +260,12 @@ if __name__ == "__main__":
     logger.info(f"Models: {list(model_answers.keys())}")
     logger.info(f"Total number of questions: {len(questions):,}")
     logger.info(
-        f"Total number of matches: {sum(len(m) for m in match_groups.values()):,}"
+        f"Total number of matches: {sum(len(matches) for matches in match_groups.values()):,}"
     )
+    estimated_cost = 0
+    for matches in match_groups.values():
+        estimated_cost += sum(m.estimate_cost() for m in matches)
+    logger.info(f"Total cost (estimated): ${int(estimated_cost):,}")
     logger.info(f"Output directory: {output_dir}")
 
     if not args.yes:
