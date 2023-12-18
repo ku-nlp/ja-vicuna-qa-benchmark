@@ -14,7 +14,8 @@ To be clarified, such zero-shot QA-style evaluation might be more suitable for t
 - [Supported baseline Models](#supported-baseline-models)
 
 ## Install
-```
+
+```bash
 pip install -e .
 ```
 
@@ -22,7 +23,7 @@ pip install -e .
 
 #### Step 1. Generate model answers to Japanese Vicuna QA questions (noted as jp-bench).
 
-```
+```bash
 python llm_judge/gen_model_answer.py --config <CONFIG-PATH>
 ```
 
@@ -31,97 +32,86 @@ Arguments & Options:
 
 For example:
 
-```
+```bash
 python llm_judge/gen_model_answer.py --config configs/rinna--japanese-gpt-neox-3.6b-instruction-ppo.json
 ```
-
-The answers will be saved to `data/jp_bench/model_answer`.
 
 #### Step 2. Generate GPT-4 judgments
 
 There are several options to use GPT-4 as a judge, such as pairwise win-rate and single-answer grading.
-We show an example of the pairwise win-rate evaluation of instruction fine-tuned models (rinna-3.6b-sft-v2, rinna-3.6b-ppo, and japanese-alpaca-lora-7b) at the bottom.
 
-```
+```bash
 OPENAI_API_KEY=<YOUR-KEY> python llm_judge/gen_judgment.py \
     --mode {single|pairwise-baseline|pairwise-all} \
+    [--baseline-model <BASELINE-MODEL-ID>] \
     [--model-list <LIST-OF-MODEL-IDS>]
 ```
 
 Arguments & Options:
 - `--mode {single|pairwise-baseline|pairwise-all}` is the mode of judgment.
-    - `single`: run score-based single-model grading.
     - `pairwise-baseline`: run pairwise comparison against a baseline model.
     - `pairwise-all`: run pairwise comparison between all model pairs.
+    - `single`: run score-based single-model grading.
+- `--baseline-model <BASELINE-MODEL-ID>` is the model ID of the baseline model. This option is only available in `pairwise-baseline` mode. If not specified, the baseline model is set to `text-davinci-003`.
 - `--model-list <LIST-OF-MODEL-IDS>` is a list of model IDs to be evaluated. If not specified, all models in `data/jp_bench/model_answer` will be evaluated.
 
+**Mode: `pairwise-baseline`**
+
+This mode runs pairwise comparison against a baseline model.
+By default, the baseline model is set to `text-davinci-003`.
 For example:
 
-```
+```bash
 OPENAI_API_KEY=<YOUR-KEY> python llm_judge/gen_judgment.py \
-    --mode pairwise-all \
-    --model-list rinna-3.6b-sft-v2 rinna-3.6b-ppo japanese-alpaca-lora-7b
+    --mode pairwise-baseline \
+    --model-list rinna--japanese-gpt-neox-3.6b-instruction-ppo
 ```
 
-The judgments will be saved to `data/jp_bench/model_judgment/gpt-4_pair.jsonl`
+To show the scores:
 
-#### Step 3. Show jp-bench scores
-
-Show the scores for selected models.
-
-```
+```bash
 python llm_judge/show_result.py \
-    --mode pairwise-all \
-    --model-list rinna-3.6b-sft-v2 rinna-3.6b-ppo japanese-alpaca-lora-7b
+    --mode pairwise-baseline \
+    --model-list rinna--japanese-gpt-neox-3.6b-instruction-ppo
 ```
 
----
+**Mode: `pairwise-all`**
 
-#### Pairwise comparison against a baseline (default: gpt-3.5-turbo)
+This mode runs pairwise comparison between all model pairs.
+For example:
 
-The `pairwise-baseline` mode runs pairwise comparison against a baseline model.
-
-Generate GPT-4 judgments:
-
-```
+```bash
 OPENAI_API_KEY=<YOUR-KEY> python llm_judge/gen_judgment.py \
-  --mode pairwise-baseline \
-  [--model-list <LIST-OF-MODEL-IDS>] \
-  [--baseline-model <name-of-baseline-model>]
+    --mode pairwise-all
 ```
 
-The judgments will be saved to `data/jp_bench/model_judgment/gpt-4_pair.jsonl`
+To show the scores:
 
-Show results:
-
-```
+```bash
 python llm_judge/show_result.py \
-  --bench-name "jp_bench" \
-  --mode pairwise-baseline \
-  [--model-list <LIST-OF-MODEL-IDS>]
+    --mode pairwise-all
 ```
 
-#### Run GPT-4 judge with the single model
+To be noticed, the `pairwise-all` mode might become very inefficient when evaluating many LLMs, as it evaluates combinations of each two of them.
+In such cases, we recommend using the `pairwise-baseline` mode, allowing all models to be compared against a fixed baseline such as ChatGPT.
 
-The `single` mode grades models by asking GPT-4 to grade and give a score to model's answer directly without pairwise comparison.
+**Mode: `single`**
 
-Generate GPT-4 judgments:
+This mode runs score-based single-model grading.
+For example:
 
+```bash
+python llm_judge/gen_judgment.py \
+    --mode single \
+    --model-list rinna--japanese-gpt-neox-3.6b-instruction-ppo
 ```
-OPENAI_API_KEY=<YOUR-KEY> python llm_judge/gen_judgment.py \
-  --mode single \
-  [--model-list <LIST-OF-MODEL-IDS>]
-```
 
-The judgments will be saved to `data/jp_bench/model_judgment/gpt-4_single.jsonl`
+To show the scores:
 
-Show results:
-
-```
+```bash
 python llm_judge/show_result.py \
-  --bench-name "jp_bench" \
-  --mode single \
-  [--model-list <LIST-OF-MODEL-IDS>]
+    --mode single \
+    --model-list rinna--japanese-gpt-neox-3.6b-instruction-ppo
 ```
 
 ## Sample Outputs
@@ -140,6 +130,7 @@ Model outputs:
 | cyberagent--calm2-7b-chat                                | 植物性タンパク源と動物性タンパク源の違いは以下の通りです。\n\n1. 供給源: 植物性タンパク源は主に植物、特に穀物から得られます。一方、動物性タンパク源は動物、特に哺乳類から得られます。\n\n2. 生物的特性: 植物性タンパク源は、植物が有する、植物の、特に植物の、植物性タンパク源の、特に植物性タンパク源の、植物性タンパク源の、特に植物性タンパク源の、特に特に特に特に特に特に特に特に特に特に                                                                                                                               |
 
 ## Pairwise win-rate compared with GPT-3.5-davinci-003
+
 | Model                                                    | Win | Loss | Tie | Win Rate | Loss Rate | Win Rate Adjusted |
 |----------------------------------------------------------|-----|------|-----|----------|-----------|-------------------|
 | llm-jp--llm-jp-13b-instruct-lora-jaster-dolly-oasst-v1.0 |  22 |   48 |  10 | 0.2750   | 0.6000    | 0.33750           |
@@ -148,19 +139,16 @@ Model outputs:
 | rinna--japanese-gpt-neox-3.6b-instruction-sft-v2         |   8 |   69 |   3 | 0.1000   | 0.8625    | 0.11875           |
 | cyberagent--calm2-7b-chat                                |   5 |   67 |   8 | 0.0625   | 0.8375    | 0.11250           |
 
-The GPT4 judgments is placed in `data/jp_bench/model_judgment/gpt-4_pair.jsonl`.
-
-To be noticed, `pairwise-all` might become very inefficient when evaluating more LLMs, as it evaluates combinations of each two of them. In such cases, we recommend using the `pairwise-baseline` mode, allowing all models to be compared against a fixed baseline such as ChatGPT.
-
 ## Supported baseline Models
-To make it more convenient for users to utilize pairwise comparisons with existing Japanese LLMs, we offer the prediction of the following four baselines in `fastchat/llm_judge/data/jp_bench/model_answer`.
 
-- [Rinna-3.6B](https://huggingface.co/rinna/japanese-gpt-neox-3.6b)
-- [Rinna-3.6B-sft-v2](https://huggingface.co/rinna/japanese-gpt-neox-3.6b-instruction-sft-v2)
-- [Rinna-3.6B-ppo](https://huggingface.co/rinna/japanese-gpt-neox-3.6b-instruction-ppo)
-- [Japanese-Alpaca-Lora](https://huggingface.co/kunishou)
+To make it more convenient for users to utilize pairwise comparisons with existing Japanese LLMs, we offer the prediction of the following four baselines in `data/jp_bench/model_answer`.
 
-We will regularly include latest LLM baselines.
+- [llm-jp/llm-jp-13b-instruct-full-jaster-dolly-oasst-v1.0](https://huggingface.co/llm-jp/llm-jp-13b-instruct-full-jaster-dolly-oasst-v1.0)
+- [llm-jp/llm-jp-13b-instruct-lora-jaster-dolly-oasst-v1.0](https://huggingface.co/llm-jp/llm-jp-13b-instruct-lora-jaster-dolly-oasst-v1.0)
+- [rinna/japanese-gpt-neox-3.6b-instruction-ppo](https://huggingface.co/rinna/japanese-gpt-neox-3.6b-instruction-ppo)
+- [rinna/japanese-gpt-neox-3.6b-instruction-sft-v2](https://huggingface.co/rinna/japanese-gpt-neox-3.6b-instruction-sft-v2)
+- [cyberagent/calm2-7b-chat](https://huggingface.co/cyberagent/calm2-7b-chat)
 
 ## Questions
+
 If you have any questions and feedback, please feel free to leave questions in the `Issues' list.
