@@ -44,7 +44,8 @@ There are several options to use GPT-4 as a judge, such as pairwise win-rate and
 OPENAI_API_KEY=<YOUR-KEY> python llm_judge/gen_judgment.py \
     --mode {single|pairwise-baseline|pairwise-all} \
     [--baseline-model <BASELINE-MODEL-ID>] \
-    [--model-list <LIST-OF-MODEL-IDS>]
+    [--model-list <LIST-OF-MODEL-IDS>] \
+    [--wandb]
 ```
 
 Arguments & Options:
@@ -54,6 +55,7 @@ Arguments & Options:
     - `single`: run score-based single-model grading.
 - `--baseline-model <BASELINE-MODEL-ID>` is the model ID of the baseline model. This option is only available in `pairwise-baseline` mode. If not specified, the baseline model is set to `text-davinci-003`.
 - `--model-list <LIST-OF-MODEL-IDS>` is a list of model IDs to be evaluated. If not specified, all models in `data/jp_bench/model_answer` will be evaluated.
+- `--wandb` is a flag to enable logging to W&B.
 
 **Mode: `pairwise-baseline` (Default)**
 
