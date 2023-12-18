@@ -1,147 +1,118 @@
-"""
-Usage:
-python gen_judgment.py --model-list [LIST-OF-MODEL-ID] --parallel [num-concurrent-api-call] --mode [single|pairwise-baseline|pairwise-all]
-"""
 import argparse
-from concurrent.futures import ThreadPoolExecutor
+import json
 import logging
-import random
+from concurrent.futures import ThreadPoolExecutor
 from itertools import combinations
-from functools import partial
-from pathlib import Path
-
-import numpy as np
-from tqdm import tqdm
+from typing import Optional
 
 from common import (
-    load_questions,
-    load_model_answers,
-    load_judge_prompts,
-    check_data,
-    play_a_match_pair,
-    play_a_match_single,
-    get_model_list,
+    JUDGEMENT_DIR,
+    JUDGEMENT_PROMPT_FILE,
+    NEED_REF_CATS,
+    PREDICTION_DIR,
+    QUESTION_FILE,
+    REFERENCE_DIR,
     Judge,
     MatchPair,
     MatchSingle,
-    NEED_REF_CATS,
+    get_model_list,
+    load_judge_prompts,
+    load_model_answers,
+    load_questions,
 )
+from tqdm import tqdm
+from upload_result import upload_results
 
 logger = logging.getLogger(__name__)
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-BENCHMARK_FILE_MAP = {
-    "jp_bench": DATA_DIR / "jp_bench" / "question.jsonl",
-}
-PREDICTION_DIR_MAP = {
-    "jp_bench": DATA_DIR / "jp_bench" / "model_answer",
-}
-REFERENCE_DIR_MAP = {
-    "jp_bench": DATA_DIR / "jp_bench" / "reference_answer",
-}
-JUDGEMENT_DIR_MAP = {
-    "jp_bench": DATA_DIR / "jp_bench" / "model_judgment",
-}
 
-
-def make_match(
-    questions,
-    models,
-    model_answers,
-    judge,
-    baseline_model,
-    ref_answers=None,
+def make_match_groups_single(
+    questions: list[dict],
+    model_answers: dict[str, dict[int, dict]],
+    ref_answers: dict[str, dict[int, dict]],
+    judge_default: Judge,
+    judge_math: Judge,
 ):
-    matches = []
-    for question in questions:
-        qid = question["question_id"]
-        ref_answer = ref_answers[judge.model_name][qid] if ref_answers else None
-        for model in models:
-            if model == baseline_model:
-                continue
+    """Make match groups for single answer grading.
+
+    Args:
+        questions (list): A list of questions.
+        model_answers (dict): A dict of model answers.
+        ref_answers (dict): A dict of reference answers.
+        judge_default (Judge): A judge for default questions.
+        judge_math (Judge): A judge for math questions.
+    """
+    match_groups = {}
+    for model in model_answers:
+        matches = []
+        for question in questions:
+            qid = question["question_id"]
             answer = model_answers[model][qid]
-            answer_baseline = model_answers[baseline_model][qid]
-            matches.append(
-                MatchPair(
-                    dict(question),
-                    model,
-                    baseline_model,
-                    answer,
-                    answer_baseline,
-                    judge,
-                    ref_answer=ref_answer,
-                )
-            )
-    return matches
-
-
-def make_match_all_pairs(
-    questions,
-    models,
-    model_answers,
-    judge,
-    baseline_model=None,
-    ref_answers=None,
-):
-    matches = []
-    for question in questions:
-        qid = question["question_id"]
-        ref_answer = ref_answers[judge.model_name][qid] if ref_answers else None
-        for model_1, model_2 in combinations(models, 2):
-            answer_1 = model_answers[model_1][qid]
-            answer_2 = model_answers[model_2][qid]
-            matches.append(
-                MatchPair(
-                    dict(question),
-                    model_1,
-                    model_2,
-                    answer_1,
-                    answer_2,
-                    judge,
-                    ref_answer=ref_answer,
-                )
-            )
-    return matches
-
-
-def make_match_single(
-    questions,
-    models,
-    model_answers,
-    judge,
-    baseline_model=None,
-    ref_answers=None,
-):
-    matches = []
-    for question in questions:
-        qid = question["question_id"]
-        ref_answer = ref_answers[judge.model_name][qid] if ref_answers else None
-        for model in models:
-            answer = model_answers[model][qid]
+            if question["category"] in NEED_REF_CATS:
+                judge = judge_math
+                ref_answer = ref_answers[judge.model][qid]
+            else:
+                judge = judge_default
+                ref_answer = None
             matches.append(
                 MatchSingle(
-                    dict(question),
-                    model,
-                    answer,
-                    judge,
+                    question=question,
+                    model=model,
+                    answer=answer,
+                    judge=judge,
                     ref_answer=ref_answer,
                 )
             )
-    return matches
+        match_groups[model] = matches
+    return match_groups
 
 
-def make_judge_pairwise(judge_model, judge_prompts):
-    return {
-        "default": Judge(judge_model, judge_prompts["pair-v2"]),
-        "math": Judge(judge_model, judge_prompts["pair-math-v1"], ref_based=True),
-    }
+def make_match_groups_pairwise(
+    questions: list[dict],
+    model_answers: dict[str, dict[int, dict]],
+    ref_answers: dict[str, dict[int, dict]],
+    judge_default: Judge,
+    judge_math: Judge,
+    baseline_model: Optional[str] = None,
+):
+    """Make match groups for pairwise comparison.
 
-
-def make_judge_single(judge_model, judge_prompts):
-    return {
-        "default": Judge(judge_model, judge_prompts["single-v1"]),
-        "math": Judge(judge_model, judge_prompts["single-math-v1"], ref_based=True),
-    }
+    Args:
+        questions (list): A list of questions.
+        model_answers (dict): A dict of model answers.
+        ref_answers (dict): A dict of reference answers.
+        judge_default (Judge): A judge for default questions.
+        judge_math (Judge): A judge for math questions.
+        baseline_model (Optional[str]): The baseline model.
+    """
+    match_groups = {}
+    for model_1, model_2 in combinations(model_answers, 2):
+        if baseline_model and baseline_model not in {model_1, model_2}:
+            continue
+        matches = []
+        for question in questions:
+            qid = question["question_id"]
+            answer_1 = model_answers[model_1][qid]
+            answer_2 = model_answers[model_2][qid]
+            if question["category"] in NEED_REF_CATS:
+                judge = judge_math
+                ref_answer = ref_answers[judge.model][qid]
+            else:
+                judge = judge_default
+                ref_answer = None
+            matches.append(
+                MatchPair(
+                    question=question,
+                    model_1=model_1,
+                    model_2=model_2,
+                    answer_1=answer_1,
+                    answer_2=answer_2,
+                    judge=judge,
+                    ref_answer=ref_answer,
+                )
+            )
+        match_groups[f"{model_1}_{model_2}"] = matches
+    return match_groups
 
 
 if __name__ == "__main__":
@@ -149,49 +120,52 @@ if __name__ == "__main__":
     parser.add_argument(
         "--mode",
         type=str,
-        required=True,
+        default="pairwise-baseline",
         choices=["pairwise-baseline", "pairwise-all", "single"],
         help=(
             "Evaluation mode. "
-            "`pairwise-baseline` runs pairwise comparision against a baseline. "
-            "`pairwise-all` runs pairwise comparision between all pairs. "
+            "`pairwise-baseline` runs pairwise comparison against a baseline. "
+            "`pairwise-all` runs pairwise comparison between all pairs. "
             "`single` runs single answer grading."
         ),
     )
     parser.add_argument(
-        "--bench-name",
+        "--judge-model",
         type=str,
-        default="jp_bench",
-        help="The name of the benchmark question set.",
+        default="gpt-4",
+        choices=["gpt-4", "gpt-3.5-turbo"],
+        help="The judge model.",
     )
     parser.add_argument(
-        "--judge-file",
+        "--baseline-model",
         type=str,
-        default="data/judge_prompts_jp.jsonl",
-        help="The file of judge prompts.",
-    )
-    parser.add_argument("--judge-model", type=str, default="gpt-4")
-    parser.add_argument(
-        "--baseline-model", type=str, default="openai--text-davinci-003"
+        default="openai--text-davinci-003",
+        help="The baseline model. This is only used in `pairwise-baseline` mode.",
     )
     parser.add_argument(
         "--model-list",
         type=str,
         nargs="+",
         default=None,
-        help="A list of models to be evaluated",
+        help="A list of models to be evaluated. If not specified, all models will be evaluated",
     )
     parser.add_argument(
         "--parallel", type=int, default=1, help="The number of concurrent API calls."
     )
+    parser.add_argument("--first-n", type=int, help="Only run the first `n` judgments.")
     parser.add_argument(
-        "--first-n", type=int, help="A debug option. Only run the first `n` judgments."
+        "--yes", "-y", action="store_true", help="Skip confirmation and run."
     )
     parser.add_argument(
-        "--seed", default=0, type=int, help="random seed for reproducibility"
+        "--overwrite", action="store_true", help="Overwrite existing judgment files."
     )
     parser.add_argument(
-        "-v", "--verbose", action="count", default=0, help="verbosity level"
+        "--wandb",
+        action="store_true",
+        help="Log to wandb.",
+    )
+    parser.add_argument(
+        "--verbose", "-v", action="count", default=0, help="Verbosity level"
     )
     args = parser.parse_args()
 
@@ -205,92 +179,114 @@ if __name__ == "__main__":
         level=level,
     )
 
-    logger.info(f"Set random seed to {args.seed}")
-    seed = args.seed
-    random.seed(seed)
-    np.random.seed(seed)
+    if args.wandb:
+        import wandb
+
+        wandb.login()
+        if args.mode != "pairwise-baseline":
+            logger.warning(
+                "Leaderboard is only available in pairwise-baseline mode. "
+                "Only raw outputs will be logged."
+            )
 
     logger.info("Load questions")
-    question_file = BENCHMARK_FILE_MAP[args.bench_name]
-    questions = load_questions(question_file)
+    questions = load_questions(QUESTION_FILE)
     if args.first_n:
         logger.warning(f"Only run the first {args.first_n} judgments")
         questions = questions[: args.first_n]
 
     logger.info("Load answers")
-    answer_dir = PREDICTION_DIR_MAP[args.bench_name]
-    model_answers = load_model_answers(answer_dir)
-
-    logger.info("Load reference answers")
-    reference_dir = REFERENCE_DIR_MAP[args.bench_name]
-    ref_answers = load_model_answers(reference_dir)
-
-    # Load judge
-    logger.info("Load judge prompts")
-    judge_prompts = load_judge_prompts(args.judge_file)
-
     if args.model_list is None:
-        models = get_model_list(answer_dir)
+        models = get_model_list(PREDICTION_DIR)
     else:
         models = args.model_list
+        if args.mode == "pairwise-baseline" and args.baseline_model not in models:
+            models.append(args.baseline_model)
+    model_answers = {}
+    for model in sorted(models):
+        answers = load_model_answers(PREDICTION_DIR / model)
+        for question in questions:
+            assert question["question_id"] in answers
+        model_answers[model] = answers
 
-    output_dir = JUDGEMENT_DIR_MAP[args.bench_name]
+    logger.info("Load reference answers")
+    judge_model = args.judge_model
+    answers = load_model_answers(REFERENCE_DIR / judge_model)
+    for question in filter(lambda x: x["category"] in NEED_REF_CATS, questions):
+        assert question["question_id"] in answers
+    ref_answers = {judge_model: answers}
 
+    logger.info("Load judge prompts")
+    judge_prompts = load_judge_prompts(JUDGEMENT_PROMPT_FILE)
+
+    logger.info("Make matches")
     if args.mode == "single":
-        judges = make_judge_single(args.judge_model, judge_prompts)
-        play_a_match_func = play_a_match_single
-        output_file = output_dir / f"{args.judge_model}_single.jsonl"
-        make_match_func = make_match_single
-        baseline_model = None
+        match_groups = make_match_groups_single(
+            questions,
+            model_answers,
+            ref_answers=ref_answers,
+            judge_default=Judge(args.judge_model, judge_prompts["single"]),
+            judge_math=Judge(args.judge_model, judge_prompts["single-math"]),
+        )
+        output_dir = JUDGEMENT_DIR / "single" / args.judge_model
     else:
-        judges = make_judge_pairwise(args.judge_model, judge_prompts)
-        play_a_match_func = play_a_match_pair
-        output_file = output_dir / f"{args.judge_model}_pair.jsonl"
+        assert args.mode in {"pairwise-baseline", "pairwise-all"}
         if args.mode == "pairwise-all":
-            make_match_func = make_match_all_pairs
             baseline_model = None
         else:
-            make_match_func = make_match
             baseline_model = args.baseline_model
+        match_groups = make_match_groups_pairwise(
+            questions,
+            model_answers,
+            ref_answers=ref_answers,
+            judge_default=Judge(args.judge_model, judge_prompts["pair"]),
+            judge_math=Judge(args.judge_model, judge_prompts["pair-math"]),
+            baseline_model=baseline_model,
+        )
+        output_dir = JUDGEMENT_DIR / "pairwise" / args.judge_model
+    target_match_ids = set()
+    for match_id in match_groups:
+        output_file = output_dir / f"{match_id}.jsonl"
+        if output_file.exists():
+            if not args.overwrite:
+                logger.info(f"Skip {match_id}; to overwrite, use --overwrite")
+                continue
+        target_match_ids.add(match_id)
+    match_groups = {k: v for k, v in match_groups.items() if k in target_match_ids}
 
-    check_data(questions, model_answers, ref_answers, models, judges)
-
-    question_math = [q for q in questions if q["category"] in NEED_REF_CATS]
-    question_default = [q for q in questions if q["category"] not in NEED_REF_CATS]
-
-    # Make matches
-    matches = []
-    matches += make_match_func(
-        question_default, models, model_answers, judges["default"], baseline_model
-    )
-    matches += make_match_func(
-        question_math,
-        models,
-        model_answers,
-        judges["math"],
-        baseline_model,
-        ref_answers,
-    )
-
-    logger.info(f"Benchmark: {args.bench_name}")
     logger.info(f"Mode: {args.mode}")
     logger.info(f"Judge model: {args.judge_model}")
-    logger.info(f"Baseline model: {baseline_model}")
-    logger.info(f"Models: {models}")
-    logger.info(f"Total number of questions: {len(questions)}")
-    logger.info(f"Total number of matches: {len(matches)}")
-    logger.info(f"Output file: {output_file}")
-    input("Press Enter to confirm...")
+    if args.mode == "pairwise-baseline":
+        logger.info(f"Baseline model: {args.baseline_model}")
+    logger.info(f"Total number of questions: {len(questions):,}")
+    logger.info(
+        f"Total number of matches: {sum(len(matches) for matches in match_groups.values()):,}"
+    )
+    estimated_cost = 0
+    for matches in match_groups.values():
+        estimated_cost += sum(m.estimate_cost() for m in matches)
+    logger.info(f"Total cost (estimated): ${int(estimated_cost):,}")
+    logger.info(f"Output directory: {output_dir}")
 
-    # Play matches
-    if args.parallel == 1:
-        for match in tqdm(matches):
-            play_a_match_func(match, output_file=output_file)
-    else:
-        np.random.shuffle(matches)
-        play_a_match_wrapper = partial(play_a_match_func, output_file=output_file)
+    if not args.yes:
+        input("Press Enter to confirm...")
+
+    logger.info("Play matches")
+    for match_id, matches in match_groups.items():
+        output_file = output_dir / f"{match_id}.jsonl"
+        results = []
         with ThreadPoolExecutor(args.parallel) as executor:
-            for match in tqdm(
-                executor.map(play_a_match_wrapper, matches), total=len(matches)
-            ):
-                pass
+            futures = [executor.submit(match.play) for match in matches]
+            for future in tqdm(futures):
+                results.append(future.result())
+
+        logger.info(f"Write {len(results)} judgments")
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(output_file, "w") as f:
+            for result in results:
+                f.write(json.dumps(result, ensure_ascii=False) + "\n")
+        logger.info(f"Saved the judgments to {output_file}")
+
+        if args.wandb:
+            logger.info("Log to wandb")
+            upload_results(args.mode, match_id, results, args.baseline_model)

@@ -2,25 +2,17 @@ import argparse
 import json
 import logging
 import random
-import shortuuid
 import time
-from pathlib import Path
-from tqdm import tqdm
 
 import numpy as np
+import shortuuid
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from common import PREDICTION_DIR, QUESTION_FILE, load_questions
 from peft import PeftModel
+from tqdm import tqdm
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 logger = logging.getLogger(__name__)
-
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-BENCHMARK_FILE_MAP = {
-    "jp_bench": DATA_DIR / "jp_bench" / "question.jsonl",
-}
-PREDICTION_DIR_MAP = {
-    "jp_bench": DATA_DIR / "jp_bench" / "model_answer",
-}
 
 DEFAULT_TEMPERATURE_MAP = {
     "writing": 0.7,
@@ -75,18 +67,17 @@ def generate_response(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str, required=True, help="config file")
     parser.add_argument(
-        "--bench-name",
-        default="jp_bench",
-        type=str,
-        help="A file that contains instructions (one instruction per line)",
+        "--config", type=str, required=True, help="Path to configuration file"
     )
     parser.add_argument(
-        "--seed", default=0, type=int, help="random seed for reproducibility"
+        "--seed", default=0, type=int, help="Random seed for reproducibility"
     )
     parser.add_argument(
-        "-v", "--verbose", action="count", default=0, help="verbosity level"
+        "-v", "--verbose", action="count", default=0, help="Verbosity level"
+    )
+    parser.add_argument(
+        "--overwrite", action="store_true", help="Overwrite the existing results"
     )
     args = parser.parse_args()
 
@@ -139,11 +130,8 @@ if __name__ == "__main__":
     )
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_name_or_path)
 
-    # test data
     logger.info("Load the data")
-    data_file = BENCHMARK_FILE_MAP[args.bench_name]
-    with open(data_file, "r") as f:
-        questions = [json.loads(line) for line in tqdm(f)]
+    questions = load_questions(str(QUESTION_FILE))
 
     logger.info("Start inference.")
     model_id = config["model_id"]
@@ -151,6 +139,14 @@ if __name__ == "__main__":
     if "{instruction}" not in prompt_template:
         raise ValueError("prompt_template must contain {instruction}")
     special_token_map = config.get("special_token_map", {})
+
+    prediction_dir = PREDICTION_DIR / model_id
+    prediction_file = prediction_dir / "results.jsonl"
+    if prediction_file.exists() and not args.overwrite:
+        raise FileExistsError(
+            f"{prediction_file} already exists. Use --overwrite to overwrite."
+        )
+
     results = []
     for index, question in tqdm(enumerate(questions)):
         instruction = question["turns"][0]
@@ -168,9 +164,8 @@ if __name__ == "__main__":
             special_token_map=special_token_map,
         )
 
-        logger.debug(f"======={index}=======")
-        logger.debug(f"Input: {instruction}")
-        logger.debug(f"Output: {output}")
+        logger.debug(f"{instruction}\n\n{output}")
+
         results.append(
             {
                 "question_id": int(question["question_id"]),
@@ -182,10 +177,14 @@ if __name__ == "__main__":
         )
 
     logger.info("Save the results")
-    prediction_dir = PREDICTION_DIR_MAP[args.bench_name]
     prediction_dir.mkdir(parents=True, exist_ok=True)
-    prediction_file = prediction_dir / f"{model_id}.jsonl"
     with open(prediction_file, "w", encoding="utf-8") as f:
         for result in results:
             f.write(json.dumps(result, ensure_ascii=False) + "\n")
     logger.info(f"Saved the results to {prediction_file}")
+
+    logger.info("Save the config")
+    config_file = prediction_dir / "config.json"
+    with open(config_file, "w", encoding="utf-8") as f:
+        json.dump(config, f, ensure_ascii=False, indent=2)
+    logger.info(f"Saved the config to {config_file}")

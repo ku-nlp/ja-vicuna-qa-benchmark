@@ -1,0 +1,16 @@
+{
+  "model_id": "openai--text-davinci-003",
+  "model_name_or_path": null,
+  "lora_model_name_or_path": null,
+  "tokenizer_name_or_path": null,
+  "prompt_template": "{instruction}",
+  "generation_config": {
+    "engine": "text-davinci-003",
+    "temperature": 0.0,
+    "max_tokens": 2048,
+    "top_p": 1.0,
+    "frequency_penalty": 0.0,
+    "presence_penalty": 0.0
+  },
+  "special_token_map": {}
+}

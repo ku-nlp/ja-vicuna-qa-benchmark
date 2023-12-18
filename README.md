@@ -44,18 +44,20 @@ There are several options to use GPT-4 as a judge, such as pairwise win-rate and
 OPENAI_API_KEY=<YOUR-KEY> python llm_judge/gen_judgment.py \
     --mode {single|pairwise-baseline|pairwise-all} \
     [--baseline-model <BASELINE-MODEL-ID>] \
-    [--model-list <LIST-OF-MODEL-IDS>]
+    [--model-list <LIST-OF-MODEL-IDS>] \
+    [--wandb]
 ```
 
 Arguments & Options:
 - `--mode {single|pairwise-baseline|pairwise-all}` is the mode of judgment.
-    - `pairwise-baseline`: run pairwise comparison against a baseline model.
+    - `pairwise-baseline`: run pairwise comparison against a baseline model. This mode will be used by default.
     - `pairwise-all`: run pairwise comparison between all model pairs.
     - `single`: run score-based single-model grading.
 - `--baseline-model <BASELINE-MODEL-ID>` is the model ID of the baseline model. This option is only available in `pairwise-baseline` mode. If not specified, the baseline model is set to `text-davinci-003`.
 - `--model-list <LIST-OF-MODEL-IDS>` is a list of model IDs to be evaluated. If not specified, all models in `data/jp_bench/model_answer` will be evaluated.
+- `--wandb` is a flag to enable logging to W&B. You can upload the results later to W&B by running `upload_result.py`, as described in the next section.
 
-**Mode: `pairwise-baseline`**
+**Mode: `pairwise-baseline` (Default)**
 
 This mode runs pairwise comparison against a baseline model.
 By default, the baseline model is set to `text-davinci-003`.
@@ -114,6 +116,17 @@ python llm_judge/show_result.py \
     --model-list rinna--japanese-gpt-neox-3.6b-instruction-ppo
 ```
 
+#### Step 3. Upload the results to W&B (Optional)
+
+If you want to upload the results to W&B, you can run the following command:
+
+```bash
+python llm_judge/upload_result.py \
+    --mode {single|pairwise-baseline|pairwise-all} \
+    [--baseline-model <BASELINE-MODEL-ID>] \
+    [--model-list <LIST-OF-MODEL-IDS>]
+```
+
 ## Sample Outputs
 
 Question: 植物性タンパク源と動物性タンパク源の違いは何ですか？
@@ -131,13 +144,13 @@ Model outputs:
 
 ## Pairwise win-rate compared with GPT-3.5-davinci-003
 
-| Model                                                    | Win | Loss | Tie | Win Rate | Loss Rate | Win Rate Adjusted |
-|----------------------------------------------------------|-----|------|-----|----------|-----------|-------------------|
-| llm-jp--llm-jp-13b-instruct-lora-jaster-dolly-oasst-v1.0 |  22 |   48 |  10 | 0.2750   | 0.6000    | 0.33750           |
-| rinna--japanese-gpt-neox-3.6b-instruction-ppo            |  10 |   61 |   9 | 0.1250   | 0.7625    | 0.18125           |
-| llm-jp--llm-jp-13b-instruct-full-jaster-dolly-oasst-v1.0 |   7 |   65 |   8 | 0.0875   | 0.8125    | 0.13750           |
-| rinna--japanese-gpt-neox-3.6b-instruction-sft-v2         |   8 |   69 |   3 | 0.1000   | 0.8625    | 0.11875           |
-| cyberagent--calm2-7b-chat                                |   5 |   67 |   8 | 0.0625   | 0.8375    | 0.11250           |
+| Model                                                    | Win Rate | Loss Rate | Win Rate Adjusted |
+|----------------------------------------------------------|----------|-----------|-------------------|
+| llm-jp--llm-jp-13b-instruct-lora-jaster-dolly-oasst-v1.0 | 28.7     | 62.5      | 33.1              |
+| rinna--japanese-gpt-neox-3.6b-instruction-ppo            | 13.8     | 13.8      | 18.8              |
+| rinna--japanese-gpt-neox-3.6b-instruction-sft-v2         | 8.8      | 82.5      | 13.1              |
+| cyberagent--calm2-7b-chat                                | 6.2      | 81.2      | 12.5              |
+| llm-jp--llm-jp-13b-instruct-full-jaster-dolly-oasst-v1.0 | 10.0     | 87.5      | 11.2              |
 
 ## Supported baseline Models
 
