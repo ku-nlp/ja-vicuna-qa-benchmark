@@ -55,7 +55,7 @@ Arguments & Options:
     - `single`: run score-based single-model grading.
 - `--baseline-model <BASELINE-MODEL-ID>` is the model ID of the baseline model. This option is only available in `pairwise-baseline` mode. If not specified, the baseline model is set to `text-davinci-003`.
 - `--model-list <LIST-OF-MODEL-IDS>` is a list of model IDs to be evaluated. If not specified, all models in `data/jp_bench/model_answer` will be evaluated.
-- `--wandb` is a flag to enable logging to W&B.
+- `--wandb` is a flag to enable logging to W&B. You can upload the results later to W&B by running `upload_result.py`, as described in the next section.
 
 **Mode: `pairwise-baseline` (Default)**
 
@@ -114,6 +114,17 @@ To show the scores:
 python llm_judge/show_result.py \
     --mode single \
     --model-list rinna--japanese-gpt-neox-3.6b-instruction-ppo
+```
+
+#### Step 3. Upload the results to W&B (Optional)
+
+If you want to upload the results to W&B, you can run the following command:
+
+```bash
+python llm_judge/upload_result.py \
+    --mode {single|pairwise-baseline|pairwise-all} \
+    [--baseline-model <BASELINE-MODEL-ID>] \
+    [--model-list <LIST-OF-MODEL-IDS>]
 ```
 
 ## Sample Outputs
