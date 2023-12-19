@@ -63,7 +63,7 @@ def make_match_groups_single(
                     ref_answer=ref_answer,
                 )
             )
-        match_groups[model] = matches
+        match_groups[f"single:{model}"] = matches
     return match_groups
 
 
@@ -111,7 +111,7 @@ def make_match_groups_pairwise(
                     ref_answer=ref_answer,
                 )
             )
-        match_groups[f"{model_1}_{model_2}"] = matches
+        match_groups[f"pairwise:{model_1}_{model_2}"] = matches
     return match_groups
 
 
