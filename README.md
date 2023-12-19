@@ -45,6 +45,7 @@ OPENAI_API_KEY=<YOUR-KEY> python llm_judge/gen_judgment.py \
     --mode {single|pairwise-baseline|pairwise-all} \
     [--baseline-model <BASELINE-MODEL-ID>] \
     [--model-list <LIST-OF-MODEL-IDS>] \
+    [--yes] \
     [--wandb]
 ```
 
@@ -55,6 +56,7 @@ Arguments & Options:
     - `single`: run score-based single-model grading.
 - `--baseline-model <BASELINE-MODEL-ID>` is the model ID of the baseline model. This option is only available in `pairwise-baseline` mode. If not specified, the baseline model is set to `text-davinci-003`.
 - `--model-list <LIST-OF-MODEL-IDS>` is a list of model IDs to be evaluated. If not specified, all models in `data/jp_bench/model_answer` will be evaluated.
+- `--yes` is a flag to skip the confirmation prompt.
 - `--wandb` is a flag to enable logging to W&B. You can upload the results later to W&B by running `upload_result.py`, as described in the next section.
 
 **Mode: `pairwise-baseline` (Default)**
