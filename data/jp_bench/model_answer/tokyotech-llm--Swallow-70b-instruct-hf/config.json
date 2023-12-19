@@ -1,0 +1,13 @@
+{
+  "model_id": "tokyotech-llm--Swallow-70b-instruct-hf",
+  "model_name_or_path": "tokyotech-llm/Swallow-70b-instruct-hf",
+  "lora_model_name_or_path": null,
+  "tokenizer_name_or_path": null,
+  "prompt_template": "以下に、あるタスクを説明する指示があります。リクエストを適切に完了するための回答を記述してください。\n\n### 指示:\n{instruction}\n\n### 応答:\n",
+  "generation_config": {
+    "do_sample": true,
+    "max_length": 2048,
+    "temperature": 0.99,
+    "top_p": 0.95
+  }
+}

@@ -150,6 +150,7 @@ Model outputs:
 
 | Model                                                    | Win Rate | Loss Rate | Win Rate Adjusted |
 |----------------------------------------------------------|----------|-----------|-------------------|
+| tokyotech-llm--Swallow-70b-instruct-hf                   | 46.2     | 42.5      | 51.9              |
 | llm-jp--llm-jp-13b-instruct-lora-jaster-dolly-oasst-v1.0 | 28.7     | 62.5      | 33.1              |
 | rinna--japanese-gpt-neox-3.6b-instruction-ppo            | 13.8     | 13.8      | 18.8              |
 | rinna--japanese-gpt-neox-3.6b-instruction-sft-v2         | 8.8      | 82.5      | 13.1              |
