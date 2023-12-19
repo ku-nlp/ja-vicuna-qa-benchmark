@@ -59,7 +59,7 @@ def upload_results(
         results: A list of results.
         baseline_model: Baseline model name. Only used in `pairwise-baseline` mode.
     """
-    project = os.getenv("WANDB_PROJECT", "ja-vicuna-qa-benchmark")
+    project = os.getenv("WANDB_PROJECT", "ja-vicuna-qa-benchmark-dev")
     if len(results) == 0:
         logger.warning(f"No results found for {result_id}")
         return

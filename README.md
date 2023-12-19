@@ -129,7 +129,7 @@ WANDB_ENTITY=<USER-NAME or ORGANIZATION-NAME> WANDB_PROJECT=<PROJECT-NAME> pytho
     [--model-list <LIST-OF-MODEL-IDS>]
 ```
 
-By default, the entity is configured to use your username, and the project name is set to `ja-vicuna-qa-benchmark`.
+By default, the entity is configured to use your username, and the project name is set to `ja-vicuna-qa-benchmark-dev`.
 
 ## Sample Outputs
 
