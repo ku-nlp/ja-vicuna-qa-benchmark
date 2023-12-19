@@ -39,25 +39,25 @@ def generate_response(
         generation_config (Optional[dict]): Generation config.
         special_token_map (Optional[dict]): Special token map used to replace special tokens.
     """
-    inputs = tokenizer(input_text, return_tensors="pt", add_special_tokens=False)
-    inputs = inputs.to(model.device)
-
-    input_token_ids = inputs["input_ids"]
+    input_ids = tokenizer.encode(
+        input_text, return_tensors="pt", add_special_tokens=False
+    )
+    input_ids = input_ids.to(model.device)
 
     if generation_config is None:
         generation_config = {}
 
     with torch.no_grad():
-        output_token_ids = model.generate(
-            **inputs,
-            **generation_config,
+        output_ids = model.generate(
+            input_ids=input_ids,
             pad_token_id=tokenizer.pad_token_id,
             bos_token_id=tokenizer.bos_token_id,
             eos_token_id=tokenizer.eos_token_id,
+            **generation_config,
         )[0]
-    output_token_ids = output_token_ids[input_token_ids.size(1) :]
+    output_ids = output_ids[input_ids.size(1) :]
 
-    output = tokenizer.decode(output_token_ids.tolist(), skip_special_tokens=True)
+    output = tokenizer.decode(output_ids.tolist(), skip_special_tokens=True)
     if special_token_map:
         for src, tgt in special_token_map.items():
             output = output.replace(src, tgt)
