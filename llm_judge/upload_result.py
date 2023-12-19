@@ -3,16 +3,46 @@ import logging
 import os
 
 import pandas as pd
-import wandb
 from common import (
     JUDGEMENT_DIR,
-    load_judgements,
-    filter_single_judgements,
+    PREDICTION_DIR,
     filter_pairwise_judgements,
+    filter_single_judgements,
+    load_judgements,
+    load_model_config,
 )
 from show_result import calculate_win_rate
 
+import wandb
+
 logger = logging.getLogger(__name__)
+
+
+def get_run_config_from_result(mode: str, result: dict) -> dict:
+    if mode == "single":
+        model = result["model"]
+        model_config = load_model_config(PREDICTION_DIR / model)
+        judge_model = result["judge_model"]
+        return {
+            "mode": mode,
+            "judge_model": judge_model,
+            "model": model,
+            "model_config": model_config,
+        }
+    else:
+        model_1 = result["model_1"]
+        model_1_config = load_model_config(PREDICTION_DIR / model_1)
+        model_2 = result["model_2"]
+        model_2_config = load_model_config(PREDICTION_DIR / model_2)
+        judge_model = result["judge_model"]
+        return {
+            "mode": mode,
+            "judge_model": judge_model,
+            "model_1": model_1,
+            "model_2": model_2,
+            "model_1_config": model_1_config,
+            "model_2_config": model_2_config,
+        }
 
 
 def upload_results(
@@ -30,7 +60,11 @@ def upload_results(
         baseline_model: Baseline model name. Only used in `pairwise-baseline` mode.
     """
     project = os.getenv("WANDB_PROJECT", "ja-vicuna-qa-benchmark")
-    run = wandb.init(project=project, name=result_id, reinit=True)
+    if len(results) == 0:
+        logger.warning(f"No results found for {result_id}")
+        return
+    config = get_run_config_from_result(mode, results[0])
+    run = wandb.init(project=project, name=result_id, config=config, reinit=True)
 
     table_prefix = mode
     if mode == "pairwise-baseline":

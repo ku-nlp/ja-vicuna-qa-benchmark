@@ -6,7 +6,7 @@ import os
 import re
 import time
 from pathlib import Path
-from typing import Union, Optional
+from typing import Optional, Union
 
 import openai
 import tiktoken
@@ -255,6 +255,16 @@ def load_model_answers(answer_dir: Union[str, Path]):
             answer = json.loads(line)
             answers[answer["question_id"]] = answer
     return answers
+
+
+def load_model_config(answer_dir: Union[str, Path]):
+    """Load model config.
+
+    Args:
+        answer_dir (Union[str, Path]): The answer directory.
+    """
+    with open(Path(answer_dir) / "config.json", "r") as fin:
+        return json.load(fin)
 
 
 def load_judgements(judgement_dir: Union[str, Path]):
