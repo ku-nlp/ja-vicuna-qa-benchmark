@@ -257,6 +257,16 @@ def load_model_answers(answer_dir: Union[str, Path]):
     return answers
 
 
+def load_model_config(answer_dir: Union[str, Path]):
+    """Load model config.
+
+    Args:
+        answer_dir (Union[str, Path]): The answer directory.
+    """
+    with open(Path(answer_dir) / "config.json", "r") as fin:
+        return json.load(fin)
+
+
 def load_judgements(judgement_dir: Union[str, Path]):
     """Load judgements.
 
