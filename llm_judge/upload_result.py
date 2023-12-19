@@ -1,4 +1,5 @@
 import argparse
+import importlib.metadata
 import logging
 import os
 
@@ -16,6 +17,8 @@ from show_result import calculate_win_rate
 import wandb
 
 logger = logging.getLogger(__name__)
+
+VERSION = importlib.metadata.version("ja-vicuna-qa-benchmark")
 
 
 def get_run_config_from_result(mode: str, result: dict) -> dict:
@@ -59,7 +62,7 @@ def upload_results(
         results: A list of results.
         baseline_model: Baseline model name. Only used in `pairwise-baseline` mode.
     """
-    project = os.getenv("WANDB_PROJECT", "ja-vicuna-qa-benchmark-dev")
+    project = os.getenv("WANDB_PROJECT", f"ja-vicuna-qa-benchmark-dev-{VERSION}")
     if len(results) == 0:
         logger.warning(f"No results found for {result_id}")
         return
