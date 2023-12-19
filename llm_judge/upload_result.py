@@ -3,16 +3,17 @@ import logging
 import os
 
 import pandas as pd
-import wandb
 from common import (
     JUDGEMENT_DIR,
     PREDICTION_DIR,
+    filter_pairwise_judgements,
+    filter_single_judgements,
     load_judgements,
     load_model_config,
-    filter_single_judgements,
-    filter_pairwise_judgements,
 )
 from show_result import calculate_win_rate
+
+import wandb
 
 logger = logging.getLogger(__name__)
 

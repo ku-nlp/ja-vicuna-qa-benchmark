@@ -6,7 +6,7 @@ import os
 import re
 import time
 from pathlib import Path
-from typing import Union, Optional
+from typing import Optional, Union
 
 import openai
 import tiktoken

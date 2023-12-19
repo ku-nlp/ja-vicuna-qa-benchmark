@@ -5,9 +5,9 @@ from pathlib import Path
 import pandas as pd
 from common import (
     JUDGEMENT_DIR,
-    load_judgements,
-    filter_single_judgements,
     filter_pairwise_judgements,
+    filter_single_judgements,
+    load_judgements,
 )
 
 logger = logging.getLogger(__name__)
