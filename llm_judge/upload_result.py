@@ -30,13 +30,14 @@ def upload_results(
         baseline_model: Baseline model name. Only used in `pairwise-baseline` mode.
     """
     project = os.getenv("WANDB_PROJECT", "ja-vicuna-qa-benchmark")
-    project += f"|{mode}"
-    if mode == "pairwise-baseline":
-        project += f"|{baseline_model}"
     run = wandb.init(project=project, name=result_id, reinit=True)
 
+    table_prefix = mode
+    if mode == "pairwise-baseline":
+        table_prefix += f":{baseline_model}"
+
     outputs_table = wandb.Table(dataframe=pd.DataFrame(results))
-    run.log({"outputs": outputs_table})
+    run.log({f"{table_prefix}/outputs": outputs_table})
 
     if mode == "pairwise-baseline":
         win_rate_map = calculate_win_rate(results)
@@ -63,7 +64,7 @@ def upload_results(
             ],
             data=[[model, adjusted_win_rate, win_rate, lose_rate]],
         )
-        run.log({"leaderboard": leaderboard_table})
+        run.log({f"{table_prefix}/leaderboard": leaderboard_table})
 
 
 if __name__ == "__main__":
