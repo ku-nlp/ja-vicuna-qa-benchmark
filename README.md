@@ -6,13 +6,6 @@ To automate the evaluation process, we prompt strong LLMs like GPT-4 to act as j
 
 To be clarified, such zero-shot QA-style evaluation might be more suitable for those LLMs that have been fine-tuned with instructions. The 80 questions are manually translated from the English Vicuna benchmark.
 
-## Contents
-- [Install](#install)
-- [Evaluate a model with Japanese Vicuna QA Benchmark](#evaluate-a-model-with-japanese-vicuna-qa-benchmark)
-- [Sample Outputs](#sample-outputs)
-- [An Example of pairwise win-rate of three Japanese LLMs](#pairwise-win-rate-of-three-japanese-llms)
-- [Supported baseline Models](#supported-baseline-models)
-
 ## Install
 
 ```bash
@@ -131,31 +124,9 @@ WANDB_ENTITY=<USER-NAME or ORGANIZATION-NAME> WANDB_PROJECT=<PROJECT-NAME> pytho
 
 By default, the entity is configured to use your username, and the project name is set to `ja-vicuna-qa-benchmark-dev-<VERSION>`.
 
-## Sample Outputs
+## Pairwise win-rate compared with GPT-3.5 (text-davinci-003)
 
-Question: 植物性タンパク源と動物性タンパク源の違いは何ですか？
-
-Model outputs:
-
-| Model                                                    | Answer                                                                                                                                                                                                                                                                                                                                 |
-|----------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| openai--text-davinci-003                                 | 植物性タンパク源は、植物から抽出されたタンパク質で構成されています。一方、動物性タンパク源は、動物から抽出されたタンパク質で構成されています。植物性タンパク源は、植物から抽出されたタンパク質であるため、植物性タンパク源は、動物性タンパク源よりも低カロリーであり、低脂肪である可能性があります。また、植物性タンパク源は、動物性タンパク源よりもビタミンやミネラルなどの有益な栄養素を多く含んでいる可能性があります。                                                                                                                          |
-| llm-jp--llm-jp-13b-instruct-full-jaster-dolly-oasst-v1.0 | 動物性タンパク質は、牛、羊、ヤギ、豚、魚、甲殻類、昆虫、乳製品など、さまざまな種類の生き物から得ることができる。植物性タンパク質は、大豆、ナッツ類、種子類、野菜、果物などのさまざまな植物から得ることができる。                                                                                                                                                                                                                               |
-| llm-jp--llm-jp-13b-instruct-lora-jaster-dolly-oasst-v1.0 | 植物性タンパク源は動物性タンパク源に比べて消化・吸収が遅いため、植物性タンパク源を多く摂取すると、動物性タンパク源よりも満腹感が得られます。さらに、植物性タンパク源は、動物性タンパク源よりもグルテン、乳糖、その他の成分が少ないため、より健康的です。                                                                                                                                                                                                           |
-| rinna--japanese-gpt-neox-3.6b-instruction-ppo            | 植物性タンパク源とは、大豆やナッツ類などの豆類、豆腐、テンペなど、植物から作られるタンパク質源です。一方、動物性タンパク源とは、牛肉や豚肉などの肉類、卵、牛乳、チーズなどの乳製品、魚介類など、主に動物から得られるタンパク質源です。                                                                                                                                                                                                                    |
-| rinna--japanese-gpt-neox-3.6b-instruction-sft-v2         | それは、肉を食べるか魚を食べるか、です。                                                                                                                                                                                                                                                                                                                   |
-| cyberagent--calm2-7b-chat                                | 植物性タンパク源と動物性タンパク源の違いは以下の通りです。\n\n1. 供給源: 植物性タンパク源は主に植物、特に穀物から得られます。一方、動物性タンパク源は動物、特に哺乳類から得られます。\n\n2. 生物的特性: 植物性タンパク源は、植物が有する、植物の、特に植物の、植物性タンパク源の、特に植物性タンパク源の、植物性タンパク源の、特に植物性タンパク源の、特に特に特に特に特に特に特に特に特に特に                                                                                                                               |
-
-## Pairwise win-rate compared with GPT-3.5-davinci-003
-
-| Model                                                    | Win Rate | Loss Rate | Win Rate Adjusted |
-|----------------------------------------------------------|----------|-----------|-------------------|
-| tokyotech-llm--Swallow-70b-instruct-hf                   | 46.2     | 42.5      | 51.9              |
-| llm-jp--llm-jp-13b-instruct-lora-jaster-dolly-oasst-v1.0 | 28.7     | 62.5      | 33.1              |
-| rinna--japanese-gpt-neox-3.6b-instruction-ppo            | 13.8     | 13.8      | 18.8              |
-| rinna--japanese-gpt-neox-3.6b-instruction-sft-v2         | 8.8      | 82.5      | 13.1              |
-| cyberagent--calm2-7b-chat                                | 6.2      | 81.2      | 12.5              |
-| llm-jp--llm-jp-13b-instruct-full-jaster-dolly-oasst-v1.0 | 10.0     | 87.5      | 11.2              |
+See the [leaderboard](http://wandb.me/llm-jp-vicunaleaderboard) (in Japanese).
 
 ## Supported baseline Models
 
@@ -166,6 +137,7 @@ To make it more convenient for users to utilize pairwise comparisons with existi
 - [rinna/japanese-gpt-neox-3.6b-instruction-ppo](https://huggingface.co/rinna/japanese-gpt-neox-3.6b-instruction-ppo)
 - [rinna/japanese-gpt-neox-3.6b-instruction-sft-v2](https://huggingface.co/rinna/japanese-gpt-neox-3.6b-instruction-sft-v2)
 - [cyberagent/calm2-7b-chat](https://huggingface.co/cyberagent/calm2-7b-chat)
+- [tokyotech-llm/Swallow-70b-instruct-hf](https://huggingface.co/tokyotech-llm/Swallow-70b-instruct-hf)
 
 ## Questions
 
