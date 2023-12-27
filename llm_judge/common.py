@@ -181,10 +181,12 @@ class MatchPair:
             return winner, judgment
 
         g1_winner, g1_judgment = play(self.answer_1, self.answer_2)
-        g1_winner = "model_1" if g1_winner == "A" else "model_2"
+        winner_map = {"A": "model_1", "B": "model_2"}
+        g1_winner = winner_map.get(g1_winner, g1_winner)
 
         g2_winner, g2_judgment = play(self.answer_2, self.answer_1)
-        g2_winner = "model_2" if g2_winner == "A" else "model_1"
+        winner_map = {"A": "model_2", "B": "model_1"}
+        g2_winner = winner_map.get(g2_winner, g2_winner)
 
         result = {
             "model_1": self.model_1,
