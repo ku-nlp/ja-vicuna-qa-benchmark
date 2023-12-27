@@ -167,26 +167,27 @@ class MatchPair:
             }
             if self.ref_answer is not None:
                 kwargs["ref_answer_1"] = self.ref_answer["choices"][0]["turns"][0]
-            judgment = self.judge.judge(**kwargs)
+            return self.judge.judge(**kwargs)
 
-            if "[[A]]" in judgment:
-                winner = "A"
-            elif "[[B]]" in judgment:
-                winner = "B"
-            elif "[[C]]" in judgment:
-                winner = "tie"
-            else:
-                winner = "error"
+        g1_judgment = play(self.answer_1, self.answer_2)
+        if "[[A]]" in g1_judgment:
+            g1_winner = "model_1"
+        elif "[[B]]" in g1_judgment:
+            g1_winner = "model_2"
+        elif "[[C]]" in g1_judgment:
+            g1_winner = "tie"
+        else:
+            g1_winner = "error"
 
-            return winner, judgment
-
-        g1_winner, g1_judgment = play(self.answer_1, self.answer_2)
-        winner_map = {"A": "model_1", "B": "model_2"}
-        g1_winner = winner_map.get(g1_winner, g1_winner)
-
-        g2_winner, g2_judgment = play(self.answer_2, self.answer_1)
-        winner_map = {"A": "model_2", "B": "model_1"}
-        g2_winner = winner_map.get(g2_winner, g2_winner)
+        g2_judgment = play(self.answer_2, self.answer_1)
+        if "[[A]]" in g2_judgment:
+            g2_winner = "model_2"
+        elif "[[B]]" in g2_judgment:
+            g2_winner = "model_1"
+        elif "[[C]]" in g2_judgment:
+            g2_winner = "tie"
+        else:
+            g2_winner = "error"
 
         result = {
             "model_1": self.model_1,

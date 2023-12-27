@@ -15,23 +15,23 @@ def reparse_result_pairwise(result: dict) -> dict:
     """
     reparsed_result = result.copy()
 
-    g1_judgement = result["g1_judgment"]
-    if "[[A]]" in g1_judgement:
+    g1_judgment = result["g1_judgment"]
+    if "[[A]]" in g1_judgment:
         g1_winner = "model_1"
-    elif "[[B]]" in g1_judgement:
+    elif "[[B]]" in g1_judgment:
         g1_winner = "model_2"
-    elif "[[C]]" in g1_judgement:
+    elif "[[C]]" in g1_judgment:
         g1_winner = "tie"
     else:
         g1_winner = "error"
     reparsed_result["g1_winner"] = g1_winner
 
-    g2_judgement = result["g2_judgment"]
-    if "[[A]]" in g2_judgement:
+    g2_judgment = result["g2_judgment"]
+    if "[[A]]" in g2_judgment:
         g2_winner = "model_2"
-    elif "[[B]]" in g2_judgement:
+    elif "[[B]]" in g2_judgment:
         g2_winner = "model_1"
-    elif "[[C]]" in g2_judgement:
+    elif "[[C]]" in g2_judgment:
         g2_winner = "tie"
     else:
         g2_winner = "error"
