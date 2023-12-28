@@ -14,6 +14,9 @@ class TestMatchSingle(unittest.TestCase):
         judgement = "[[rating:3]]"
         self.assertEqual(MatchSingle.get_score(judgement), 3)
 
+        judgement = "[[rating: 4]]"
+        self.assertEqual(MatchSingle.get_score(judgement), 4)
+
         judgement = "[[rating: 4.5]]"
         self.assertEqual(MatchSingle.get_score(judgement), -1)
 
