@@ -2,7 +2,7 @@ import argparse
 import json
 import logging
 
-from common import JUDGEMENT_DIR, load_judgements
+from common import JUDGEMENT_DIR, MatchPair, load_judgements
 
 logger = logging.getLogger(__name__)
 
@@ -16,25 +16,11 @@ def reparse_result_pairwise(result: dict) -> dict:
     reparsed_result = result.copy()
 
     g1_judgment = result["g1_judgment"]
-    if "[[A]]" in g1_judgment:
-        g1_winner = "model_1"
-    elif "[[B]]" in g1_judgment:
-        g1_winner = "model_2"
-    elif "[[C]]" in g1_judgment:
-        g1_winner = "tie"
-    else:
-        g1_winner = "error"
+    g1_winner = MatchPair.get_winner(g1_judgment, model_a="model_1", model_b="model_2")
     reparsed_result["g1_winner"] = g1_winner
 
     g2_judgment = result["g2_judgment"]
-    if "[[A]]" in g2_judgment:
-        g2_winner = "model_2"
-    elif "[[B]]" in g2_judgment:
-        g2_winner = "model_1"
-    elif "[[C]]" in g2_judgment:
-        g2_winner = "tie"
-    else:
-        g2_winner = "error"
+    g2_winner = MatchPair.get_winner(g2_judgment, model_a="model_2", model_b="model_1")
     reparsed_result["g2_winner"] = g2_winner
 
     return reparsed_result
