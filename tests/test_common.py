@@ -1,6 +1,6 @@
 import unittest
 
-from llm_judge.common import MatchSingle
+from llm_judge.common import MatchSingle, MatchPair
 
 
 class TestMatchSingle(unittest.TestCase):
@@ -19,3 +19,41 @@ class TestMatchSingle(unittest.TestCase):
 
         judgement = "[[rating: Perfect]]"
         self.assertEqual(MatchSingle.get_score(judgement), -1)
+
+
+class TestMatchPair(unittest.TestCase):
+    def test_get_winner(self):
+        judgement = "[[A]]"
+        self.assertEqual(
+            MatchPair.get_winner(judgement, model_a="model_1", model_b="model_2"),
+            "model_1",
+        )
+
+        judgement = "[[B]]"
+        self.assertEqual(
+            MatchPair.get_winner(judgement, model_a="model_1", model_b="model_2"),
+            "model_2",
+        )
+
+        judgement = "[[A]]"
+        self.assertEqual(
+            MatchPair.get_winner(judgement, model_a="model_2", model_b="model_1"),
+            "model_2",
+        )
+
+        judgement = "[[B]]"
+        self.assertEqual(
+            MatchPair.get_winner(judgement, model_a="model_2", model_b="model_1"),
+            "model_1",
+        )
+
+        judgement = "[[C]]"
+        self.assertEqual(
+            MatchPair.get_winner(judgement, model_a="model_1", model_b="model_2"), "tie"
+        )
+
+        judgement = "[[D]]"
+        self.assertEqual(
+            MatchPair.get_winner(judgement, model_a="model_1", model_b="model_2"),
+            "error",
+        )

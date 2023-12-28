@@ -173,24 +173,10 @@ class MatchPair:
             return self.judge.judge(**kwargs)
 
         g1_judgment = play(self.answer_1, self.answer_2)
-        if "[[A]]" in g1_judgment:
-            g1_winner = "model_1"
-        elif "[[B]]" in g1_judgment:
-            g1_winner = "model_2"
-        elif "[[C]]" in g1_judgment:
-            g1_winner = "tie"
-        else:
-            g1_winner = "error"
+        g1_winner = self.get_winner(g1_judgment, model_a="model_1", model_b="model_2")
 
         g2_judgment = play(self.answer_2, self.answer_1)
-        if "[[A]]" in g2_judgment:
-            g2_winner = "model_2"
-        elif "[[B]]" in g2_judgment:
-            g2_winner = "model_1"
-        elif "[[C]]" in g2_judgment:
-            g2_winner = "tie"
-        else:
-            g2_winner = "error"
+        g2_winner = self.get_winner(g2_judgment, model_a="model_2", model_b="model_1")
 
         result = {
             "model_1": self.model_1,
@@ -228,6 +214,16 @@ class MatchPair:
         elif self.judge.model == "gpt-3.5-turbo":
             return 2 * (0.001 * num_input_tokens + 0.002 * num_output_tokens) / 1_000
         raise AssertionError
+
+    @staticmethod
+    def get_winner(judgment: str, model_a: str, model_b: str) -> str:
+        if "[[A]]" in judgment:
+            return model_a
+        elif "[[B]]" in judgment:
+            return model_b
+        elif "[[C]]" in judgment:
+            return "tie"
+        return "error"
 
 
 def load_questions(question_file: Union[str, Path]) -> list[dict]:
