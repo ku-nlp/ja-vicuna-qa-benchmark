@@ -1,6 +1,6 @@
 import unittest
 
-from llm_judge.common import MatchSingle, MatchPair
+from llm_judge.common import MatchPair, MatchSingle
 
 
 class TestMatchSingle(unittest.TestCase):

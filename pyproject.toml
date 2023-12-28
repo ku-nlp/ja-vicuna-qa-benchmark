@@ -20,5 +20,11 @@ dependencies = [
     "wandb", "tiktoken"
 ]
 
+[tool.ruff.lint]
+select = [
+    "F",  # pyflakes
+    "I001"  # isort
+]
+
 [tool.setuptools.packages.find]
 exclude = ["*"]

@@ -1,6 +1,5 @@
 import argparse
 import logging
-from pathlib import Path
 
 import pandas as pd
 from common import (
@@ -11,11 +10,6 @@ from common import (
 )
 
 logger = logging.getLogger(__name__)
-
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-JUDGEMENT_DIR_MAP = {
-    "jp_bench": DATA_DIR / "jp_bench" / "model_judgment",
-}
 
 pd.set_option("display.max_colwidth", 1000)
 pd.set_option("display.float_format", "{:.1f}".format)
