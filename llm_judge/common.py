@@ -95,15 +95,7 @@ class MatchSingle:
         if self.ref_answer:
             kwargs["ref_answer_1"] = self.ref_answer["choices"][0]["turns"][0]
         judgment = self.judge.judge(**kwargs)
-        match = (
-            re.search(one_score_pattern, judgment)
-            or re.search(one_score_pattern_another_format, judgment)
-            or re.search(one_score_pattern_another_format2, judgment)
-        )
-        if match:
-            score = ast.literal_eval(match.groups()[0])
-        else:
-            score = -1
+        score = self.get_score(judgment)
         return {
             "model": self.model,
             "question_id": self.question["question_id"],
@@ -134,6 +126,17 @@ class MatchSingle:
         elif self.judge.model == "gpt-3.5-turbo":
             return (0.001 * num_input_tokens + 0.002 * num_output_tokens) / 1_000
         raise AssertionError
+
+    @staticmethod
+    def get_score(judgment: str) -> int:
+        match = (
+            re.search(one_score_pattern, judgment)
+            or re.search(one_score_pattern_another_format, judgment)
+            or re.search(one_score_pattern_another_format2, judgment)
+        )
+        if match:
+            return ast.literal_eval(match.groups()[0])
+        return -1
 
 
 @dataclasses.dataclass
