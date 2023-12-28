@@ -41,7 +41,10 @@ def calculate_win_rate(results: list[dict]):
     num_win_2 = 0
     num_tie = 0
     for result in results:
-        if result["g1_winner"] == "tie" or result["g1_winner"] != result["g2_winner"]:
+        if (
+            "tie" in {result["g1_winner"], result["g2_winner"]}
+            or result["g1_winner"] != result["g2_winner"]
+        ):
             num_tie += 1
         elif result["g1_winner"] == "model_1":
             num_win_1 += 1
