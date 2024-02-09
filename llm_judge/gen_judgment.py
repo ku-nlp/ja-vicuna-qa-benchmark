@@ -133,7 +133,7 @@ if __name__ == "__main__":
         "--judge-model",
         type=str,
         default="gpt-4",
-        choices=["gpt-4", "gpt-3.5-turbo"],
+        choices=["gpt-4", "gpt-4-0613", "gpt-4-1106-preview", "gpt-3.5-turbo"],
         help="The judge model.",
     )
     parser.add_argument(
