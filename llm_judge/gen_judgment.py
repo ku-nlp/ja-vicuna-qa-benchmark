@@ -211,7 +211,7 @@ if __name__ == "__main__":
 
     logger.info("Load reference answers")
     judge_model = args.judge_model
-    answers = load_model_answers(REFERENCE_DIR / judge_model)
+    answers = load_model_answers(REFERENCE_DIR / "gpt-4")
     for question in filter(lambda x: x["category"] in NEED_REF_CATS, questions):
         assert question["question_id"] in answers
     ref_answers = {judge_model: answers}
