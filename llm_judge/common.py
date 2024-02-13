@@ -17,6 +17,9 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 openai.organization = os.getenv("OPENAI_ORGANIZATION")
+openai.api_type = os.getenv("OPENAI_API_TYPE")
+openai.api_base = os.getenv("OPENAI_API_BASE")
+openai.api_version = os.getenv("OPENAI_API_VERSION")
 
 # Data paths
 JP_BENCH_DIR = Path(__file__).resolve().parent.parent / "data" / "jp_bench"
@@ -56,12 +59,16 @@ class Judge:
         ]
         for _ in range(API_MAX_RETRY):
             try:
-                response = openai.ChatCompletion.create(
-                    model=self.model,
-                    messages=messages,
-                    temperature=0,
-                    max_tokens=2048,
-                )
+                params = {
+                    "messages": messages,
+                    "temperature": 0,
+                    "max_tokens": 2048,
+                }
+                if openai.api_type == "azure":
+                    params["engine"] = self.model
+                else:
+                    params["model"] = self.model
+                response = openai.ChatCompletion.create(**params)
                 return response["choices"][0]["message"]["content"]
             except openai.error.OpenAIError as e:
                 logger.warning(f"OpenAI API error: {e}")
@@ -121,10 +128,12 @@ class MatchSingle:
                 enc.encode(self.ref_answer["choices"][0]["turns"][0])
             )
         num_output_tokens = 200  # Estimated from a few samples
-        if self.judge.model == "gpt-4":
+        if self.judge.model in {"gpt-4", "gpt-4-0613"}:
             return (0.03 * num_input_tokens + 0.06 * num_output_tokens) / 1_000
+        elif self.judge.model == "gpt-4-1106-preview":
+            return (0.01 * num_input_tokens + 0.03 * num_output_tokens) / 1_000
         elif self.judge.model == "gpt-3.5-turbo":
-            return (0.001 * num_input_tokens + 0.002 * num_output_tokens) / 1_000
+            return (0.0005 * num_input_tokens + 0.0015 * num_output_tokens) / 1_000
         raise AssertionError
 
     @staticmethod
@@ -209,10 +218,12 @@ class MatchPair:
                 enc.encode(self.ref_answer["choices"][0]["turns"][0])
             )
         num_output_tokens = 200  # Estimated from a few samples
-        if self.judge.model == "gpt-4":
-            return 2 * (0.03 * num_input_tokens + 0.06 * num_output_tokens) / 1_000
+        if self.judge.model in {"gpt-4", "gpt-4-0613"}:
+            return (0.03 * num_input_tokens + 0.06 * num_output_tokens) / 1_000
+        elif self.judge.model == "gpt-4-1106-preview":
+            return (0.01 * num_input_tokens + 0.03 * num_output_tokens) / 1_000
         elif self.judge.model == "gpt-3.5-turbo":
-            return 2 * (0.001 * num_input_tokens + 0.002 * num_output_tokens) / 1_000
+            return (0.0005 * num_input_tokens + 0.0015 * num_output_tokens) / 1_000
         raise AssertionError
 
     @staticmethod
