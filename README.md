@@ -1,5 +1,9 @@
 # Japanese Vicuna QA Benchmark
 
+This repository contains code for Japanese Vicuna QA Benchmark, described by the paper: [Rapidly Developing High-quality Instruction Data and Evaluation Benchmark for Large Language Models with Minimal Human Effort: A Case Study on Japanese](https://arxiv.org/pdf/2010.12812.pdf).
+
+
+
 We released Japanese Vicuna QA Benchmark for measuring comprehensive capabilities of Japanese LLMs, which consists of 80 diverse questions in 10 categories (generic, coding, roleplay, writing, etc.)
 You can leverage this package to evaluate the answers of your Japanese LLM models in a reference-free manner with LLM-as-a-judge.
 To automate the evaluation process, we prompt strong LLMs like GPT-4 to act as judges and assess the quality of the models' responses.
@@ -142,3 +146,15 @@ To make it more convenient for users to utilize pairwise comparisons with existi
 ## Questions
 
 If you have any questions and feedback, please feel free to leave questions in the `Issues' list.
+
+## Citation
+If you use our code in your research, please cite our work:
+```bibtex
+@inproceedings{sun2024rapidly,
+   title={Rapidly Developing High-quality Instruction Data and Evaluation Benchmark for Large Language Models with Minimal Human Effort: A Case Study on Japanese},
+   author={Sun, Yikun and Wan, Zhen and Ueda, Nobuhiro and Yahata, Sakiko and Cheng, Fei and Chu, Chenhui and Kurohashi, Sadao},
+   booktitle={The 2024 Joint International Conference on Computational Linguistics, Language Resources and Evaluation (LREC-COLING 2024)},
+   year={2024}
+}
+```
+
