@@ -1,6 +1,6 @@
 # Japanese Vicuna QA Benchmark
 
-This repository contains code for Japanese Vicuna QA Benchmark, described by the paper: [Rapidly Developing High-quality Instruction Data and Evaluation Benchmark for Large Language Models with Minimal Human Effort: A Case Study on Japanese](https://arxiv.org/pdf/2010.12812.pdf).
+This repository contains code for Japanese Vicuna QA Benchmark, described by the paper: [Rapidly Developing High-quality Instruction Data and Evaluation Benchmark for Large Language Models with Minimal Human Effort: A Case Study on Japanese](https://arxiv.org/abs/2403.03690).
 
 
 
