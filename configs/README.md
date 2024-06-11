@@ -19,7 +19,6 @@ Each configuration file is a JSON file with the following structure:
   "generation_config": {
     "do_sample": true,
     "max_new_tokens": 512,
-    "temperature": 0.7,
     "repetition_penalty": 1.1
   },
   // The special token map (optional); this is used to replace special tokens in the output
