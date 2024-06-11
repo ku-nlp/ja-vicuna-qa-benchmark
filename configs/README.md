@@ -16,6 +16,7 @@ Each configuration file is a JSON file with the following structure:
   // The prompt template
   "prompt_template": "ユーザー: {instruction}<NL>システム: ",
   // The generation configuration (optional)
+  // NOTE: `temperature` will be set to a default value for each task category if left empty
   "generation_config": {
     "do_sample": true,
     "max_new_tokens": 512,
