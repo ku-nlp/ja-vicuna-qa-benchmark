@@ -26,7 +26,6 @@ DEFAULT_TEMPERATURE_MAP = {
     "generic": 0.1,
 }
 
-
 def generate_response(
     input_text, model, tokenizer, generation_config=None, special_token_map=None
 ):
@@ -64,7 +63,6 @@ def generate_response(
 
     return output
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -78,6 +76,9 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--overwrite", action="store_true", help="Overwrite the existing results"
+    )
+    parser.add_argument(
+        "--num_answers_per_question", type=int, default=1, help="Number of answers to generate per question"
     )
     args = parser.parse_args()
 
@@ -159,25 +160,26 @@ if __name__ == "__main__":
             category = question["category"]
             generation_config["temperature"] = DEFAULT_TEMPERATURE_MAP[category]
 
-        output = generate_response(
-            input_text=prompt_template.format_map({"instruction": instruction}),
-            model=model,
-            tokenizer=tokenizer,
-            generation_config=generation_config,
-            special_token_map=special_token_map,
-        )
+        for _ in range(args.num_answers_per_question):
+            output = generate_response(
+                input_text=prompt_template.format_map({"instruction": instruction}),
+                model=model,
+                tokenizer=tokenizer,
+                generation_config=generation_config,
+                special_token_map=special_token_map,
+            )
 
-        logger.debug(f"{instruction}\n\n{output}")
+            logger.debug(f"{instruction}\n\n{output}")
 
-        results.append(
-            {
-                "question_id": int(question["question_id"]),
-                "answer_id": shortuuid.uuid(),
-                "model_id": model_id,
-                "choices": [{"index": 0, "turns": [output]}],
-                "tstamp": time.time(),
-            }
-        )
+            results.append(
+                {
+                    "question_id": int(question["question_id"]),
+                    "answer_id": shortuuid.uuid(),
+                    "model_id": model_id,
+                    "choices": [{"index": 0, "turns": [output]}],
+                    "tstamp": time.time(),
+                }
+            )
 
     logger.info("Save the results")
     prediction_dir.mkdir(parents=True, exist_ok=True)
