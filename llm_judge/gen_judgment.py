@@ -32,6 +32,7 @@ def make_match_groups_single(
     ref_answers: dict[str, dict[int, dict]],
     judge_default: Judge,
     judge_math: Judge,
+    num_answers_per_question: Optional[int] = None,
 ):
     """Make match groups for single answer grading.
 
@@ -41,6 +42,7 @@ def make_match_groups_single(
         ref_answers (dict): A dict of reference answers.
         judge_default (Judge): A judge for default questions.
         judge_math (Judge): A judge for math questions.
+        num_answers_per_question (Optional[int]): Number of answers to evaluate per question.
     """
     match_groups = {}
     for model in model_answers:
@@ -63,6 +65,8 @@ def make_match_groups_single(
                     ref_answer=ref_answer,
                 )
             )
+        if num_answers_per_question:
+            matches = matches[:num_answers_per_question]
         match_groups[f"single:{model}"] = matches
     return match_groups
 
@@ -74,6 +78,7 @@ def make_match_groups_pairwise(
     judge_default: Judge,
     judge_math: Judge,
     baseline_model: Optional[str] = None,
+    num_answers_per_question: Optional[int] = None,
 ):
     """Make match groups for pairwise comparison.
 
@@ -84,6 +89,7 @@ def make_match_groups_pairwise(
         judge_default (Judge): A judge for default questions.
         judge_math (Judge): A judge for math questions.
         baseline_model (Optional[str]): The baseline model.
+        num_answers_per_question (Optional[int]): Number of answers to evaluate per question.
     """
     match_groups = {}
     for model_1, model_2 in combinations(model_answers, 2):
@@ -111,6 +117,8 @@ def make_match_groups_pairwise(
                     ref_answer=ref_answer,
                 )
             )
+        if num_answers_per_question:
+            matches = matches[:num_answers_per_question]
         match_groups[f"pairwise:{model_1}_{model_2}"] = matches
     return match_groups
 
@@ -132,7 +140,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--judge-model",
         type=str,
-        default="gpt-4",
+        default="gpt-4-0613",
         choices=["gpt-4", "gpt-4-0613", "gpt-4-1106-preview", "gpt-3.5-turbo"],
         help="The judge model.",
     )
@@ -166,6 +174,9 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--verbose", "-v", action="count", default=0, help="Verbosity level"
+    )
+    parser.add_argument(
+        "--num_answers_per_question", type=int, default=None, help="Number of answers to evaluate per question."
     )
     args = parser.parse_args()
 
@@ -227,6 +238,7 @@ if __name__ == "__main__":
             ref_answers=ref_answers,
             judge_default=Judge(args.judge_model, judge_prompts["single"]),
             judge_math=Judge(args.judge_model, judge_prompts["single-math"]),
+            num_answers_per_question=args.num_answers_per_question,
         )
         output_dir = JUDGEMENT_DIR / "single" / args.judge_model
     else:
@@ -242,6 +254,7 @@ if __name__ == "__main__":
             judge_default=Judge(args.judge_model, judge_prompts["pair"]),
             judge_math=Judge(args.judge_model, judge_prompts["pair-math"]),
             baseline_model=baseline_model,
+            num_answers_per_question=args.num_answers_per_question,
         )
         output_dir = JUDGEMENT_DIR / "pairwise" / args.judge_model
     target_match_ids = set()
@@ -290,3 +303,4 @@ if __name__ == "__main__":
         if args.wandb:
             logger.info("Log to wandb")
             upload_results(args.mode, match_id, results, args.baseline_model)
+

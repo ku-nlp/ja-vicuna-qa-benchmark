@@ -9,17 +9,20 @@ from pathlib import Path
 from typing import Optional, Union
 
 import openai
+from openai import AzureOpenAI
+
+client = AzureOpenAI(api_key=os.getenv("OPENAI_API_KEY"),
+api_version=os.getenv("OPENAI_API_VERSION"))
 import tiktoken
 from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
-openai.organization = os.getenv("OPENAI_ORGANIZATION")
-openai.api_type = os.getenv("OPENAI_API_TYPE")
-openai.api_base = os.getenv("OPENAI_API_BASE")
-openai.api_version = os.getenv("OPENAI_API_VERSION")
+# TODO: The 'openai.organization' option isn't read in the client API. You will need to pass it when you instantiate the client, e.g. 'OpenAI(organization=os.getenv("OPENAI_ORGANIZATION"))'
+# openai.organization = os.getenv("OPENAI_ORGANIZATION")
+# TODO: The 'openai.api_base' option isn't read in the client API. You will need to pass it when you instantiate the client, e.g. 'OpenAI(base_url=os.getenv("OPENAI_API_BASE"))'
+# openai.api_base = os.getenv("OPENAI_API_BASE")
 
 # Data paths
 JP_BENCH_DIR = Path(__file__).resolve().parent.parent / "data" / "jp_bench"
@@ -68,9 +71,9 @@ class Judge:
                     params["engine"] = self.model
                 else:
                     params["model"] = self.model
-                response = openai.ChatCompletion.create(**params)
-                return response["choices"][0]["message"]["content"]
-            except openai.error.OpenAIError as e:
+                response = client.chat.completions.create(**params)
+                return response.choices[0].message.content
+            except openai.OpenAIError as e:
                 logger.warning(f"OpenAI API error: {e}")
                 time.sleep(API_RETRY_SLEEP)
 
@@ -363,3 +366,8 @@ def filter_pairwise_judgements(
         else:
             filtered_result_id_results_map[result_id] = results
     return filtered_result_id_results_map
+
+
+
+
+

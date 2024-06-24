@@ -26,12 +26,15 @@ python llm_judge/gen_model_answer.py --config <CONFIG-PATH>
 
 Arguments & Options:
   - `<CONFIG-PATH>` is the path to a configuration file. Examples are in `configs/`.
+  - `num_answers_per_question` specifies how many to generate (default: all)
 
 For example:
 
 ```bash
-python llm_judge/gen_model_answer.py --config configs/rinna--japanese-gpt-neox-3.6b-instruction-ppo.json
+python llm_judge/gen_model_answer.py --config configs/rinna--japanese-gpt-neox-3.6b-instruction-ppo.json --num_answers_per_question <n>
 ```
+
+
 
 #### Step 2. Generate GPT-4 judgments
 
@@ -43,7 +46,8 @@ OPENAI_API_KEY=<YOUR-KEY> python llm_judge/gen_judgment.py \
     [--baseline-model <BASELINE-MODEL-ID>] \
     [--model-list <LIST-OF-MODEL-IDS>] \
     [--yes] \
-    [--wandb]
+    [--wandb] \
+    [--num_answers_per_question]
 ```
 
 Arguments & Options:
@@ -55,6 +59,7 @@ Arguments & Options:
 - `--model-list <LIST-OF-MODEL-IDS>` is a list of model IDs to be evaluated. If not specified, all models in `data/jp_bench/model_answer` will be evaluated.
 - `--yes` is a flag to skip the confirmation prompt.
 - `--wandb` is a flag to enable logging to W&B. You can upload the results later to W&B by running `upload_result.py`, as described in the next section.
+- `num_answers_per_question` : Number of answers to evaluate per question
 
 **Mode: `pairwise-baseline` (Default)**
 
