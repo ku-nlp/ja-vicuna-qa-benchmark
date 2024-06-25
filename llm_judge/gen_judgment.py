@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 def make_match_groups_single(
     questions: list[dict],
-    model_answers: dict[str, dict[int, dict]],
+    model_answers: dict[str, dict[int, list[dict]]],
     ref_answers: dict[str, dict[int, dict]],
     judge_default: Judge,
     judge_math: Judge,
@@ -49,31 +49,33 @@ def make_match_groups_single(
         matches = []
         for question in questions:
             qid = question["question_id"]
-            answer = model_answers[model][qid]
-            if question["category"] in NEED_REF_CATS:
-                judge = judge_math
-                ref_answer = ref_answers[judge.model][qid]
-            else:
-                judge = judge_default
-                ref_answer = None
-            matches.append(
-                MatchSingle(
-                    question=question,
-                    model=model,
-                    answer=answer,
-                    judge=judge,
-                    ref_answer=ref_answer,
+            answers = model_answers[model].get(qid, [])
+            if num_answers_per_question:
+                # For each question, the number of answers specified by num_answers_per_question is extracted.
+                answers = answers[:num_answers_per_question]
+            for answer in answers:
+                if question["category"] in NEED_REF_CATS:
+                    judge = judge_math
+                    ref_answer = ref_answers[judge.model][qid]
+                else:
+                    judge = judge_default
+                    ref_answer = None
+                matches.append(
+                    MatchSingle(
+                        question=question,
+                        model=model,
+                        answer=answer,
+                        judge=judge,
+                        ref_answer=ref_answer,
+                    )
                 )
-            )
-        if num_answers_per_question:
-            matches = matches[:num_answers_per_question]
         match_groups[f"single:{model}"] = matches
     return match_groups
 
 
 def make_match_groups_pairwise(
     questions: list[dict],
-    model_answers: dict[str, dict[int, dict]],
+    model_answers: dict[str, dict[int, list[dict]]],
     ref_answers: dict[str, dict[int, dict]],
     judge_default: Judge,
     judge_math: Judge,
@@ -98,27 +100,30 @@ def make_match_groups_pairwise(
         matches = []
         for question in questions:
             qid = question["question_id"]
-            answer_1 = model_answers[model_1][qid]
-            answer_2 = model_answers[model_2][qid]
-            if question["category"] in NEED_REF_CATS:
-                judge = judge_math
-                ref_answer = ref_answers[judge.model][qid]
-            else:
-                judge = judge_default
-                ref_answer = None
-            matches.append(
-                MatchPair(
-                    question=question,
-                    model_1=model_1,
-                    model_2=model_2,
-                    answer_1=answer_1,
-                    answer_2=answer_2,
-                    judge=judge,
-                    ref_answer=ref_answer,
+            answers_1 = model_answers[model_1].get(qid, [])
+            answers_2 = model_answers[model_2].get(qid, [])
+            if num_answers_per_question:
+                # For each question, the number of answers specified by num_answers_per_question is extracted.
+                answers_1 = answers_1[:num_answers_per_question]
+                answers_2 = answers_2[:num_answers_per_question]
+            for answer_1, answer_2 in zip(answers_1, answers_2):
+                if question["category"] in NEED_REF_CATS:
+                    judge = judge_math
+                    ref_answer = ref_answers[judge.model][qid]
+                else:
+                    judge = judge_default
+                    ref_answer = None
+                matches.append(
+                    MatchPair(
+                        question=question,
+                        model_1=model_1,
+                        model_2=model_2,
+                        answer_1=answer_1,
+                        answer_2=answer_2,
+                        judge=judge,
+                        ref_answer=ref_answer,
+                    )
                 )
-            )
-        if num_answers_per_question:
-            matches = matches[:num_answers_per_question]
         match_groups[f"pairwise:{model_1}_{model_2}"] = matches
     return match_groups
 
@@ -132,15 +137,15 @@ if __name__ == "__main__":
         choices=["pairwise-baseline", "pairwise-all", "single"],
         help=(
             "Evaluation mode. "
-            "`pairwise-baseline` runs pairwise comparison against a baseline. "
-            "`pairwise-all` runs pairwise comparison between all pairs. "
-            "`single` runs single answer grading."
+            "pairwise-baseline runs pairwise comparison against a baseline. "
+            "pairwise-all runs pairwise comparison between all pairs. "
+            "single runs single answer grading."
         ),
     )
     parser.add_argument(
         "--judge-model",
         type=str,
-        default="gpt-4-0613",
+        default="gpt-4",
         choices=["gpt-4", "gpt-4-0613", "gpt-4-1106-preview", "gpt-3.5-turbo"],
         help="The judge model.",
     )
@@ -148,7 +153,7 @@ if __name__ == "__main__":
         "--baseline-model",
         type=str,
         default="openai--text-davinci-003",
-        help="The baseline model. This is only used in `pairwise-baseline` mode.",
+        help="The baseline model. This is only used in pairwise-baseline mode.",
     )
     parser.add_argument(
         "--model-list",
@@ -160,7 +165,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--parallel", type=int, default=1, help="The number of concurrent API calls."
     )
-    parser.add_argument("--first-n", type=int, help="Only run the first `n` judgments.")
+    parser.add_argument("--first-n", type=int, help="Only run the first n judgments.")
     parser.add_argument(
         "--yes", "-y", action="store_true", help="Skip confirmation and run."
     )
@@ -218,7 +223,8 @@ if __name__ == "__main__":
         answers = load_model_answers(PREDICTION_DIR / model)
         for question in questions:
             assert question["question_id"] in answers
-        model_answers[model] = answers
+        # Make sure answers are lists
+        model_answers[model] = {qid: [answers[qid]] for qid in answers}
 
     logger.info("Load reference answers")
     judge_model = args.judge_model
@@ -303,4 +309,3 @@ if __name__ == "__main__":
         if args.wandb:
             logger.info("Log to wandb")
             upload_results(args.mode, match_id, results, args.baseline_model)
-
