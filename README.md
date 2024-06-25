@@ -26,12 +26,12 @@ python llm_judge/gen_model_answer.py --config <CONFIG-PATH>
 
 Arguments & Options:
   - `<CONFIG-PATH>` is the path to a configuration file. Examples are in `configs/`.
-  - `num_answers_per_question` specifies how many to generate (default: all)
+  - `num_answers_per_question` specifies the number of answers to generate per question (default: all)
 
 For example:
 
 ```bash
-python llm_judge/gen_model_answer.py --config configs/rinna--japanese-gpt-neox-3.6b-instruction-ppo.json --num_answers_per_question <n>
+python llm_judge/gen_model_answer.py --config configs/rinna--japanese-gpt-neox-3.6b-instruction-ppo.json
 ```
 
 
@@ -59,7 +59,7 @@ Arguments & Options:
 - `--model-list <LIST-OF-MODEL-IDS>` is a list of model IDs to be evaluated. If not specified, all models in `data/jp_bench/model_answer` will be evaluated.
 - `--yes` is a flag to skip the confirmation prompt.
 - `--wandb` is a flag to enable logging to W&B. You can upload the results later to W&B by running `upload_result.py`, as described in the next section.
-- `num_answers_per_question` : Number of answers to evaluate per question
+- `num_answers_per_question` : specifies the number of answers to evaluate per question
 
 **Mode: `pairwise-baseline` (Default)**
 
@@ -162,4 +162,3 @@ If you use our code in your research, please cite our work:
    year={2024}
 }
 ```
-
